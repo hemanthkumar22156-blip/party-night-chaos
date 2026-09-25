@@ -3,2071 +3,1168 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport"
-      content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
-<title>Party Night: Chaos</title>
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+<title>PARTY NIGHT: CHAOS</title>
 
 <style>
-html,body{
+*{
+    box-sizing:border-box;
     margin:0;
     padding:0;
-    width:100%;
-    height:100%;
+    -webkit-tap-highlight-color:transparent;
+}
+
+body{
+    background:#050609;
+    color:white;
+    font-family:Arial,Helvetica,sans-serif;
     overflow:hidden;
-    background:#050608;
-    touch-action:none;
 }
 
-#game{
-    width:100%;
-    height:100%;
+/* =========================
+   CHARACTER SELECT
+========================= */
+
+#characterScreen{
+    position:fixed;
+    inset:0;
+    z-index:100;
+    background:
+        radial-gradient(circle at 50% 20%,#30114c 0%,transparent 35%),
+        radial-gradient(circle at 80% 80%,#071e35 0%,transparent 40%),
+        #050609;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    overflow-y:auto;
+    padding:25px 15px 40px;
 }
 
-canvas{
+.logo{
+    text-align:center;
+    margin-bottom:8px;
+}
+
+.logo h1{
+    font-size:clamp(28px,6vw,54px);
+    letter-spacing:3px;
+    font-weight:900;
+}
+
+.logo h1 span{
+    color:#ff168f;
+}
+
+.logo p{
+    color:#00d9ff;
+    letter-spacing:4px;
+    font-size:12px;
+    margin-top:7px;
+}
+
+.selectTitle{
+    margin:22px 0 16px;
+    font-size:clamp(18px,4vw,27px);
+    letter-spacing:3px;
+}
+
+.characters{
+    width:min(1050px,100%);
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:15px;
+}
+
+.card{
+    position:relative;
+    min-height:290px;
+    border:1px solid #28364e;
+    border-radius:15px;
+    background:linear-gradient(145deg,#111827,#090b12);
+    overflow:hidden;
+    cursor:pointer;
+    transition:.2s;
+}
+
+.card:hover{
+    transform:translateY(-5px);
+    border-color:#00d9ff;
+    box-shadow:0 0 25px #00d9ff30;
+}
+
+.card.selected{
+    border:2px solid #ff168f;
+    box-shadow:
+        0 0 20px #ff168f55,
+        inset 0 0 30px #ff168f12;
+}
+
+.cardTop{
+    position:absolute;
+    top:10px;
+    left:12px;
+    right:12px;
+    display:flex;
+    justify-content:space-between;
+    z-index:2;
+}
+
+.gender{
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:10px;
+    font-weight:bold;
+    letter-spacing:1px;
+    background:#111;
+}
+
+.gender.male{
+    color:#00d9ff;
+    border:1px solid #00d9ff66;
+}
+
+.gender.female{
+    color:#ff55b3;
+    border:1px solid #ff55b366;
+}
+
+.level{
+    color:#ffd400;
+    font-size:10px;
+}
+
+.avatar{
+    height:185px;
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    padding-top:25px;
+}
+
+/* simple adult character */
+
+.person{
+    width:76px;
+    height:145px;
+    position:relative;
+}
+
+.head{
+    width:48px;
+    height:52px;
+    border-radius:48% 48% 45% 45%;
+    background:#b97950;
+    position:absolute;
+    top:0;
+    left:14px;
+    z-index:3;
+}
+
+.hair{
+    position:absolute;
+    width:53px;
+    height:29px;
+    background:#211712;
+    border-radius:50% 50% 25% 25%;
+    top:-4px;
+    left:11px;
+    z-index:4;
+}
+
+.hair.long{
+    height:40px;
+    border-radius:50% 50% 20px 20px;
+}
+
+.eye{
+    position:absolute;
+    width:5px;
+    height:5px;
+    background:#111;
+    border-radius:50%;
+    top:25px;
+    z-index:5;
+}
+
+.eye.e1{left:26px}
+.eye.e2{left:39px}
+
+.body{
+    position:absolute;
+    width:64px;
+    height:65px;
+    left:6px;
+    top:47px;
+    border-radius:13px 13px 8px 8px;
+}
+
+.body.jacket{background:#171b24}
+.body.red{background:#9b183f}
+.body.blue{background:#1262a0}
+.body.purple{background:#612b87}
+.body.white{background:#d9d9df}
+.body.green{background:#17624d}
+
+.arm{
+    position:absolute;
+    width:15px;
+    height:60px;
+    top:50px;
+    border-radius:12px;
+    background:#b97950;
+    z-index:0;
+}
+
+.arm.a1{left:-4px;transform:rotate(8deg)}
+.arm.a2{right:-4px;transform:rotate(-8deg)}
+
+.leg{
+    position:absolute;
+    width:21px;
+    height:51px;
+    top:106px;
+    background:#111722;
+    border-radius:5px;
+}
+
+.leg.l1{left:14px}
+.leg.l2{right:14px}
+
+.shoe{
+    position:absolute;
+    width:29px;
+    height:11px;
+    background:#e9e9e9;
+    border-radius:10px;
+    top:148px;
+}
+
+.shoe.s1{left:7px}
+.shoe.s2{right:7px}
+
+.cardInfo{
+    padding:0 16px 15px;
+}
+
+.cardInfo h2{
+    font-size:19px;
+    letter-spacing:2px;
+}
+
+.role{
+    color:#8c9bad;
+    font-size:11px;
+    margin-top:4px;
+}
+
+.stats{
+    display:flex;
+    gap:5px;
+    margin-top:11px;
+}
+
+.stat{
+    flex:1;
+    height:5px;
+    background:#252c38;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.stat i{
     display:block;
+    height:100%;
+    background:#00d9ff;
+}
+
+.selectBtn{
+    margin-top:10px;
+    width:100%;
+    padding:9px;
+    border:1px solid #334154;
+    border-radius:8px;
+    background:#0d1119;
+    color:#fff;
+    font-size:11px;
+    letter-spacing:2px;
+}
+
+/* =========================
+   START BUTTON
+========================= */
+
+#startBtn{
+    margin-top:22px;
+    width:min(420px,90%);
+    padding:15px;
+    border:0;
+    border-radius:10px;
+    background:linear-gradient(90deg,#ff168f,#7b2cff);
+    color:#fff;
+    font-size:15px;
+    font-weight:bold;
+    letter-spacing:3px;
+    cursor:pointer;
+    box-shadow:0 0 25px #ff168f55;
+}
+
+#selectedName{
+    margin-top:10px;
+    color:#aaa;
+    font-size:12px;
+}
+
+/* =========================
+   GAME
+========================= */
+
+#gameScreen{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#050609;
+}
+
+#gameHeader{
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    height:65px;
+    z-index:20;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    background:linear-gradient(#050609ee,transparent);
+}
+
+.gameLogo{
+    font-size:clamp(15px,3vw,25px);
+    font-weight:bold;
+}
+
+.gameLogo span{
+    color:#ff168f;
+}
+
+.score{
+    color:#00d9ff;
+    font-weight:bold;
+    font-size:18px;
+}
+
+#map{
+    position:absolute;
+    inset:65px 0 0;
+    overflow:hidden;
+    background:
+        linear-gradient(#ffffff05 1px,transparent 1px),
+        linear-gradient(90deg,#ffffff05 1px,transparent 1px),
+        #080b11;
+    background-size:50px 50px;
+}
+
+/* rooms */
+
+.room{
+    position:absolute;
+    border:2px solid #26354f;
+    background:#101724;
+    box-shadow:inset 0 0 30px #0008;
+}
+
+.room span{
+    position:absolute;
+    top:12px;
+    left:14px;
+    padding:7px 11px;
+    background:#05070b;
+    font-size:13px;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+
+.party{
+    left:3%;
+    top:5%;
+    width:34%;
+    height:37%;
+    background:#21102e;
+}
+
+.kitchen{
+    left:39%;
+    top:5%;
+    width:28%;
+    height:37%;
+    background:#102d35;
+}
+
+.bedroom{
+    right:3%;
+    top:5%;
+    width:27%;
+    height:37%;
+    background:#251a31;
+}
+
+.lounge{
+    left:39%;
+    top:48%;
+    width:28%;
+    height:42%;
+    background:#141b31;
+}
+
+.garden{
+    right:3%;
+    top:48%;
+    width:27%;
+    height:42%;
+    background:#092b21;
+}
+
+.bar{
+    left:3%;
+    top:48%;
+    width:34%;
+    height:42%;
+    background:#281716;
+}
+
+/* PLAYER */
+
+#player{
+    position:absolute;
+    width:38px;
+    height:55px;
+    z-index:10;
+    transform:translate(-50%,-50%);
+    transition:left .07s,top .07s;
+}
+
+.playerHead{
+    position:absolute;
+    width:25px;
+    height:25px;
+    top:0;
+    left:6px;
+    border-radius:50%;
+    background:#b97950;
+    z-index:3;
+}
+
+.playerHair{
+    position:absolute;
+    width:27px;
+    height:13px;
+    top:-2px;
+    left:5px;
+    border-radius:50% 50% 20% 20%;
+    background:#211712;
+    z-index:4;
+}
+
+.playerBody{
+    position:absolute;
+    width:34px;
+    height:30px;
+    left:2px;
+    top:21px;
+    border-radius:9px;
+    background:#151c2a;
+}
+
+.playerGlow{
+    position:absolute;
+    inset:-9px;
+    border-radius:50%;
+    border:2px solid #00d9ff88;
+    animation:pulse 1.4s infinite;
+}
+
+@keyframes pulse{
+    50%{transform:scale(1.15);opacity:.35}
+}
+
+/* objective */
+
+#objective{
+    position:absolute;
+    width:25px;
+    height:25px;
+    border-radius:50%;
+    background:#ffd000;
+    box-shadow:0 0 20px #ffd000;
+    z-index:8;
+    transform:translate(-50%,-50%);
+}
+
+/* controls */
+
+#controls{
+    position:absolute;
+    bottom:18px;
+    left:18px;
+    width:150px;
+    height:150px;
+    z-index:30;
+    display:none;
+}
+
+.control{
+    position:absolute;
+    width:50px;
+    height:50px;
+    border:1px solid #ffffff44;
+    background:#111827cc;
+    color:white;
+    border-radius:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    user-select:none;
+}
+
+.up{left:50px;top:0}
+.left{left:0;top:52px}
+.down{left:50px;top:52px}
+.right{left:100px;top:52px}
+
+#mission{
+    position:absolute;
+    left:20px;
+    bottom:20px;
+    z-index:20;
+    color:#fff;
+    font-size:12px;
+}
+
+#mission b{
+    color:#ffd000;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:700px){
+
+    #characterScreen{
+        padding-top:15px;
+    }
+
+    .characters{
+        grid-template-columns:repeat(2,1fr);
+        gap:10px;
+    }
+
+    .card{
+        min-height:250px;
+    }
+
+    .avatar{
+        height:155px;
+        transform:scale(.82);
+        transform-origin:bottom center;
+    }
+
+    .cardInfo{
+        padding:0 11px 12px;
+    }
+
+    .cardInfo h2{
+        font-size:15px;
+    }
+
+    .role{
+        font-size:9px;
+    }
+
+    #controls{
+        display:block;
+    }
+
+    #gameHeader{
+        padding:0 12px;
+    }
+
+    .room span{
+        font-size:9px;
+        padding:5px 7px;
+    }
+}
+
+@media(max-width:420px){
+
+    .characters{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .card{
+        min-height:225px;
+    }
+
+    .avatar{
+        height:135px;
+        transform:scale(.7);
+    }
+
+    .selectTitle{
+        margin:12px 0;
+    }
 }
 </style>
 </head>
 
 <body>
 
-<div id="game"></div>
+<!-- =========================
+     CHARACTER SELECT
+========================= -->
+
+<section id="characterScreen">
+
+    <div class="logo">
+        <h1>PARTY <span>NIGHT</span>: CHAOS</h1>
+        <p>CHOOSE YOUR CHARACTER</p>
+    </div>
+
+    <div class="selectTitle">SELECT PLAYER</div>
+
+    <div class="characters">
+
+        <!-- ALEX -->
+        <div class="card selected" data-name="ALEX">
+            <div class="cardTop">
+                <div class="gender male">♂ MALE</div>
+                <div class="level">LV 01</div>
+            </div>
+
+            <div class="avatar">
+                <div class="person">
+                    <div class="hair"></div>
+                    <div class="head">
+                        <i class="eye e1"></i>
+                        <i class="eye e2"></i>
+                    </div>
+                    <div class="arm a1"></div>
+                    <div class="arm a2"></div>
+                    <div class="body jacket"></div>
+                    <div class="leg l1"></div>
+                    <div class="leg l2"></div>
+                    <div class="shoe s1"></div>
+                    <div class="shoe s2"></div>
+                </div>
+            </div>
+
+            <div class="cardInfo">
+                <h2>ALEX</h2>
+                <div class="role">BALANCED • MAIN PLAYER</div>
+                <div class="stats">
+                    <div class="stat"><i style="width:80%"></i></div>
+                    <div class="stat"><i style="width:75%"></i></div>
+                    <div class="stat"><i style="width:78%"></i></div>
+                </div>
+                <button class="selectBtn">SELECT</button>
+            </div>
+        </div>
+
+
+        <!-- RYAN -->
+        <div class="card" data-name="RYAN">
+            <div class="cardTop">
+                <div class="gender male">♂ MALE</div>
+                <div class="level">LV 01</div>
+            </div>
+
+            <div class="avatar">
+                <div class="person">
+                    <div class="hair"></div>
+                    <div class="head">
+                        <i class="eye e1"></i>
+                        <i class="eye e2"></i>
+                    </div>
+                    <div class="arm a1"></div>
+                    <div class="arm a2"></div>
+                    <div class="body blue"></div>
+                    <div class="leg l1"></div>
+                    <div class="leg l2"></div>
+                    <div class="shoe s1"></div>
+                    <div class="shoe s2"></div>
+                </div>
+            </div>
+
+            <div class="cardInfo">
+                <h2>RYAN</h2>
+                <div class="role">FAST • RUNNER</div>
+                <div class="stats">
+                    <div class="stat"><i style="width:65%"></i></div>
+                    <div class="stat"><i style="width:96%"></i></div>
+                    <div class="stat"><i style="width:70%"></i></div>
+                </div>
+                <button class="selectBtn">SELECT</button>
+            </div>
+        </div>
+
+
+        <!-- KAI -->
+        <div class="card" data-name="KAI">
+            <div class="cardTop">
+                <div class="gender male">♂ MALE</div>
+                <div class="level">LV 01</div>
+            </div>
+
+            <div class="avatar">
+                <div class="person">
+                    <div class="hair"></div>
+                    <div class="head">
+                        <i class="eye e1"></i>
+                        <i class="eye e2"></i>
+                    </div>
+                    <div class="arm a1"></div>
+                    <div class="arm a2"></div>
+                    <div class="body red"></div>
+                    <div class="leg l1"></div>
+                    <div class="leg l2"></div>
+                    <div class="shoe s1"></div>
+                    <div class="shoe s2"></div>
+                </div>
+            </div>
+
+            <div class="cardInfo">
+                <h2>KAI</h2>
+                <div class="role">STRONG • POWER</div>
+                <div class="stats">
+                    <div class="stat"><i style="width:95%"></i></div>
+                    <div class="stat"><i style="width:60%"></i></div>
+                    <div class="stat"><i style="width:90%"></i></div>
+                </div>
+                <button class="selectBtn">SELECT</button>
+            </div>
+        </div>
+
+
+        <!-- MAYA -->
+        <div class="card" data-name="MAYA">
+            <div class="cardTop">
+                <div class="gender female">♀ FEMALE</div>
+                <div class="level">LV 01</div>
+            </div>
+
+            <div class="avatar">
+                <div class="person">
+                    <div class="hair long"></div>
+                    <div class="head">
+                        <i class="eye e1"></i>
+                        <i class="eye e2"></i>
+                    </div>
+                    <div class="arm a1"></div>
+                    <div class="arm a2"></div>
+                    <div class="body purple"></div>
+                    <div class="leg l1"></div>
+                    <div class="leg l2"></div>
+                    <div class="shoe s1"></div>
+                    <div class="shoe s2"></div>
+                </div>
+            </div>
+
+            <div class="cardInfo">
+                <h2>MAYA</h2>
+                <div class="role">AGILE • STEALTH</div>
+                <div class="stats">
+                    <div class="stat"><i style="width:70%"></i></div>
+                    <div class="stat"><i style="width:93%"></i></div>
+                    <div class="stat"><i style="width:82%"></i></div>
+                </div>
+                <button class="selectBtn">SELECT</button>
+            </div>
+        </div>
+
+
+        <!-- ZARA -->
+        <div class="card" data-name="ZARA">
+            <div class="cardTop">
+                <div class="gender female">♀ FEMALE</div>
+                <div class="level">LV 01</div>
+            </div>
+
+            <div class="avatar">
+                <div class="person">
+                    <div class="hair long"></div>
+                    <div class="head">
+                        <i class="eye e1"></i>
+                        <i class="eye e2"></i>
+                    </div>
+                    <div class="arm a1"></div>
+                    <div class="arm a2"></div>
+                    <div class="body blue"></div>
+                    <div class="leg l1"></div>
+                    <div class="leg l2"></div>
+                    <div class="shoe s1"></div>
+                    <div class="shoe s2"></div>
+                </div>
+            </div>
+
+            <div class="cardInfo">
+                <h2>ZARA</h2>
+                <div class="role">BALANCED • TACTICAL</div>
+                <div class="stats">
+                    <div class="stat"><i style="width:82%"></i></div>
+                    <div class="stat"><i style="width:82%"></i></div>
+                    <div class="stat"><i style="width:80%"></i></div>
+                </div>
+                <button class="selectBtn">SELECT</button>
+            </div>
+        </div>
+
+
+        <!-- NINA -->
+        <div class="card" data-name="NINA">
+            <div class="cardTop">
+                <div class="gender female">♀ FEMALE</div>
+                <div class="level">LV 01</div>
+            </div>
+
+            <div class="avatar">
+                <div class="person">
+                    <div class="hair long"></div>
+                    <div class="head">
+                        <i class="eye e1"></i>
+                        <i class="eye e2"></i>
+                    </div>
+                    <div class="arm a1"></div>
+                    <div class="arm a2"></div>
+                    <div class="body green"></div>
+                    <div class="leg l1"></div>
+                    <div class="leg l2"></div>
+                    <div class="shoe s1"></div>
+                    <div class="shoe s2"></div>
+                </div>
+            </div>
+
+            <div class="cardInfo">
+                <h2>NINA</h2>
+                <div class="role">AGILE • QUICK</div>
+                <div class="stats">
+                    <div class="stat"><i style="width:72%"></i></div>
+                    <div class="stat"><i style="width:97%"></i></div>
+                    <div class="stat"><i style="width:76%"></i></div>
+                </div>
+                <button class="selectBtn">SELECT</button>
+            </div>
+        </div>
+
+    </div>
+
+    <button id="startBtn">START NIGHT</button>
+
+    <div id="selectedName">
+        SELECTED: ALEX
+    </div>
+
+</section>
+
+
+<!-- =========================
+     GAME SCREEN
+========================= -->
+
+<section id="gameScreen">
+
+    <div id="gameHeader">
+        <div class="gameLogo">
+            PARTY NIGHT <span>CHAOS</span>
+        </div>
+
+        <div class="score">
+            SCORE <span id="score">0</span>
+        </div>
+    </div>
+
+    <div id="map">
+
+        <div class="room party">
+            <span>PARTY HALL</span>
+        </div>
+
+        <div class="room kitchen">
+            <span>KITCHEN</span>
+        </div>
+
+        <div class="room bedroom">
+            <span>BEDROOM</span>
+        </div>
+
+        <div class="room lounge">
+            <span>LOUNGE</span>
+        </div>
+
+        <div class="room garden">
+            <span>GARDEN</span>
+        </div>
+
+        <div class="room bar">
+            <span>BAR</span>
+        </div>
+
+        <div id="objective"></div>
+
+        <div id="player">
+            <div class="playerGlow"></div>
+            <div class="playerHair"></div>
+            <div class="playerHead"></div>
+            <div class="playerBody"></div>
+        </div>
+
+    </div>
+
+    <div id="mission">
+        <b>OBJECTIVE</b><br>
+        Reach the yellow objective
+    </div>
+
+    <div id="controls">
+        <div class="control up" data-key="ArrowUp">▲</div>
+        <div class="control left" data-key="ArrowLeft">◀</div>
+        <div class="control down" data-key="ArrowDown">▼</div>
+        <div class="control right" data-key="ArrowRight">▶</div>
+    </div>
+
+</section>
+
 
 <script>
 
-/* =========================================================
-   PARTY NIGHT: CHAOS
-   LEVEL 1 — THE MANSION PARTY
-========================================================= */
+/* =========================
+   CHARACTER SYSTEM
+========================= */
 
-const WORLD_W = 2400;
-const WORLD_H = 1400;
+const cards = document.querySelectorAll(".card");
+const selectedName = document.getElementById("selectedName");
 
-let player;
-let walls;
-let npcs = [];
+let selectedCharacter = "ALEX";
 
-let objective;
-let objectiveDone = false;
+cards.forEach(card => {
+
+    card.addEventListener("click", () => {
+
+        cards.forEach(c => c.classList.remove("selected"));
+
+        card.classList.add("selected");
+
+        selectedCharacter = card.dataset.name;
+
+        selectedName.textContent =
+            "SELECTED: " + selectedCharacter;
+    });
+
+});
+
+
+/* =========================
+   START GAME
+========================= */
+
+const startBtn = document.getElementById("startBtn");
+const characterScreen = document.getElementById("characterScreen");
+const gameScreen = document.getElementById("gameScreen");
+
+const player = document.getElementById("player");
+const objective = document.getElementById("objective");
+const scoreText = document.getElementById("score");
 
 let score = 0;
 
-let scoreText;
-let missionText;
+let playerX = 25;
+let playerY = 70;
 
-let joystickBase;
-let joystickThumb;
-let actionButton;
+let speed = 0.8;
 
-let joystickActive = false;
-let joystickId = null;
+function startGame(){
 
-let joyX = 0;
-let joyY = 0;
+    characterScreen.style.display = "none";
+    gameScreen.style.display = "block";
 
-let cursors;
-let keys;
+    /* character stats */
 
-let sceneRef;
-
-
-/* =========================================================
-   CONFIG
-========================================================= */
-
-const config = {
-
-    type: Phaser.AUTO,
-
-    parent: "game",
-
-    width: 1280,
-    height: 720,
-
-    backgroundColor: "#050608",
-
-    physics:{
-        default:"arcade",
-
-        arcade:{
-            gravity:{
-                y:0
-            },
-            debug:false
-        }
-    },
-
-    scale:{
-        mode:Phaser.Scale.FIT,
-        autoCenter:Phaser.Scale.CENTER_BOTH,
-        width:1280,
-        height:720
-    },
-
-    scene:{
-        create:create,
-        update:update
-    }
-};
-
-new Phaser.Game(config);
-
-
-/* =========================================================
-   CREATE
-========================================================= */
-
-function create(){
-
-    const scene = this;
-
-    sceneRef = scene;
-
-    scene.physics.world.setBounds(
-        0,
-        0,
-        WORLD_W,
-        WORLD_H
-    );
-
-    scene.cameras.main.setBounds(
-        0,
-        0,
-        WORLD_W,
-        WORLD_H
-    );
-
-
-    /* WORLD BACKGROUND */
-
-    scene.add.rectangle(
-        WORLD_W / 2,
-        WORLD_H / 2,
-        WORLD_W,
-        WORLD_H,
-        0x080a0e
-    );
-
-
-    createFloor(scene);
-
-    walls =
-        scene.physics.add.staticGroup();
-
-
-    createArchitecture(scene);
-
-    createFurniture(scene);
-
-    createPartyDetails(scene);
-
-
-    /* PLAYER */
-
-    player =
-        createPlayer(
-            scene,
-            1180,
-            760
-        );
-
-
-    scene.physics.add.collider(
-        player,
-        walls
-    );
-
-
-    /* NPCs */
-
-    createNPC(scene,700,300,0xff3d8d);
-    createNPC(scene,900,350,0x00d9ff);
-    createNPC(scene,1100,300,0xffc107);
-    createNPC(scene,1450,320,0x9d6cff);
-
-    createNPC(scene,500,750,0xff4d8d);
-    createNPC(scene,750,820,0xffc107);
-    createNPC(scene,1550,760,0x00e5a0);
-
-    createNPC(scene,1750,980,0xff4d8d);
-    createNPC(scene,1950,1050,0xffc107);
-    createNPC(scene,2150,850,0x9d6cff);
-
-    createNPC(scene,500,1100,0x00d9ff);
-    createNPC(scene,850,1120,0xff3d8d);
-
-
-    /* NPC COLLISION */
-
-    npcs.forEach(npc => {
-
-        scene.physics.add.collider(
-            npc,
-            walls
-        );
-
-    });
-
-
-    /* OBJECTIVE */
-
-    objective =
-        scene.add.circle(
-            760,
-            250,
-            18,
-            0xffd000
-        );
-
-    objective.setStrokeStyle(
-        4,
-        0xffffff,
-        0.9
-    );
-
-
-    scene.tweens.add({
-
-        targets:objective,
-
-        scale:1.5,
-
-        alpha:0.45,
-
-        duration:650,
-
-        yoyo:true,
-
-        repeat:-1
-
-    });
-
-
-    /* CAMERA */
-
-    scene.cameras.main.startFollow(
-        player,
-        true,
-        0.08,
-        0.08
-    );
-
-
-    /* KEYBOARD */
-
-    cursors =
-        scene.input.keyboard.createCursorKeys();
-
-    keys =
-        scene.input.keyboard.addKeys({
-            W:Phaser.Input.Keyboard.KeyCodes.W,
-            A:Phaser.Input.Keyboard.KeyCodes.A,
-            S:Phaser.Input.Keyboard.KeyCodes.S,
-            D:Phaser.Input.Keyboard.KeyCodes.D
-        });
-
-
-    createHUD(scene);
-
-    createMobileControls(scene);
-
-}
-
-
-/* =========================================================
-   UPDATE
-========================================================= */
-
-function update(time,delta){
-
-    if(!player) return;
-
-    let x = 0;
-    let y = 0;
-
-
-    /* KEYBOARD */
-
-    if(
-        cursors.left.isDown ||
-        keys.A.isDown
-    ){
-        x -= 1;
+    if(selectedCharacter === "RYAN"){
+        speed = 1.15;
     }
 
-    if(
-        cursors.right.isDown ||
-        keys.D.isDown
-    ){
-        x += 1;
+    else if(selectedCharacter === "MAYA"){
+        speed = 1.05;
     }
 
-    if(
-        cursors.up.isDown ||
-        keys.W.isDown
-    ){
-        y -= 1;
+    else if(selectedCharacter === "NINA"){
+        speed = 1.12;
     }
 
-    if(
-        cursors.down.isDown ||
-        keys.S.isDown
-    ){
-        y += 1;
-    }
-
-
-    /* MOBILE */
-
-    if(joystickActive){
-
-        x = joyX;
-        y = joyY;
-
-    }
-
-
-    const movement =
-        new Phaser.Math.Vector2(
-            x,
-            y
-        );
-
-
-    const speed = 240;
-
-
-    if(movement.length() > 0){
-
-        movement.normalize();
-
-        player.body.setVelocity(
-            movement.x * speed,
-            movement.y * speed
-        );
-
-        player.walking = true;
-
-
-        if(movement.x < -0.1){
-
-            player.scaleX = -1;
-
-        }
-
-        else if(movement.x > 0.1){
-
-            player.scaleX = 1;
-
-        }
-
+    else if(selectedCharacter === "KAI"){
+        speed = 0.68;
     }
 
     else{
-
-        player.body.setVelocity(
-            0,
-            0
-        );
-
-        player.walking = false;
-
+        speed = 0.8;
     }
 
+    positionPlayer();
 
-    animatePlayer(
-        player,
-        time
-    );
+    /* objective */
+    objective.style.left = "83%";
+    objective.style.top = "78%";
+}
 
-
-    /* OBJECTIVE */
-
-    const distance =
-        Phaser.Math.Distance.Between(
-            player.x,
-            player.y,
-            objective.x,
-            objective.y
-        );
+startBtn.addEventListener("click",startGame);
 
 
-    if(
-        distance < 55 &&
-        !objectiveDone
-    ){
+/* =========================
+   PLAYER MOVEMENT
+========================= */
 
-        objectiveDone = true;
+const keys = {};
 
-        score += 100;
+window.addEventListener("keydown",e=>{
+    keys[e.key] = true;
 
-        scoreText.setText(
-            "SCORE  " + score
-        );
+    if([
+        "ArrowUp",
+        "ArrowDown",
+        "ArrowLeft",
+        "ArrowRight",
+        "w","a","s","d",
+        "W","A","S","D"
+    ].includes(e.key)){
+        e.preventDefault();
+    }
+});
 
-        missionText.setText(
-            "VIP FOUND  •  MISSION COMPLETE"
-        );
+window.addEventListener("keyup",e=>{
+    keys[e.key] = false;
+});
 
-        missionText.setColor(
-            "#00ff9d"
-        );
 
-        objective.setFillStyle(
-            0x00ff9d
-        );
+function move(){
 
+    if(gameScreen.style.display !== "block"){
+        requestAnimationFrame(move);
+        return;
     }
 
-
-    /* NPC MOVEMENT */
-
-    npcs.forEach(npc => {
-
-        npc.timer -= delta;
-
-
-        if(npc.timer <= 0){
-
-            npc.timer =
-                Phaser.Math.Between(
-                    1200,
-                    3500
-                );
-
-            npc.targetX =
-                Phaser.Math.Between(
-                    180,
-                    WORLD_W - 180
-                );
-
-            npc.targetY =
-                Phaser.Math.Between(
-                    180,
-                    WORLD_H - 180
-                );
-
-        }
-
-
-        const distance =
-            Phaser.Math.Distance.Between(
-                npc.x,
-                npc.y,
-                npc.targetX,
-                npc.targetY
-            );
-
-
-        if(distance < 25){
-
-            npc.body.setVelocity(
-                0,
-                0
-            );
-
-        }
-
-        else{
-
-            const angle =
-                Phaser.Math.Angle.Between(
-                    npc.x,
-                    npc.y,
-                    npc.targetX,
-                    npc.targetY
-                );
-
-
-            npc.body.setVelocity(
-                Math.cos(angle) * 35,
-                Math.sin(angle) * 35
-            );
-
-        }
-
-    });
-
-}
-
-
-/* =========================================================
-   FLOOR
-========================================================= */
-
-function createFloor(scene){
-
-    /* MAIN FLOOR */
-
-    scene.add.rectangle(
-        1200,
-        700,
-        2250,
-        1250,
-        0x17191e
-    );
-
-
-    /* FLOOR GRID */
-
-    const graphics =
-        scene.add.graphics();
-
-
-    graphics.lineStyle(
-        1,
-        0x292d35,
-        0.45
-    );
-
-
-    for(
-        let x = 80;
-        x < WORLD_W;
-        x += 80
-    ){
-
-        graphics.lineBetween(
-            x,
-            70,
-            x,
-            WORLD_H - 70
-        );
-
+    if(keys["ArrowUp"] || keys["w"] || keys["W"]){
+        playerY -= speed;
     }
 
-
-    for(
-        let y = 70;
-        y < WORLD_H;
-        y += 80
-    ){
-
-        graphics.lineBetween(
-            70,
-            y,
-            WORLD_W - 70,
-            y
-        );
-
+    if(keys["ArrowDown"] || keys["s"] || keys["S"]){
+        playerY += speed;
     }
 
-
-    /* OUTER BORDER */
-
-    scene.add.rectangle(
-        1200,
-        700,
-        2250,
-        1250
-    ).setStrokeStyle(
-        8,
-        0x313846
-    );
-
-}
-
-
-/* =========================================================
-   ARCHITECTURE
-========================================================= */
-
-function createArchitecture(scene){
-
-    /* PARTY HALL */
-
-    createRoom(
-        scene,
-        120,
-        120,
-        600,
-        430,
-        0x24143a,
-        "PARTY HALL"
-    );
-
-
-    /* KITCHEN / BAR */
-
-    createRoom(
-        scene,
-        760,
-        120,
-        520,
-        430,
-        0x172d34,
-        "BAR & KITCHEN"
-    );
-
-
-    /* BEDROOM */
-
-    createRoom(
-        scene,
-        1320,
-        120,
-        560,
-        430,
-        0x292033,
-        "BEDROOM"
-    );
-
-
-    /* BATHROOM */
-
-    createRoom(
-        scene,
-        1920,
-        120,
-        330,
-        300,
-        0x17262c,
-        "BATHROOM"
-    );
-
-
-    /* LOUNGE */
-
-    createRoom(
-        scene,
-        120,
-        650,
-        560,
-        430,
-        0x191f36,
-        "LOUNGE"
-    );
-
-
-    /* MAIN CORRIDOR */
-
-    createRoom(
-        scene,
-        720,
-        610,
-        1160,
-        300,
-        0x11161d,
-        "MAIN CORRIDOR"
-    );
-
-
-    /* GARDEN */
-
-    createRoom(
-        scene,
-        760,
-        960,
-        780,
-        300,
-        0x102b22,
-        "GARDEN"
-    );
-
-
-    /* POOL */
-
-    createRoom(
-        scene,
-        1580,
-        960,
-        500,
-        300,
-        0x102632,
-        "POOL"
-    );
-
-
-    /* STORAGE */
-
-    createRoom(
-        scene,
-        2100,
-        650,
-        180,
-        610,
-        0x191919,
-        "STORAGE"
-    );
-
-
-    /* WALLS / ROOM DIVIDERS */
-
-    addWall(scene,80,700,35,1180);
-    addWall(scene,2320,700,35,1180);
-
-    addWall(scene,1200,75,2250,35);
-    addWall(scene,1200,1325,2250,35);
-
-
-    addWall(scene,740,335,30,430);
-    addWall(scene,1300,335,30,430);
-    addWall(scene,1900,270,30,300);
-
-
-    addWall(scene,740,760,30,300);
-    addWall(scene,1880,760,30,300);
-
-
-    /* DOOR GAPS ARE LEFT OPEN */
-
-}
-
-
-/* =========================================================
-   ROOM
-========================================================= */
-
-function createRoom(
-    scene,
-    x,
-    y,
-    w,
-    h,
-    color,
-    label
-){
-
-    const room =
-        scene.add.rectangle(
-            x + w / 2,
-            y + h / 2,
-            w,
-            h,
-            color
-        );
-
-
-    room.setStrokeStyle(
-        4,
-        0x3b4353,
-        0.9
-    );
-
-
-    scene.add.text(
-        x + 25,
-        y + 22,
-        label,
-        {
-            fontFamily:"Arial",
-            fontSize:"22px",
-            fontStyle:"bold",
-            color:"#ffffff",
-            backgroundColor:"#07090dcc",
-            padding:{
-                left:12,
-                right:12,
-                top:8,
-                bottom:8
-            }
-        }
-    );
-
-}
-
-
-/* =========================================================
-   WALL
-========================================================= */
-
-function addWall(
-    scene,
-    x,
-    y,
-    w,
-    h
-){
-
-    const wall =
-        scene.add.rectangle(
-            x,
-            y,
-            w,
-            h,
-            0x090b10
-        );
-
-
-    wall.setStrokeStyle(
-        2,
-        0x47516a
-    );
-
-
-    scene.physics.add.existing(
-        wall,
-        true
-    );
-
-
-    walls.add(
-        wall
-    );
-
-}
-
-
-/* =========================================================
-   FURNITURE
-========================================================= */
-
-function createFurniture(scene){
-
-    /* PARTY HALL DJ */
-
-    createDJ(
-        scene,
-        420,
-        220
-    );
-
-
-    /* PARTY TABLES */
-
-    createTable(scene,220,400);
-    createTable(scene,550,400);
-
-    createTable(scene,930,450);
-    createTable(scene,1130,450);
-
-
-    /* KITCHEN COUNTERS */
-
-    for(
-        let x = 820;
-        x < 1220;
-        x += 110
-    ){
-
-        createCounter(
-            scene,
-            x,
-            220
-        );
-
+    if(keys["ArrowLeft"] || keys["a"] || keys["A"]){
+        playerX -= speed;
     }
 
-
-    /* BED */
-
-    createBed(
-        scene,
-        1550,
-        300
-    );
-
-
-    /* SOFA LOUNGE */
-
-    createSofa(
-        scene,
-        330,
-        820
-    );
-
-
-    createSofa(
-        scene,
-        500,
-        960
-    );
-
-
-    /* GARDEN TABLES */
-
-    createOutdoorTable(
-        scene,
-        980,
-        1080
-    );
-
-
-    createOutdoorTable(
-        scene,
-        1270,
-        1160
-    );
-
-
-    /* POOL */
-
-    createPool(
-        scene,
-        1830,
-        1110
-    );
-
-
-    /* STORAGE BOXES */
-
-    for(
-        let i = 0;
-        i < 6;
-        i++
-    ){
-
-        scene.add.rectangle(
-            2180,
-            720 + i * 80,
-            80,
-            55,
-            0x493526
-        ).setStrokeStyle(
-            2,
-            0x7a5a3c
-        );
-
+    if(keys["ArrowRight"] || keys["d"] || keys["D"]){
+        playerX += speed;
     }
 
+    playerX = Math.max(3,Math.min(97,playerX));
+    playerY = Math.max(4,Math.min(94,playerY));
+
+    positionPlayer();
+
+    checkObjective();
+
+    requestAnimationFrame(move);
+}
+
+function positionPlayer(){
+
+    player.style.left = playerX + "%";
+    player.style.top = playerY + "%";
 }
 
 
-/* =========================================================
-   PARTY DETAILS
-========================================================= */
+/* =========================
+   OBJECTIVE
+========================= */
 
-function createPartyDetails(scene){
+function checkObjective(){
 
-    /* LIGHTS */
-
-    const lightPositions = [
-
-        [180,170],
-        [350,170],
-        [520,170],
-
-        [820,170],
-        [1050,170],
-        [1220,170],
-
-        [1400,170],
-        [1650,170],
-        [1820,170],
-
-        [180,700],
-        [500,700],
-
-        [800,650],
-        [1100,650],
-        [1400,650],
-        [1700,650],
-
-        [850,1010],
-        [1150,1010],
-        [1400,1010],
-
-        [1650,1010],
-        [2000,1010]
-    ];
-
-
-    lightPositions.forEach(
-        ([x,y],index) => {
-
-            const glow =
-                scene.add.circle(
-                    x,
-                    y,
-                    18,
-                    index % 2
-                    ? 0xff238d
-                    : 0x00d9ff,
-                    0.12
-                );
-
-
-            scene.tweens.add({
-
-                targets:glow,
-
-                scale:1.6,
-
-                alpha:0.03,
-
-                duration:800 +
-                    index * 40,
-
-                yoyo:true,
-
-                repeat:-1
-
-            });
-
-
-            scene.add.circle(
-                x,
-                y,
-                5,
-                index % 2
-                ? 0xff238d
-                : 0x00d9ff
-            );
-
-        }
-    );
-
-
-    /* PLANTS */
-
-    const plants = [
-
-        [150,150],
-        [690,150],
-        [1340,150],
-        [1870,150],
-
-        [150,1030],
-        [690,1030],
-        [800,1240],
-        [1510,1240]
-    ];
-
-
-    plants.forEach(
-        ([x,y]) => createPlant(scene,x,y)
-    );
-
-
-    /* PARTY CONFETTI */
-
-    for(
-        let i = 0;
-        i < 80;
-        i++
-    ){
-
-        const x =
-            Phaser.Math.Between(
-                130,
-                1880
-            );
-
-        const y =
-            Phaser.Math.Between(
-                140,
-                550
-            );
-
-
-        scene.add.rectangle(
-            x,
-            y,
-            3,
-            7,
-            [
-                0xff238d,
-                0x00d9ff,
-                0xffd000,
-                0xffffff
-            ][i % 4],
-            0.7
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   TABLE
-========================================================= */
-
-function createTable(scene,x,y){
-
-    scene.add.circle(
-        x,
-        y,
-        35,
-        0x2b2520
-    ).setStrokeStyle(
-        3,
-        0x715943
-    );
-
-
-    for(
-        let i = 0;
-        i < 4;
-        i++
-    ){
-
-        const a =
-            (Math.PI * 2 / 4) * i;
-
-        scene.add.rectangle(
-            x + Math.cos(a) * 55,
-            y + Math.sin(a) * 55,
-            25,
-            25,
-            0x302821
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   COUNTER
-========================================================= */
-
-function createCounter(scene,x,y){
-
-    scene.add.rectangle(
-        x,
-        y,
-        90,
-        45,
-        0x22272b
-    ).setStrokeStyle(
-        2,
-        0x69747c
-    );
-
-
-    scene.add.circle(
-        x,
-        y - 3,
-        7,
-        0xffd000
-    );
-
-}
-
-
-/* =========================================================
-   SOFA
-========================================================= */
-
-function createSofa(scene,x,y){
-
-    scene.add.rectangle(
-        x,
-        y,
-        180,
-        70,
-        0x30253d
-    ).setStrokeStyle(
-        3,
-        0x68527c
-    );
-
-
-    scene.add.rectangle(
-        x,
-        y - 38,
-        180,
-        30,
-        0x30253d
-    );
-
-}
-
-
-/* =========================================================
-   BED
-========================================================= */
-
-function createBed(scene,x,y){
-
-    scene.add.rectangle(
-        x,
-        y,
-        230,
-        150,
-        0x31262a
-    ).setStrokeStyle(
-        4,
-        0x77606a
-    );
-
-
-    scene.add.rectangle(
-        x,
-        y + 10,
-        200,
-        110,
-        0x5b4651
-    );
-
-
-    scene.add.rectangle(
-        x - 70,
-        y - 40,
-        60,
-        35,
-        0xe6e0db
-    );
-
-
-    scene.add.rectangle(
-        x + 20,
-        y - 40,
-        60,
-        35,
-        0xe6e0db
-    );
-
-}
-
-
-/* =========================================================
-   DJ
-========================================================= */
-
-function createDJ(scene,x,y){
-
-    scene.add.rectangle(
-        x,
-        y,
-        180,
-        70,
-        0x08090d
-    ).setStrokeStyle(
-        3,
-        0xff238d
-    );
-
-
-    scene.add.rectangle(
-        x,
-        y - 55,
-        120,
-        25,
-        0x11141b
-    );
-
-
-    for(
-        let i = 0;
-        i < 3;
-        i++
-    ){
-
-        scene.add.circle(
-            x - 50 + i * 50,
-            y,
-            15,
-            i % 2
-            ? 0x00d9ff
-            : 0xff238d
-        );
-
-    }
-
-
-    scene.add.text(
-        x - 55,
-        y - 100,
-        "DJ",
-        {
-            fontSize:"22px",
-            fontStyle:"bold",
-            color:"#ff238d"
-        }
-    );
-
-}
-
-
-/* =========================================================
-   OUTDOOR TABLE
-========================================================= */
-
-function createOutdoorTable(scene,x,y){
-
-    scene.add.circle(
-        x,
-        y,
-        32,
-        0x493a2c
-    ).setStrokeStyle(
-        3,
-        0x806548
-    );
-
-
-    scene.add.circle(
-        x,
-        y,
-        8,
-        0xff8a00
-    );
-
-}
-
-
-/* =========================================================
-   POOL
-========================================================= */
-
-function createPool(scene,x,y){
-
-    scene.add.rectangle(
-        x,
-        y,
-        380,
-        210,
-        0x087ea3
-    ).setStrokeStyle(
-        7,
-        0x8defff
-    );
-
-
-    for(
-        let i = 0;
-        i < 8;
-        i++
-    ){
-
-        scene.add.line(
-            0,
-            0,
-            x - 150,
-            y - 70 + i * 20,
-            x + 150,
-            y - 70 + i * 20,
-            0xffffff,
-            0.16
-        );
-
-    }
-
-}
-
-
-/* =========================================================
-   PLANT
-========================================================= */
-
-function createPlant(scene,x,y){
-
-    scene.add.rectangle(
-        x,
-        y + 18,
-        28,
-        28,
-        0x5c3c2b
-    );
-
-
-    scene.add.circle(
-        x - 12,
-        y,
-        15,
-        0x1c7a49
-    );
-
-
-    scene.add.circle(
-        x + 10,
-        y - 5,
-        16,
-        0x238d55
-    );
-
-
-    scene.add.circle(
-        x,
-        y - 15,
-        15,
-        0x2fae65
-    );
-
-}
-
-
-/* =========================================================
-   MAIN CHARACTER
-========================================================= */
-
-function createPlayer(scene,x,y){
-
-    const c =
-        scene.add.container(
-            x,
-            y
-        );
-
-
-    const shadow =
-        scene.add.ellipse(
-            0,
-            38,
-            55,
-            18,
-            0x000000,
-            0.65
-        );
-
-
-    const glow =
-        scene.add.circle(
-            0,
-            0,
-            55,
-            0x00d9ff,
-            0.07
-        );
-
-
-    const legs =
-        scene.add.rectangle(
-            0,
-            20,
-            34,
-            45,
-            0x12151c
-        );
-
-
-    legs.setStrokeStyle(
-        2,
-        0x343c4c
-    );
-
-
-    const body =
-        scene.add.rectangle(
-            0,
-            -10,
-            52,
-            60,
-            0x10141b
-        );
-
-
-    body.setStrokeStyle(
-        3,
-        0x00d9ff,
-        0.7
-    );
-
-
-    const shirt =
-        scene.add.rectangle(
-            0,
-            -13,
-            22,
-            42,
-            0xf2f2f2
-        );
-
-
-    const head =
-        scene.add.circle(
-            0,
-            -57,
-            21,
-            0xd89a70
-        );
-
-
-    head.setStrokeStyle(
-        2,
-        0xa96e52
-    );
-
-
-    const hair =
-        scene.add.arc(
-            0,
-            -62,
-            24,
-            180,
-            360,
-            false,
-            0x111216
-        );
-
-
-    hair.setStrokeStyle(
-        3,
-        0x2d3039
-    );
-
-
-    const glasses =
-        scene.add.rectangle(
-            0,
-            -58,
-            38,
-            9,
-            0x050608
-        );
-
-
-    glasses.setStrokeStyle(
-        2,
-        0x7d8795
-    );
-
-
-    const leftArm =
-        scene.add.rectangle(
-            -31,
-            -5,
-            11,
-            45,
-            0x10141b
-        );
-
-
-    const rightArm =
-        scene.add.rectangle(
-            31,
-            -5,
-            11,
-            45,
-            0x10141b
-        );
-
-
-    const leftShoe =
-        scene.add.ellipse(
-            -13,
-            45,
-            27,
-            12,
-            0xffffff
-        );
-
-
-    const rightShoe =
-        scene.add.ellipse(
-            13,
-            45,
-            27,
-            12,
-            0xffffff
-        );
-
-
-    c.add([
-
-        glow,
-        shadow,
-
-        legs,
-
-        body,
-        shirt,
-
-        leftArm,
-        rightArm,
-
-        head,
-        hair,
-        glasses,
-
-        leftShoe,
-        rightShoe
-
-    ]);
-
-
-    scene.physics.world.enable(c);
-
-
-    c.body.setCircle(
-        20
-    );
-
-
-    c.body.setCollideWorldBounds(
-        true
-    );
-
-
-    c.walking = false;
-    c.walkCycle = 0;
-
-    c.glow = glow;
-    c.leftArm = leftArm;
-    c.rightArm = rightArm;
-
-    return c;
-
-}
-
-
-/* =========================================================
-   PLAYER ANIMATION
-========================================================= */
-
-function animatePlayer(player,time){
-
-    if(player.walking){
-
-        player.walkCycle += 0.22;
-
-        const swing =
-            Math.sin(
-                player.walkCycle
-            );
-
-
-        player.leftArm.rotation =
-            swing * 0.2;
-
-        player.rightArm.rotation =
-            -swing * 0.2;
-
-    }
-
-    else{
-
-        player.leftArm.rotation = 0;
-        player.rightArm.rotation = 0;
-
-    }
-
-
-    if(player.glow){
-
-        player.glow.alpha =
-            0.05 +
-            Math.sin(time * 0.004) * 0.025;
-
-    }
-
-}
-
-
-/* =========================================================
-   NPC
-========================================================= */
-
-function createNPC(
-    scene,
-    x,
-    y,
-    color
-){
-
-    const npc =
-        scene.add.circle(
-            x,
-            y,
-            15,
-            color
-        );
-
-
-    npc.setStrokeStyle(
-        3,
-        0xffffff,
-        0.7
-    );
-
-
-    scene.physics.add.existing(
-        npc
-    );
-
-
-    npc.body.setCircle(
-        15
-    );
-
-
-    npc.body.setCollideWorldBounds(
-        true
-    );
-
-
-    npc.targetX = x;
-    npc.targetY = y;
-
-    npc.timer =
-        Phaser.Math.Between(
-            500,
-            2500
-        );
-
-
-    npcs.push(npc);
-
-}
-
-
-/* =========================================================
-   HUD
-========================================================= */
-
-function createHUD(scene){
-
-    const top =
-        scene.add.rectangle(
-            640,
-            32,
-            1280,
-            64,
-            0x050608,
-            0.94
-        );
-
-
-    top.setScrollFactor(0);
-
-
-    scene.add.text(
-        25,
-        15,
-        "PARTY NIGHT: CHAOS",
-        {
-            fontFamily:"Arial",
-            fontSize:"25px",
-            fontStyle:"bold",
-            color:"#ffffff"
-        }
-    ).setScrollFactor(0);
-
-
-    scene.add.text(
-        300,
-        20,
-        "LEVEL 01  •  THE MANSION PARTY",
-        {
-            fontFamily:"Arial",
-            fontSize:"14px",
-            color:"#ff238d"
-        }
-    ).setScrollFactor(0);
-
-
-    scoreText =
-        scene.add.text(
-            1080,
-            18,
-            "SCORE  0",
-            {
-                fontFamily:"Arial",
-                fontSize:"22px",
-                fontStyle:"bold",
-                color:"#00d9ff"
-            }
-        );
-
-
-    scoreText.setScrollFactor(0);
-
-
-    /* BOTTOM */
-
-    scene.add.rectangle(
-        640,
-        690,
-        1280,
-        60,
-        0x050608,
-        0.94
-    ).setScrollFactor(0);
-
-
-    missionText =
-        scene.add.text(
-            25,
-            680,
-            "OBJECTIVE  •  Find the VIP guest in the party hall",
-            {
-                fontFamily:"Arial",
-                fontSize:"16px",
-                color:"#ffffff"
-            }
-        );
-
-
-    missionText.setScrollFactor(0);
-
-
-    scene.add.text(
-        1010,
-        682,
-        "WASD / ARROWS",
-        {
-            fontFamily:"Arial",
-            fontSize:"13px",
-            color:"#8f99a9"
-        }
-    ).setScrollFactor(0);
-
-}
-
-
-/* =========================================================
-   MOBILE CONTROLS
-========================================================= */
-
-function createMobileControls(scene){
-
-    joystickBase =
-        scene.add.circle(
-            105,
-            605,
-            65,
-            0x111827,
-            0.75
-        );
-
-
-    joystickBase.setScrollFactor(0);
-
-    joystickBase.setStrokeStyle(
-        3,
-        0x00d9ff,
-        0.7
-    );
-
-
-    joystickThumb =
-        scene.add.circle(
-            105,
-            605,
-            29,
-            0x00d9ff,
-            0.8
-        );
-
-
-    joystickThumb.setScrollFactor(0);
-
-
-    joystickBase.setInteractive();
-
-
-    joystickBase.on(
-        "pointerdown",
-        pointer => {
-
-            joystickActive = true;
-
-            joystickId =
-                pointer.id;
-
-            updateJoystick(
-                pointer
-            );
-
-        }
-    );
-
-
-    scene.input.on(
-        "pointermove",
-        pointer => {
-
-            if(
-                joystickActive &&
-                pointer.id === joystickId
-            ){
-
-                updateJoystick(
-                    pointer
-                );
-
-            }
-
-        }
-    );
-
-
-    scene.input.on(
-        "pointerup",
-        pointer => {
-
-            if(
-                pointer.id === joystickId
-            ){
-
-                joystickActive = false;
-
-                joystickId = null;
-
-                joyX = 0;
-                joyY = 0;
-
-                joystickThumb.x =
-                    joystickBase.x;
-
-                joystickThumb.y =
-                    joystickBase.y;
-
-            }
-
-        }
-    );
-
-
-    /* ACTION */
-
-    actionButton =
-        scene.add.circle(
-            1175,
-            605,
-            58,
-            0xff238d,
-            0.82
-        );
-
-
-    actionButton.setScrollFactor(0);
-
-
-    actionButton.setStrokeStyle(
-        3,
-        0xffffff,
-        0.75
-    );
-
-
-    actionButton.setInteractive();
-
-
-    actionButton.on(
-        "pointerdown",
-        actionPressed
-    );
-
-
-    scene.add.text(
-        1175,
-        605,
-        "ACTION",
-        {
-            fontFamily:"Arial",
-            fontSize:"13px",
-            fontStyle:"bold",
-            color:"#ffffff"
-        }
-    )
-    .setOrigin(0.5)
-    .setScrollFactor(0);
-
-
-    /* HIDE MOBILE UI ON DESKTOP */
-
-    if(
-        !/Android|iPhone|iPad|iPod/i.test(
-            navigator.userAgent
-        )
-    ){
-
-        joystickBase.setVisible(false);
-        joystickThumb.setVisible(false);
-        actionButton.setVisible(false);
-
-    }
-
-}
-
-
-/* =========================================================
-   JOYSTICK
-========================================================= */
-
-function updateJoystick(pointer){
-
-    const dx =
-        pointer.x -
-        joystickBase.x;
-
-    const dy =
-        pointer.y -
-        joystickBase.y;
-
+    const ox = 83;
+    const oy = 78;
 
     const distance =
         Math.sqrt(
-            dx * dx +
-            dy * dy
+            Math.pow(playerX-ox,2) +
+            Math.pow(playerY-oy,2)
         );
 
-
-    const max = 45;
-
-
-    let px = dx;
-    let py = dy;
-
-
-    if(distance > max){
-
-        px =
-            dx / distance * max;
-
-        py =
-            dy / distance * max;
-
-    }
-
-
-    joystickThumb.x =
-        joystickBase.x + px;
-
-    joystickThumb.y =
-        joystickBase.y + py;
-
-
-    joyX =
-        px / max;
-
-    joyY =
-        py / max;
-
-}
-
-
-/* =========================================================
-   ACTION
-========================================================= */
-
-function actionPressed(){
-
-    if(!player || !objective)
-        return;
-
-
-    const distance =
-        Phaser.Math.Distance.Between(
-            player.x,
-            player.y,
-            objective.x,
-            objective.y
-        );
-
-
-    if(
-        distance < 100 &&
-        !objectiveDone
-    ){
-
-        objectiveDone = true;
+    if(distance < 5){
 
         score += 100;
 
-        scoreText.setText(
-            "SCORE  " + score
-        );
+        scoreText.textContent = score;
 
-        missionText.setText(
-            "MISSION COMPLETE  •  VIP FOUND"
-        );
+        /* new objective */
 
-        missionText.setColor(
-            "#00ff9d"
-        );
+        const positions = [
+            [15,20],
+            [52,20],
+            [83,20],
+            [52,65],
+            [18,72]
+        ];
 
-        objective.setFillStyle(
-            0x00ff9d
-        );
+        const p =
+            positions[
+                Math.floor(Math.random()*positions.length)
+            ];
 
+        objective.style.left = p[0] + "%";
+        objective.style.top = p[1] + "%";
     }
-
 }
+
+
+/* =========================
+   MOBILE CONTROLS
+========================= */
+
+document.querySelectorAll(".control").forEach(button => {
+
+    const key = button.dataset.key;
+
+    button.addEventListener("touchstart",e=>{
+        e.preventDefault();
+        keys[key] = true;
+    },{passive:false});
+
+    button.addEventListener("touchend",e=>{
+        e.preventDefault();
+        keys[key] = false;
+    },{passive:false});
+
+    button.addEventListener("mousedown",()=>{
+        keys[key] = true;
+    });
+
+    button.addEventListener("mouseup",()=>{
+        keys[key] = false;
+    });
+
+    button.addEventListener("mouseleave",()=>{
+        keys[key] = false;
+    });
+
+});
+
+
+/* START MOVEMENT LOOP */
+
+move();
 
 </script>
 
