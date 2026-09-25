@@ -2,1169 +2,1404 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-
-<title>PARTY NIGHT: CHAOS</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>PARTY NIGHT CHAOS</title>
 
 <style>
 *{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
-    -webkit-tap-highlight-color:transparent;
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
-body{
-    background:#050609;
-    color:white;
-    font-family:Arial,Helvetica,sans-serif;
-    overflow:hidden;
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#05070c;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
 }
 
-/* =========================
-   CHARACTER SELECT
-========================= */
+button{
+  font:inherit;
+}
 
-#characterScreen{
-    position:fixed;
-    inset:0;
-    z-index:100;
-    background:
-        radial-gradient(circle at 50% 20%,#30114c 0%,transparent 35%),
-        radial-gradient(circle at 80% 80%,#071e35 0%,transparent 40%),
-        #050609;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    overflow-y:auto;
-    padding:25px 15px 40px;
+#app{
+  width:100%;
+  height:100%;
+  position:relative;
+  overflow:hidden;
+}
+
+/* ================= SELECT SCREEN ================= */
+
+#selectScreen{
+  position:absolute;
+  inset:0;
+  overflow:auto;
+  background:
+    radial-gradient(circle at 50% 0%,#201044 0,#090b14 38%,#030408 100%);
+  padding:35px 4vw 45px;
+  z-index:10;
 }
 
 .logo{
-    text-align:center;
-    margin-bottom:8px;
+  text-align:center;
+  font-size:clamp(28px,5vw,58px);
+  font-weight:900;
+  letter-spacing:4px;
+  margin-bottom:5px;
 }
 
-.logo h1{
-    font-size:clamp(28px,6vw,54px);
-    letter-spacing:3px;
-    font-weight:900;
+.logo span{
+  color:#ff1590;
+  text-shadow:0 0 20px #ff1590;
 }
 
-.logo h1 span{
-    color:#ff168f;
-}
-
-.logo p{
-    color:#00d9ff;
-    letter-spacing:4px;
-    font-size:12px;
-    margin-top:7px;
-}
-
-.selectTitle{
-    margin:22px 0 16px;
-    font-size:clamp(18px,4vw,27px);
-    letter-spacing:3px;
+.subtitle{
+  text-align:center;
+  color:#7deaff;
+  letter-spacing:4px;
+  font-size:12px;
+  margin-bottom:30px;
 }
 
 .characters{
-    width:min(1050px,100%);
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-    gap:15px;
+  width:min(1250px,100%);
+  margin:auto;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:18px;
 }
 
 .card{
-    position:relative;
-    min-height:290px;
-    border:1px solid #28364e;
-    border-radius:15px;
-    background:linear-gradient(145deg,#111827,#090b12);
-    overflow:hidden;
-    cursor:pointer;
-    transition:.2s;
+  min-height:360px;
+  border:1px solid #29344d;
+  border-radius:18px;
+  background:linear-gradient(145deg,#111725,#080c15);
+  padding:18px;
+  position:relative;
+  transition:.2s;
+  cursor:pointer;
+  box-shadow:0 12px 35px #0008;
 }
 
 .card:hover{
-    transform:translateY(-5px);
-    border-color:#00d9ff;
-    box-shadow:0 0 25px #00d9ff30;
+  transform:translateY(-5px);
+  border-color:#00d9ff;
 }
 
 .card.selected{
-    border:2px solid #ff168f;
-    box-shadow:
-        0 0 20px #ff168f55,
-        inset 0 0 30px #ff168f12;
-}
-
-.cardTop{
-    position:absolute;
-    top:10px;
-    left:12px;
-    right:12px;
-    display:flex;
-    justify-content:space-between;
-    z-index:2;
+  border:2px solid #ff1590;
+  box-shadow:
+    0 0 0 2px #ff159033,
+    0 0 35px #ff159066;
 }
 
 .gender{
-    padding:5px 9px;
-    border-radius:20px;
-    font-size:10px;
-    font-weight:bold;
-    letter-spacing:1px;
-    background:#111;
+  position:absolute;
+  top:15px;
+  left:15px;
+  border:1px solid #00d9ff;
+  color:#00d9ff;
+  border-radius:20px;
+  padding:5px 10px;
+  font-size:11px;
+  font-weight:bold;
+  letter-spacing:1px;
 }
 
-.gender.male{
-    color:#00d9ff;
-    border:1px solid #00d9ff66;
-}
-
-.gender.female{
-    color:#ff55b3;
-    border:1px solid #ff55b366;
+.female{
+  color:#ff45a8;
+  border-color:#ff45a8;
 }
 
 .level{
-    color:#ffd400;
-    font-size:10px;
+  position:absolute;
+  right:15px;
+  top:15px;
+  color:#ffd400;
+  font-size:12px;
+  font-weight:bold;
 }
 
 .avatar{
-    height:185px;
-    display:flex;
-    justify-content:center;
-    align-items:flex-end;
-    padding-top:25px;
+  width:150px;
+  height:190px;
+  margin:35px auto 8px;
+  position:relative;
 }
 
-/* simple adult character */
-
-.person{
-    width:76px;
-    height:145px;
-    position:relative;
-}
-
+/* character */
 .head{
-    width:48px;
-    height:52px;
-    border-radius:48% 48% 45% 45%;
-    background:#b97950;
-    position:absolute;
-    top:0;
-    left:14px;
-    z-index:3;
+  width:58px;
+  height:64px;
+  border-radius:45% 45% 42% 42%;
+  background:#b8754d;
+  position:absolute;
+  left:46px;
+  top:5px;
+  z-index:3;
 }
 
 .hair{
-    position:absolute;
-    width:53px;
-    height:29px;
-    background:#211712;
-    border-radius:50% 50% 25% 25%;
-    top:-4px;
-    left:11px;
-    z-index:4;
-}
-
-.hair.long{
-    height:40px;
-    border-radius:50% 50% 20px 20px;
+  width:63px;
+  height:30px;
+  background:#211610;
+  border-radius:50% 50% 25% 25%;
+  position:absolute;
+  left:43px;
+  top:0;
+  z-index:4;
 }
 
 .eye{
-    position:absolute;
-    width:5px;
-    height:5px;
-    background:#111;
-    border-radius:50%;
-    top:25px;
-    z-index:5;
+  width:6px;
+  height:6px;
+  background:#111;
+  border-radius:50%;
+  position:absolute;
+  top:34px;
+  z-index:5;
 }
 
-.eye.e1{left:26px}
-.eye.e2{left:39px}
+.eye.one{left:61px}
+.eye.two{left:82px}
 
 .body{
-    position:absolute;
-    width:64px;
-    height:65px;
-    left:6px;
-    top:47px;
-    border-radius:13px 13px 8px 8px;
+  width:72px;
+  height:82px;
+  position:absolute;
+  top:67px;
+  left:39px;
+  border-radius:14px 14px 8px 8px;
+  z-index:2;
 }
-
-.body.jacket{background:#171b24}
-.body.red{background:#9b183f}
-.body.blue{background:#1262a0}
-.body.purple{background:#612b87}
-.body.white{background:#d9d9df}
-.body.green{background:#17624d}
 
 .arm{
-    position:absolute;
-    width:15px;
-    height:60px;
-    top:50px;
-    border-radius:12px;
-    background:#b97950;
-    z-index:0;
+  width:18px;
+  height:70px;
+  background:#b8754d;
+  border-radius:15px;
+  position:absolute;
+  top:75px;
+  z-index:1;
 }
 
-.arm.a1{left:-4px;transform:rotate(8deg)}
-.arm.a2{right:-4px;transform:rotate(-8deg)}
+.arm.left{left:25px;transform:rotate(7deg)}
+.arm.right{left:107px;transform:rotate(-7deg)}
 
 .leg{
-    position:absolute;
-    width:21px;
-    height:51px;
-    top:106px;
-    background:#111722;
-    border-radius:5px;
+  width:27px;
+  height:68px;
+  background:#121722;
+  position:absolute;
+  top:138px;
+  border-radius:0 0 8px 8px;
 }
 
-.leg.l1{left:14px}
-.leg.l2{right:14px}
+.leg.left{left:43px}
+.leg.right{left:80px}
 
 .shoe{
-    position:absolute;
-    width:29px;
-    height:11px;
-    background:#e9e9e9;
-    border-radius:10px;
-    top:148px;
+  width:36px;
+  height:12px;
+  background:#eee;
+  border-radius:10px;
+  position:absolute;
+  top:198px;
 }
 
-.shoe.s1{left:7px}
-.shoe.s2{right:7px}
+.shoe.left{left:36px}
+.shoe.right{left:78px}
 
-.cardInfo{
-    padding:0 16px 15px;
-}
-
-.cardInfo h2{
-    font-size:19px;
-    letter-spacing:2px;
+.name{
+  font-size:24px;
+  font-weight:900;
+  letter-spacing:2px;
 }
 
 .role{
-    color:#8c9bad;
-    font-size:11px;
-    margin-top:4px;
+  color:#8e9bb7;
+  margin:5px 0 15px;
+  font-size:12px;
 }
 
 .stats{
-    display:flex;
-    gap:5px;
-    margin-top:11px;
+  display:grid;
+  gap:7px;
 }
 
 .stat{
-    flex:1;
-    height:5px;
-    background:#252c38;
-    border-radius:10px;
-    overflow:hidden;
-}
-
-.stat i{
-    display:block;
-    height:100%;
-    background:#00d9ff;
-}
-
-.selectBtn{
-    margin-top:10px;
-    width:100%;
-    padding:9px;
-    border:1px solid #334154;
-    border-radius:8px;
-    background:#0d1119;
-    color:#fff;
-    font-size:11px;
-    letter-spacing:2px;
-}
-
-/* =========================
-   START BUTTON
-========================= */
-
-#startBtn{
-    margin-top:22px;
-    width:min(420px,90%);
-    padding:15px;
-    border:0;
-    border-radius:10px;
-    background:linear-gradient(90deg,#ff168f,#7b2cff);
-    color:#fff;
-    font-size:15px;
-    font-weight:bold;
-    letter-spacing:3px;
-    cursor:pointer;
-    box-shadow:0 0 25px #ff168f55;
-}
-
-#selectedName{
-    margin-top:10px;
-    color:#aaa;
-    font-size:12px;
-}
-
-/* =========================
-   GAME
-========================= */
-
-#gameScreen{
-    display:none;
-    position:fixed;
-    inset:0;
-    background:#050609;
-}
-
-#gameHeader{
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    height:65px;
-    z-index:20;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    padding:0 25px;
-    background:linear-gradient(#050609ee,transparent);
-}
-
-.gameLogo{
-    font-size:clamp(15px,3vw,25px);
-    font-weight:bold;
-}
-
-.gameLogo span{
-    color:#ff168f;
-}
-
-.score{
-    color:#00d9ff;
-    font-weight:bold;
-    font-size:18px;
-}
-
-#map{
-    position:absolute;
-    inset:65px 0 0;
-    overflow:hidden;
-    background:
-        linear-gradient(#ffffff05 1px,transparent 1px),
-        linear-gradient(90deg,#ffffff05 1px,transparent 1px),
-        #080b11;
-    background-size:50px 50px;
-}
-
-/* rooms */
-
-.room{
-    position:absolute;
-    border:2px solid #26354f;
-    background:#101724;
-    box-shadow:inset 0 0 30px #0008;
-}
-
-.room span{
-    position:absolute;
-    top:12px;
-    left:14px;
-    padding:7px 11px;
-    background:#05070b;
-    font-size:13px;
-    font-weight:bold;
-    letter-spacing:1px;
-}
-
-.party{
-    left:3%;
-    top:5%;
-    width:34%;
-    height:37%;
-    background:#21102e;
-}
-
-.kitchen{
-    left:39%;
-    top:5%;
-    width:28%;
-    height:37%;
-    background:#102d35;
-}
-
-.bedroom{
-    right:3%;
-    top:5%;
-    width:27%;
-    height:37%;
-    background:#251a31;
-}
-
-.lounge{
-    left:39%;
-    top:48%;
-    width:28%;
-    height:42%;
-    background:#141b31;
-}
-
-.garden{
-    right:3%;
-    top:48%;
-    width:27%;
-    height:42%;
-    background:#092b21;
+  display:grid;
+  grid-template-columns:55px 1fr;
+  align-items:center;
+  font-size:10px;
+  color:#8d99ad;
 }
 
 .bar{
-    left:3%;
-    top:48%;
-    width:34%;
-    height:42%;
-    background:#281716;
+  height:7px;
+  background:#222a39;
+  border-radius:10px;
+  overflow:hidden;
 }
 
-/* PLAYER */
-
-#player{
-    position:absolute;
-    width:38px;
-    height:55px;
-    z-index:10;
-    transform:translate(-50%,-50%);
-    transition:left .07s,top .07s;
+.fill{
+  height:100%;
+  background:#00d9ff;
+  border-radius:10px;
 }
 
-.playerHead{
-    position:absolute;
-    width:25px;
-    height:25px;
-    top:0;
-    left:6px;
-    border-radius:50%;
-    background:#b97950;
-    z-index:3;
+.selectBtn{
+  width:100%;
+  margin-top:17px;
+  padding:12px;
+  background:#0b101b;
+  color:white;
+  border:1px solid #35415a;
+  border-radius:10px;
+  cursor:pointer;
+  letter-spacing:2px;
+  font-weight:bold;
 }
 
-.playerHair{
-    position:absolute;
-    width:27px;
-    height:13px;
-    top:-2px;
-    left:5px;
-    border-radius:50% 50% 20% 20%;
-    background:#211712;
-    z-index:4;
+.selected .selectBtn{
+  background:#ff1590;
+  border-color:#ff1590;
 }
 
-.playerBody{
-    position:absolute;
-    width:34px;
-    height:30px;
-    left:2px;
-    top:21px;
-    border-radius:9px;
-    background:#151c2a;
+/* ================= GAME ================= */
+
+#gameScreen{
+  display:none;
+  position:absolute;
+  inset:0;
+  background:#06080d;
 }
 
-.playerGlow{
-    position:absolute;
-    inset:-9px;
-    border-radius:50%;
-    border:2px solid #00d9ff88;
-    animation:pulse 1.4s infinite;
+#gameCanvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  touch-action:none;
 }
 
-@keyframes pulse{
-    50%{transform:scale(1.15);opacity:.35}
+.topbar{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:70px;
+  padding:15px 25px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  background:linear-gradient(#030408dd,transparent);
+  pointer-events:none;
+  z-index:3;
 }
 
-/* objective */
-
-#objective{
-    position:absolute;
-    width:25px;
-    height:25px;
-    border-radius:50%;
-    background:#ffd000;
-    box-shadow:0 0 20px #ffd000;
-    z-index:8;
-    transform:translate(-50%,-50%);
+.gameTitle{
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:2px;
 }
 
-/* controls */
+.gameTitle span{
+  color:#ff1590;
+}
 
-#controls{
-    position:absolute;
-    bottom:18px;
-    left:18px;
-    width:150px;
-    height:150px;
-    z-index:30;
-    display:none;
+.score{
+  color:#00dcff;
+  font-size:20px;
+  font-weight:bold;
+}
+
+.hud{
+  position:absolute;
+  left:20px;
+  bottom:20px;
+  width:210px;
+  padding:13px;
+  background:#090e18dd;
+  border:1px solid #28354e;
+  border-radius:12px;
+  z-index:4;
+}
+
+.hudName{
+  font-weight:bold;
+  margin-bottom:8px;
+}
+
+.hudLabel{
+  font-size:9px;
+  color:#8290a8;
+  margin-top:6px;
+}
+
+.hudBar{
+  height:7px;
+  background:#202839;
+  border-radius:10px;
+  overflow:hidden;
+}
+
+.hp{
+  height:100%;
+  width:100%;
+  background:#ff3d68;
+}
+
+.energy{
+  height:100%;
+  width:100%;
+  background:#00d9ff;
+}
+
+.objective{
+  position:absolute;
+  left:50%;
+  bottom:22px;
+  transform:translateX(-50%);
+  background:#080c14dd;
+  border:1px solid #34415c;
+  border-radius:10px;
+  padding:10px 18px;
+  font-size:12px;
+  color:#fff;
+  z-index:4;
+}
+
+.objective b{
+  color:#ffd000;
+}
+
+/* mobile controls */
+
+.controls{
+  position:absolute;
+  right:18px;
+  bottom:18px;
+  width:150px;
+  height:150px;
+  z-index:5;
+  display:none;
 }
 
 .control{
-    position:absolute;
-    width:50px;
-    height:50px;
-    border:1px solid #ffffff44;
-    background:#111827cc;
-    color:white;
-    border-radius:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:20px;
-    user-select:none;
+  position:absolute;
+  width:48px;
+  height:48px;
+  border-radius:50%;
+  background:#111a29cc;
+  border:1px solid #52627e;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  user-select:none;
 }
 
-.up{left:50px;top:0}
-.left{left:0;top:52px}
-.down{left:50px;top:52px}
-.right{left:100px;top:52px}
+.up{left:51px;top:0}
+.left{left:0;top:51px}
+.down{left:51px;top:102px}
+.right{left:102px;top:51px}
 
-#mission{
-    position:absolute;
-    left:20px;
-    bottom:20px;
-    z-index:20;
-    color:#fff;
-    font-size:12px;
+.backBtn{
+  position:absolute;
+  right:20px;
+  top:82px;
+  z-index:5;
+  background:#0b111d;
+  color:#fff;
+  border:1px solid #3b4965;
+  border-radius:8px;
+  padding:8px 13px;
 }
 
-#mission b{
-    color:#ffd000;
+/* responsive */
+
+@media(max-width:800px){
+  #selectScreen{
+    padding:25px 14px 35px;
+  }
+
+  .characters{
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+
+  .card{
+    min-height:315px;
+    padding:12px;
+  }
+
+  .avatar{
+    transform:scale(.82);
+    transform-origin:center;
+    margin-top:28px;
+    margin-bottom:-5px;
+  }
+
+  .name{
+    font-size:18px;
+  }
+
+  .role{
+    font-size:10px;
+  }
+
+  .selectBtn{
+    padding:10px;
+  }
 }
 
-/* =========================
-   MOBILE
-========================= */
+@media(max-width:520px){
+  .characters{
+    grid-template-columns:1fr;
+    width:min(370px,100%);
+  }
 
-@media(max-width:700px){
+  .card{
+    min-height:300px;
+  }
 
-    #characterScreen{
-        padding-top:15px;
-    }
+  .controls{
+    display:block;
+  }
 
-    .characters{
-        grid-template-columns:repeat(2,1fr);
-        gap:10px;
-    }
+  .hud{
+    left:10px;
+    bottom:12px;
+    width:170px;
+  }
 
-    .card{
-        min-height:250px;
-    }
+  .objective{
+    bottom:175px;
+    font-size:10px;
+    white-space:nowrap;
+  }
 
-    .avatar{
-        height:155px;
-        transform:scale(.82);
-        transform-origin:bottom center;
-    }
+  .gameTitle{
+    font-size:15px;
+  }
 
-    .cardInfo{
-        padding:0 11px 12px;
-    }
-
-    .cardInfo h2{
-        font-size:15px;
-    }
-
-    .role{
-        font-size:9px;
-    }
-
-    #controls{
-        display:block;
-    }
-
-    #gameHeader{
-        padding:0 12px;
-    }
-
-    .room span{
-        font-size:9px;
-        padding:5px 7px;
-    }
+  .score{
+    font-size:15px;
+  }
 }
 
-@media(max-width:420px){
-
-    .characters{
-        grid-template-columns:1fr 1fr;
-    }
-
-    .card{
-        min-height:225px;
-    }
-
-    .avatar{
-        height:135px;
-        transform:scale(.7);
-    }
-
-    .selectTitle{
-        margin:12px 0;
-    }
+@media(min-width:521px){
+  .controls{
+    display:none;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<!-- =========================
-     CHARACTER SELECT
-========================= -->
+<div id="app">
 
-<section id="characterScreen">
+<!-- ================= CHARACTER SELECT ================= -->
 
-    <div class="logo">
-        <h1>PARTY <span>NIGHT</span>: CHAOS</h1>
-        <p>CHOOSE YOUR CHARACTER</p>
-    </div>
+<section id="selectScreen">
 
-    <div class="selectTitle">SELECT PLAYER</div>
+  <div class="logo">
+    PARTY NIGHT <span>CHAOS</span>
+  </div>
 
-    <div class="characters">
+  <div class="subtitle">
+    NIGHT 01 • SELECT YOUR CHARACTER
+  </div>
 
-        <!-- ALEX -->
-        <div class="card selected" data-name="ALEX">
-            <div class="cardTop">
-                <div class="gender male">♂ MALE</div>
-                <div class="level">LV 01</div>
-            </div>
-
-            <div class="avatar">
-                <div class="person">
-                    <div class="hair"></div>
-                    <div class="head">
-                        <i class="eye e1"></i>
-                        <i class="eye e2"></i>
-                    </div>
-                    <div class="arm a1"></div>
-                    <div class="arm a2"></div>
-                    <div class="body jacket"></div>
-                    <div class="leg l1"></div>
-                    <div class="leg l2"></div>
-                    <div class="shoe s1"></div>
-                    <div class="shoe s2"></div>
-                </div>
-            </div>
-
-            <div class="cardInfo">
-                <h2>ALEX</h2>
-                <div class="role">BALANCED • MAIN PLAYER</div>
-                <div class="stats">
-                    <div class="stat"><i style="width:80%"></i></div>
-                    <div class="stat"><i style="width:75%"></i></div>
-                    <div class="stat"><i style="width:78%"></i></div>
-                </div>
-                <button class="selectBtn">SELECT</button>
-            </div>
-        </div>
-
-
-        <!-- RYAN -->
-        <div class="card" data-name="RYAN">
-            <div class="cardTop">
-                <div class="gender male">♂ MALE</div>
-                <div class="level">LV 01</div>
-            </div>
-
-            <div class="avatar">
-                <div class="person">
-                    <div class="hair"></div>
-                    <div class="head">
-                        <i class="eye e1"></i>
-                        <i class="eye e2"></i>
-                    </div>
-                    <div class="arm a1"></div>
-                    <div class="arm a2"></div>
-                    <div class="body blue"></div>
-                    <div class="leg l1"></div>
-                    <div class="leg l2"></div>
-                    <div class="shoe s1"></div>
-                    <div class="shoe s2"></div>
-                </div>
-            </div>
-
-            <div class="cardInfo">
-                <h2>RYAN</h2>
-                <div class="role">FAST • RUNNER</div>
-                <div class="stats">
-                    <div class="stat"><i style="width:65%"></i></div>
-                    <div class="stat"><i style="width:96%"></i></div>
-                    <div class="stat"><i style="width:70%"></i></div>
-                </div>
-                <button class="selectBtn">SELECT</button>
-            </div>
-        </div>
-
-
-        <!-- KAI -->
-        <div class="card" data-name="KAI">
-            <div class="cardTop">
-                <div class="gender male">♂ MALE</div>
-                <div class="level">LV 01</div>
-            </div>
-
-            <div class="avatar">
-                <div class="person">
-                    <div class="hair"></div>
-                    <div class="head">
-                        <i class="eye e1"></i>
-                        <i class="eye e2"></i>
-                    </div>
-                    <div class="arm a1"></div>
-                    <div class="arm a2"></div>
-                    <div class="body red"></div>
-                    <div class="leg l1"></div>
-                    <div class="leg l2"></div>
-                    <div class="shoe s1"></div>
-                    <div class="shoe s2"></div>
-                </div>
-            </div>
-
-            <div class="cardInfo">
-                <h2>KAI</h2>
-                <div class="role">STRONG • POWER</div>
-                <div class="stats">
-                    <div class="stat"><i style="width:95%"></i></div>
-                    <div class="stat"><i style="width:60%"></i></div>
-                    <div class="stat"><i style="width:90%"></i></div>
-                </div>
-                <button class="selectBtn">SELECT</button>
-            </div>
-        </div>
-
-
-        <!-- MAYA -->
-        <div class="card" data-name="MAYA">
-            <div class="cardTop">
-                <div class="gender female">♀ FEMALE</div>
-                <div class="level">LV 01</div>
-            </div>
-
-            <div class="avatar">
-                <div class="person">
-                    <div class="hair long"></div>
-                    <div class="head">
-                        <i class="eye e1"></i>
-                        <i class="eye e2"></i>
-                    </div>
-                    <div class="arm a1"></div>
-                    <div class="arm a2"></div>
-                    <div class="body purple"></div>
-                    <div class="leg l1"></div>
-                    <div class="leg l2"></div>
-                    <div class="shoe s1"></div>
-                    <div class="shoe s2"></div>
-                </div>
-            </div>
-
-            <div class="cardInfo">
-                <h2>MAYA</h2>
-                <div class="role">AGILE • STEALTH</div>
-                <div class="stats">
-                    <div class="stat"><i style="width:70%"></i></div>
-                    <div class="stat"><i style="width:93%"></i></div>
-                    <div class="stat"><i style="width:82%"></i></div>
-                </div>
-                <button class="selectBtn">SELECT</button>
-            </div>
-        </div>
-
-
-        <!-- ZARA -->
-        <div class="card" data-name="ZARA">
-            <div class="cardTop">
-                <div class="gender female">♀ FEMALE</div>
-                <div class="level">LV 01</div>
-            </div>
-
-            <div class="avatar">
-                <div class="person">
-                    <div class="hair long"></div>
-                    <div class="head">
-                        <i class="eye e1"></i>
-                        <i class="eye e2"></i>
-                    </div>
-                    <div class="arm a1"></div>
-                    <div class="arm a2"></div>
-                    <div class="body blue"></div>
-                    <div class="leg l1"></div>
-                    <div class="leg l2"></div>
-                    <div class="shoe s1"></div>
-                    <div class="shoe s2"></div>
-                </div>
-            </div>
-
-            <div class="cardInfo">
-                <h2>ZARA</h2>
-                <div class="role">BALANCED • TACTICAL</div>
-                <div class="stats">
-                    <div class="stat"><i style="width:82%"></i></div>
-                    <div class="stat"><i style="width:82%"></i></div>
-                    <div class="stat"><i style="width:80%"></i></div>
-                </div>
-                <button class="selectBtn">SELECT</button>
-            </div>
-        </div>
-
-
-        <!-- NINA -->
-        <div class="card" data-name="NINA">
-            <div class="cardTop">
-                <div class="gender female">♀ FEMALE</div>
-                <div class="level">LV 01</div>
-            </div>
-
-            <div class="avatar">
-                <div class="person">
-                    <div class="hair long"></div>
-                    <div class="head">
-                        <i class="eye e1"></i>
-                        <i class="eye e2"></i>
-                    </div>
-                    <div class="arm a1"></div>
-                    <div class="arm a2"></div>
-                    <div class="body green"></div>
-                    <div class="leg l1"></div>
-                    <div class="leg l2"></div>
-                    <div class="shoe s1"></div>
-                    <div class="shoe s2"></div>
-                </div>
-            </div>
-
-            <div class="cardInfo">
-                <h2>NINA</h2>
-                <div class="role">AGILE • QUICK</div>
-                <div class="stats">
-                    <div class="stat"><i style="width:72%"></i></div>
-                    <div class="stat"><i style="width:97%"></i></div>
-                    <div class="stat"><i style="width:76%"></i></div>
-                </div>
-                <button class="selectBtn">SELECT</button>
-            </div>
-        </div>
-
-    </div>
-
-    <button id="startBtn">START NIGHT</button>
-
-    <div id="selectedName">
-        SELECTED: ALEX
-    </div>
+  <div class="characters" id="characters"></div>
 
 </section>
 
 
-<!-- =========================
-     GAME SCREEN
-========================= -->
+<!-- ================= GAME ================= -->
 
 <section id="gameScreen">
 
-    <div id="gameHeader">
-        <div class="gameLogo">
-            PARTY NIGHT <span>CHAOS</span>
-        </div>
+  <canvas id="gameCanvas"></canvas>
 
-        <div class="score">
-            SCORE <span id="score">0</span>
-        </div>
+  <div class="topbar">
+    <div class="gameTitle">
+      PARTY NIGHT <span>CHAOS</span>
+    </div>
+    <div class="score">
+      SCORE <span id="score">0</span>
+    </div>
+  </div>
+
+  <button class="backBtn" onclick="backToSelect()">CHARACTERS</button>
+
+  <div class="hud">
+    <div class="hudName" id="hudName">ALEX</div>
+
+    <div class="hudLabel">HEALTH</div>
+    <div class="hudBar">
+      <div class="hp"></div>
     </div>
 
-    <div id="map">
-
-        <div class="room party">
-            <span>PARTY HALL</span>
-        </div>
-
-        <div class="room kitchen">
-            <span>KITCHEN</span>
-        </div>
-
-        <div class="room bedroom">
-            <span>BEDROOM</span>
-        </div>
-
-        <div class="room lounge">
-            <span>LOUNGE</span>
-        </div>
-
-        <div class="room garden">
-            <span>GARDEN</span>
-        </div>
-
-        <div class="room bar">
-            <span>BAR</span>
-        </div>
-
-        <div id="objective"></div>
-
-        <div id="player">
-            <div class="playerGlow"></div>
-            <div class="playerHair"></div>
-            <div class="playerHead"></div>
-            <div class="playerBody"></div>
-        </div>
-
+    <div class="hudLabel">ENERGY</div>
+    <div class="hudBar">
+      <div class="energy"></div>
     </div>
+  </div>
 
-    <div id="mission">
-        <b>OBJECTIVE</b><br>
-        Reach the yellow objective
-    </div>
+  <div class="objective">
+    OBJECTIVE : <b>Reach the yellow objective</b>
+  </div>
 
-    <div id="controls">
-        <div class="control up" data-key="ArrowUp">▲</div>
-        <div class="control left" data-key="ArrowLeft">◀</div>
-        <div class="control down" data-key="ArrowDown">▼</div>
-        <div class="control right" data-key="ArrowRight">▶</div>
-    </div>
+  <div class="controls">
+    <div class="control up" data-key="ArrowUp">▲</div>
+    <div class="control left" data-key="ArrowLeft">◀</div>
+    <div class="control down" data-key="ArrowDown">▼</div>
+    <div class="control right" data-key="ArrowRight">▶</div>
+  </div>
 
 </section>
+
+</div>
 
 
 <script>
 
-/* =========================
-   CHARACTER SYSTEM
-========================= */
+/* =========================================================
+   CHARACTER DATA
+========================================================= */
 
-const cards = document.querySelectorAll(".card");
-const selectedName = document.getElementById("selectedName");
+const characters = [
 
-let selectedCharacter = "ALEX";
+  {
+    name:"ALEX",
+    gender:"MALE",
+    role:"BALANCED • MAIN PLAYER",
+    color:"#202838",
+    speed:4,
+    power:70,
+    energy:75
+  },
 
-cards.forEach(card => {
+  {
+    name:"RYAN",
+    gender:"MALE",
+    role:"FAST • RUNNER",
+    color:"#1470ad",
+    speed:6,
+    power:55,
+    energy:90
+  },
 
-    card.addEventListener("click", () => {
+  {
+    name:"KAI",
+    gender:"MALE",
+    role:"STRONG • POWER",
+    color:"#a41448",
+    speed:3,
+    power:95,
+    energy:60
+  },
 
-        cards.forEach(c => c.classList.remove("selected"));
+  {
+    name:"MAYA",
+    gender:"FEMALE",
+    role:"SMART • TECH",
+    color:"#7130a2",
+    speed:5,
+    power:65,
+    energy:95
+  },
 
-        card.classList.add("selected");
+  {
+    name:"ZARA",
+    gender:"FEMALE",
+    role:"AGILE • STREET",
+    color:"#1375a8",
+    speed:7,
+    power:60,
+    energy:85
+  },
 
-        selectedCharacter = card.dataset.name;
+  {
+    name:"NINA",
+    gender:"FEMALE",
+    role:"CALM • TACTICAL",
+    color:"#176b58",
+    speed:4,
+    power:80,
+    energy:80
+  }
 
-        selectedName.textContent =
-            "SELECTED: " + selectedCharacter;
-    });
+];
+
+let selectedCharacter = 0;
+
+
+/* =========================================================
+   BUILD CHARACTER CARDS
+========================================================= */
+
+const characterContainer =
+  document.getElementById("characters");
+
+characters.forEach((c,index)=>{
+
+  const card = document.createElement("div");
+
+  card.className =
+    "card" + (index===0 ? " selected" : "");
+
+  card.onclick = ()=>{
+    selectCharacter(index);
+  };
+
+  card.innerHTML = `
+
+    <div class="gender ${c.gender==="FEMALE"?"female":""}">
+      ${c.gender==="MALE"?"♂":"♀"} ${c.gender}
+    </div>
+
+    <div class="level">LV 01</div>
+
+    <div class="avatar">
+
+      <div class="hair"></div>
+
+      <div class="head">
+        <div class="eye one"></div>
+        <div class="eye two"></div>
+      </div>
+
+      <div class="arm left"></div>
+      <div class="arm right"></div>
+
+      <div class="body"
+           style="background:${c.color}">
+      </div>
+
+      <div class="leg left"></div>
+      <div class="leg right"></div>
+
+      <div class="shoe left"></div>
+      <div class="shoe right"></div>
+
+    </div>
+
+    <div class="name">${c.name}</div>
+
+    <div class="role">${c.role}</div>
+
+    <div class="stats">
+
+      <div class="stat">
+        SPEED
+        <div class="bar">
+          <div class="fill"
+               style="width:${c.speed/7*100}%"></div>
+        </div>
+      </div>
+
+      <div class="stat">
+        POWER
+        <div class="bar">
+          <div class="fill"
+               style="width:${c.power}%"></div>
+        </div>
+      </div>
+
+      <div class="stat">
+        ENERGY
+        <div class="bar">
+          <div class="fill"
+               style="width:${c.energy}%"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <button class="selectBtn">
+      SELECT
+    </button>
+  `;
+
+  characterContainer.appendChild(card);
 
 });
 
 
-/* =========================
+function selectCharacter(index){
+
+  selectedCharacter=index;
+
+  document.querySelectorAll(".card")
+    .forEach((card,i)=>{
+      card.classList.toggle(
+        "selected",
+        i===index
+      );
+    });
+
+  setTimeout(startGame,180);
+}
+
+
+/* =========================================================
+   GAME ENGINE
+========================================================= */
+
+const selectScreen =
+  document.getElementById("selectScreen");
+
+const gameScreen =
+  document.getElementById("gameScreen");
+
+const canvas =
+  document.getElementById("gameCanvas");
+
+const ctx =
+  canvas.getContext("2d");
+
+let W=0;
+let H=0;
+
+let player={
+  x:0,
+  y:0,
+  size:18
+};
+
+let objective={
+  x:0,
+  y:0,
+  size:14
+};
+
+let keys={};
+
+let score=0;
+
+let gameRunning=false;
+
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+function resize(){
+
+  W=window.innerWidth;
+  H=window.innerHeight;
+
+  canvas.width=W*devicePixelRatio;
+  canvas.height=H*devicePixelRatio;
+
+  canvas.style.width=W+"px";
+  canvas.style.height=H+"px";
+
+  ctx.setTransform(
+    devicePixelRatio,
+    0,
+    0,
+    devicePixelRatio,
+    0,
+    0
+  );
+
+  if(gameRunning){
+    draw();
+  }
+}
+
+window.addEventListener("resize",resize);
+
+
+/* =========================================================
    START GAME
-========================= */
-
-const startBtn = document.getElementById("startBtn");
-const characterScreen = document.getElementById("characterScreen");
-const gameScreen = document.getElementById("gameScreen");
-
-const player = document.getElementById("player");
-const objective = document.getElementById("objective");
-const scoreText = document.getElementById("score");
-
-let score = 0;
-
-let playerX = 25;
-let playerY = 70;
-
-let speed = 0.8;
+========================================================= */
 
 function startGame(){
 
-    characterScreen.style.display = "none";
-    gameScreen.style.display = "block";
+  selectScreen.style.display="none";
+  gameScreen.style.display="block";
 
-    /* character stats */
+  resize();
 
-    if(selectedCharacter === "RYAN"){
-        speed = 1.15;
-    }
+  const c=characters[selectedCharacter];
 
-    else if(selectedCharacter === "MAYA"){
-        speed = 1.05;
-    }
+  document.getElementById("hudName").textContent=c.name;
 
-    else if(selectedCharacter === "NINA"){
-        speed = 1.12;
-    }
+  score=0;
+  document.getElementById("score").textContent=score;
 
-    else if(selectedCharacter === "KAI"){
-        speed = 0.68;
-    }
+  player.x=W*0.18;
+  player.y=H*0.70;
 
-    else{
-        speed = 0.8;
-    }
+  objective.x=W*0.82;
+  objective.y=H*0.70;
 
-    positionPlayer();
+  gameRunning=true;
 
-    /* objective */
-    objective.style.left = "83%";
-    objective.style.top = "78%";
+  requestAnimationFrame(gameLoop);
 }
 
-startBtn.addEventListener("click",startGame);
+
+/* =========================================================
+   MAP
+========================================================= */
+
+function drawMap(){
+
+  ctx.fillStyle="#070a10";
+  ctx.fillRect(0,0,W,H);
+
+  /* grid */
+
+  ctx.strokeStyle="#111927";
+  ctx.lineWidth=1;
+
+  const grid=40;
+
+  for(let x=0;x<W;x+=grid){
+
+    ctx.beginPath();
+    ctx.moveTo(x,0);
+    ctx.lineTo(x,H);
+    ctx.stroke();
+
+  }
+
+  for(let y=0;y<H;y+=grid){
+
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(W,y);
+    ctx.stroke();
+
+  }
 
 
-/* =========================
-   PLAYER MOVEMENT
-========================= */
+  const margin=40;
+  const gap=18;
 
-const keys = {};
+  const roomW=(W-margin*2-gap*2)/3;
+
+  const topY=110;
+  const roomH=H*0.30;
+
+  room(
+    margin,
+    topY,
+    roomW,
+    roomH,
+    "PARTY HALL",
+    "#261038"
+  );
+
+  room(
+    margin+roomW+gap,
+    topY,
+    roomW,
+    roomH,
+    "KITCHEN",
+    "#10323a"
+  );
+
+  room(
+    margin+(roomW+gap)*2,
+    topY,
+    roomW,
+    roomH,
+    "BEDROOM",
+    "#292038"
+  );
+
+
+  const bottomY=topY+roomH+35;
+  const bottomH=Math.max(
+    150,
+    H-bottomY-35
+  );
+
+  room(
+    margin,
+    bottomY,
+    roomW,
+    bottomH,
+    "BAR",
+    "#301c1c"
+  );
+
+  room(
+    margin+roomW+gap,
+    bottomY,
+    roomW,
+    bottomH,
+    "LOUNGE",
+    "#151c35"
+  );
+
+  room(
+    margin+(roomW+gap)*2,
+    bottomY,
+    roomW,
+    bottomH,
+    "GARDEN",
+    "#0c3326"
+  );
+
+
+  /* party lights */
+
+  for(let i=0;i<12;i++){
+
+    const x=margin+30+
+      (i%6)*45;
+
+    const y=topY+70+
+      Math.floor(i/6)*45;
+
+    ctx.fillStyle=
+      i%2===0
+      ? "#ff159055"
+      : "#00d9ff44";
+
+    ctx.fillRect(x,y,20,20);
+  }
+}
+
+
+function room(x,y,w,h,name,bg){
+
+  ctx.fillStyle=bg;
+  ctx.fillRect(x,y,w,h);
+
+  ctx.strokeStyle="#34425e";
+  ctx.lineWidth=2;
+  ctx.strokeRect(x,y,w,h);
+
+  ctx.fillStyle="#05070b";
+  ctx.fillRect(x+15,y+15,145,35);
+
+  ctx.fillStyle="#fff";
+  ctx.font="bold 15px Arial";
+  ctx.fillText(name,x+28,y+38);
+}
+
+
+/* =========================================================
+   DRAW PLAYER
+========================================================= */
+
+function drawPlayer(){
+
+  const c=characters[selectedCharacter];
+
+  const x=player.x;
+  const y=player.y;
+
+  ctx.save();
+
+  /* shadow */
+
+  ctx.fillStyle="#0008";
+
+  ctx.beginPath();
+  ctx.ellipse(
+    x,
+    y+22,
+    17,
+    7,
+    0,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+
+  /* legs */
+
+  ctx.fillStyle="#111722";
+
+  ctx.fillRect(
+    x-12,
+    y+3,
+    10,
+    20
+  );
+
+  ctx.fillRect(
+    x+2,
+    y+3,
+    10,
+    20
+  );
+
+
+  /* shoes */
+
+  ctx.fillStyle="#eee";
+
+  ctx.fillRect(
+    x-14,
+    y+20,
+    13,
+    5
+  );
+
+  ctx.fillRect(
+    x+2,
+    y+20,
+    13,
+    5
+  );
+
+
+  /* body */
+
+  ctx.fillStyle=c.color;
+
+  roundRect(
+    ctx,
+    x-17,
+    y-25,
+    34,
+    35,
+    8
+  );
+
+
+  /* arms */
+
+  ctx.fillStyle="#b8754d";
+
+  ctx.fillRect(
+    x-23,
+    y-20,
+    7,
+    27
+  );
+
+  ctx.fillRect(
+    x+16,
+    y-20,
+    7,
+    27
+  );
+
+
+  /* head */
+
+  ctx.beginPath();
+
+  ctx.fillStyle="#b8754d";
+
+  ctx.arc(
+    x,
+    y-35,
+    14,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+
+  /* hair */
+
+  ctx.fillStyle="#211610";
+
+  ctx.beginPath();
+
+  ctx.arc(
+    x,
+    y-41,
+    15,
+    Math.PI,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.fillRect(
+    x-15,
+    y-42,
+    30,
+    8
+  );
+
+
+  /* outline */
+
+  ctx.strokeStyle="#fff";
+  ctx.lineWidth=1;
+
+  ctx.beginPath();
+
+  ctx.arc(
+    x,
+    y-35,
+    14,
+    0,
+    Math.PI*2
+  );
+
+  ctx.stroke();
+
+
+  ctx.restore();
+}
+
+
+/* =========================================================
+   OBJECTIVE
+========================================================= */
+
+function drawObjective(){
+
+  const pulse=
+    1+
+    Math.sin(Date.now()/180)*.12;
+
+  ctx.save();
+
+  ctx.shadowBlur=25;
+  ctx.shadowColor="#ffd000";
+
+  ctx.fillStyle="#ffd000";
+
+  ctx.beginPath();
+
+  ctx.arc(
+    objective.x,
+    objective.y,
+    objective.size*pulse,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+  ctx.restore();
+
+  ctx.fillStyle="#fff";
+
+  ctx.font="bold 11px Arial";
+
+  ctx.fillText(
+    "ACTION",
+    objective.x+20,
+    objective.y+4
+  );
+}
+
+
+/* =========================================================
+   GAME LOOP
+========================================================= */
+
+function gameLoop(){
+
+  if(!gameRunning) return;
+
+  update();
+  draw();
+
+  requestAnimationFrame(gameLoop);
+}
+
+
+function update(){
+
+  const c=characters[selectedCharacter];
+
+  let dx=0;
+  let dy=0;
+
+  if(keys["ArrowUp"] || keys["w"] || keys["W"])
+    dy-=1;
+
+  if(keys["ArrowDown"] || keys["s"] || keys["S"])
+    dy+=1;
+
+  if(keys["ArrowLeft"] || keys["a"] || keys["A"])
+    dx-=1;
+
+  if(keys["ArrowRight"] || keys["d"] || keys["D"])
+    dx+=1;
+
+  if(dx!==0 || dy!==0){
+
+    const len=Math.hypot(dx,dy);
+
+    dx/=len;
+    dy/=len;
+
+    player.x+=dx*c.speed;
+    player.y+=dy*c.speed;
+
+    score+=0.05;
+
+    document.getElementById("score").textContent=
+      Math.floor(score);
+  }
+
+  /* screen boundaries */
+
+  player.x=
+    Math.max(
+      20,
+      Math.min(W-20,player.x)
+    );
+
+  player.y=
+    Math.max(
+      90,
+      Math.min(H-30,player.y)
+    );
+
+
+  /* objective collision */
+
+  const distance=
+    Math.hypot(
+      player.x-objective.x,
+      player.y-objective.y
+    );
+
+  if(distance<30){
+
+    score+=100;
+
+    document.getElementById("score").textContent=
+      Math.floor(score);
+
+    objective.x=
+      100+
+      Math.random()*(W-200);
+
+    objective.y=
+      130+
+      Math.random()*(H-220);
+  }
+}
+
+
+function draw(){
+
+  drawMap();
+  drawObjective();
+  drawPlayer();
+}
+
+
+/* =========================================================
+   KEYBOARD
+========================================================= */
 
 window.addEventListener("keydown",e=>{
-    keys[e.key] = true;
 
-    if([
-        "ArrowUp",
-        "ArrowDown",
-        "ArrowLeft",
-        "ArrowRight",
-        "w","a","s","d",
-        "W","A","S","D"
-    ].includes(e.key)){
-        e.preventDefault();
-    }
+  keys[e.key]=true;
+
 });
 
 window.addEventListener("keyup",e=>{
-    keys[e.key] = false;
-});
 
-
-function move(){
-
-    if(gameScreen.style.display !== "block"){
-        requestAnimationFrame(move);
-        return;
-    }
-
-    if(keys["ArrowUp"] || keys["w"] || keys["W"]){
-        playerY -= speed;
-    }
-
-    if(keys["ArrowDown"] || keys["s"] || keys["S"]){
-        playerY += speed;
-    }
-
-    if(keys["ArrowLeft"] || keys["a"] || keys["A"]){
-        playerX -= speed;
-    }
-
-    if(keys["ArrowRight"] || keys["d"] || keys["D"]){
-        playerX += speed;
-    }
-
-    playerX = Math.max(3,Math.min(97,playerX));
-    playerY = Math.max(4,Math.min(94,playerY));
-
-    positionPlayer();
-
-    checkObjective();
-
-    requestAnimationFrame(move);
-}
-
-function positionPlayer(){
-
-    player.style.left = playerX + "%";
-    player.style.top = playerY + "%";
-}
-
-
-/* =========================
-   OBJECTIVE
-========================= */
-
-function checkObjective(){
-
-    const ox = 83;
-    const oy = 78;
-
-    const distance =
-        Math.sqrt(
-            Math.pow(playerX-ox,2) +
-            Math.pow(playerY-oy,2)
-        );
-
-    if(distance < 5){
-
-        score += 100;
-
-        scoreText.textContent = score;
-
-        /* new objective */
-
-        const positions = [
-            [15,20],
-            [52,20],
-            [83,20],
-            [52,65],
-            [18,72]
-        ];
-
-        const p =
-            positions[
-                Math.floor(Math.random()*positions.length)
-            ];
-
-        objective.style.left = p[0] + "%";
-        objective.style.top = p[1] + "%";
-    }
-}
-
-
-/* =========================
-   MOBILE CONTROLS
-========================= */
-
-document.querySelectorAll(".control").forEach(button => {
-
-    const key = button.dataset.key;
-
-    button.addEventListener("touchstart",e=>{
-        e.preventDefault();
-        keys[key] = true;
-    },{passive:false});
-
-    button.addEventListener("touchend",e=>{
-        e.preventDefault();
-        keys[key] = false;
-    },{passive:false});
-
-    button.addEventListener("mousedown",()=>{
-        keys[key] = true;
-    });
-
-    button.addEventListener("mouseup",()=>{
-        keys[key] = false;
-    });
-
-    button.addEventListener("mouseleave",()=>{
-        keys[key] = false;
-    });
+  keys[e.key]=false;
 
 });
 
 
-/* START MOVEMENT LOOP */
+/* =========================================================
+   MOBILE TOUCH
+========================================================= */
 
-move();
+document.querySelectorAll(".control")
+.forEach(btn=>{
+
+  const key=btn.dataset.key;
+
+  const down=e=>{
+    e.preventDefault();
+    keys[key]=true;
+  };
+
+  const up=e=>{
+    e.preventDefault();
+    keys[key]=false;
+  };
+
+  btn.addEventListener("touchstart",down,{passive:false});
+  btn.addEventListener("touchend",up,{passive:false});
+  btn.addEventListener("touchcancel",up,{passive:false});
+
+  btn.addEventListener("mousedown",down);
+  btn.addEventListener("mouseup",up);
+  btn.addEventListener("mouseleave",up);
+
+});
+
+
+/* =========================================================
+   BACK TO CHARACTER SELECT
+========================================================= */
+
+function backToSelect(){
+
+  gameRunning=false;
+
+  gameScreen.style.display="none";
+  selectScreen.style.display="block";
+
+}
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function roundRect(ctx,x,y,w,h,r){
+
+  ctx.beginPath();
+
+  ctx.moveTo(x+r,y);
+
+  ctx.arcTo(
+    x+w,y,
+    x+w,y+h,
+    r
+  );
+
+  ctx.arcTo(
+    x+w,y+h,
+    x,y+h,
+    r
+  );
+
+  ctx.arcTo(
+    x,y+h,
+    x,y,
+    r
+  );
+
+  ctx.arcTo(
+    x,y,
+    x+w,y,
+    r
+  );
+
+  ctx.closePath();
+
+  ctx.fill();
+}
 
 </script>
 
