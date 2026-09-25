@@ -2,930 +2,823 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 
-<title>PARTY NIGHT CHAOS</title>
+<title>Party Night Chaos</title>
 
 <style>
 *{
-    box-sizing:border-box;
-    margin:0;
-    padding:0;
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    background:#05060b;
-    font-family:Arial,Helvetica,sans-serif;
-    color:white;
-    touch-action:none;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:#08090d;
+  font-family:Arial,Helvetica,sans-serif;
+  color:white;
 }
 
-/* =========================
-   GAME
-========================= */
+body{
+  user-select:none;
+}
+
+/* ================= GAME ================= */
 
 #game{
-    position:relative;
-    width:100vw;
-    height:100vh;
-    overflow:hidden;
-    background:
-        radial-gradient(circle at 50% 40%,#111827 0%,#070910 48%,#020307 100%);
+  position:relative;
+  width:100vw;
+  height:100vh;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 50% 45%,#20232d 0%,#101218 48%,#07080b 100%);
 }
 
-/* Background grid */
-
-#game::before{
-    content:"";
-    position:absolute;
-    inset:0;
-
-    background-image:
-        linear-gradient(rgba(0,220,255,.045) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(0,220,255,.045) 1px,transparent 1px);
-
-    background-size:45px 45px;
-    pointer-events:none;
-}
-
-/* =========================
-   TOP UI
-========================= */
+/* ================= TOP BAR ================= */
 
 #topbar{
-    position:absolute;
-    left:0;
-    top:0;
-    width:100%;
-    height:74px;
+  position:absolute;
+  z-index:50;
+  top:0;
+  left:0;
+  width:100%;
+  height:72px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 22px;
 
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+  background:linear-gradient(
+    180deg,
+    rgba(5,6,10,.96),
+    rgba(5,6,10,.72),
+    transparent
+  );
 
-    padding:0 28px;
-
-    background:linear-gradient(
-        180deg,
-        rgba(2,4,10,.96),
-        rgba(2,4,10,.70)
-    );
-
-    border-bottom:1px solid rgba(0,220,255,.15);
-
-    z-index:20;
+  pointer-events:none;
 }
 
 .logo{
-    font-size:25px;
-    font-weight:900;
-    letter-spacing:1px;
-}
-
-.logo span{
-    color:#ff1593;
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:2px;
+  text-shadow:0 0 14px #ff2f81;
 }
 
 .level{
-    font-size:13px;
-    color:#7e8aa5;
-    margin-top:4px;
+  font-size:12px;
+  color:#aaa;
+  margin-top:3px;
+  letter-spacing:1px;
 }
 
 .stats{
-    display:flex;
-    align-items:center;
-    gap:24px;
+  display:flex;
+  gap:10px;
+  align-items:center;
 }
 
 .stat{
-    min-width:130px;
+  width:120px;
 }
 
-.stat-title{
-    font-size:11px;
-    color:#7f8ca5;
-    margin-bottom:5px;
+.stat label{
+  display:block;
+  font-size:10px;
+  color:#aaa;
+  margin-bottom:4px;
 }
 
 .bar{
-    width:130px;
-    height:8px;
-    background:#151a25;
-    border-radius:10px;
-    overflow:hidden;
+  width:100%;
+  height:7px;
+  background:#252731;
+  border-radius:20px;
+  overflow:hidden;
+  border:1px solid #3b3d47;
 }
 
-.bar-fill{
-    height:100%;
-    border-radius:10px;
+.fill{
+  height:100%;
+  width:100%;
+  border-radius:20px;
 }
 
-.hp{
-    width:88%;
-    background:#ff2d6f;
+.health{
+  background:linear-gradient(90deg,#ff1744,#ff4f70);
 }
 
 .energy{
-    width:76%;
-    background:#00d9ff;
+  background:linear-gradient(90deg,#00d9ff,#7b5cff);
 }
 
-/* =========================
-   MAP
-========================= */
+/* ================= MAP ================= */
 
 #map{
-    position:absolute;
+  position:absolute;
+  width:1400px;
+  height:900px;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
 
-    left:50%;
-    top:50%;
+  background:
+    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
+    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
+    #15171d;
 
-    width:min(1400px,92vw);
-    height:min(780px,78vh);
+  background-size:40px 40px;
 
-    transform:translate(-50%,-47%);
+  box-shadow:
+    0 0 100px rgba(0,0,0,.9),
+    inset 0 0 100px rgba(0,0,0,.65);
 
-    border:1px solid rgba(100,130,180,.18);
-
-    background:
-        radial-gradient(circle at 50% 50%,rgba(25,35,55,.45),transparent 70%);
-
-    overflow:hidden;
+  border:2px solid #30333c;
 }
 
-/* Rooms */
+/* ================= ROOMS ================= */
 
 .room{
-    position:absolute;
-
-    border:2px solid rgba(92,118,165,.55);
-
-    box-shadow:
-        inset 0 0 35px rgba(0,0,0,.25),
-        0 0 20px rgba(0,0,0,.15);
-
-    overflow:hidden;
+  position:absolute;
+  border:2px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.025);
+  box-shadow:
+    inset 0 0 35px rgba(0,0,0,.45),
+    0 0 25px rgba(0,0,0,.25);
 }
 
-.room::after{
-    content:"";
-    position:absolute;
-    inset:0;
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(255,255,255,.025),
-            transparent 50%
-        );
-
-    pointer-events:none;
-}
-
-.room-title{
-    position:absolute;
-    left:18px;
-    top:16px;
-
-    padding:9px 15px;
-
-    background:rgba(3,5,10,.92);
-
-    font-size:14px;
-    font-weight:900;
-    letter-spacing:1px;
-
-    border-left:3px solid #00d9ff;
-
-    z-index:3;
+.room h2{
+  position:absolute;
+  top:14px;
+  left:16px;
+  font-size:13px;
+  letter-spacing:2px;
+  color:#888;
+  font-weight:900;
 }
 
 .party{
-    left:2%;
-    top:4%;
-    width:30%;
-    height:38%;
-    background:#251035;
+  left:40px;
+  top:50px;
+  width:570px;
+  height:330px;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(255,0,130,.09),transparent 60%),
+    rgba(255,255,255,.025);
 }
 
 .kitchen{
-    left:35%;
-    top:4%;
-    width:30%;
-    height:38%;
-    background:#0d2b32;
+  left:650px;
+  top:50px;
+  width:310px;
+  height:330px;
 }
 
 .bedroom{
-    left:68%;
-    top:4%;
-    width:30%;
-    height:38%;
-    background:#251a30;
+  left:1000px;
+  top:50px;
+  width:350px;
+  height:330px;
 }
 
 .bar{
-    left:2%;
-    top:47%;
-    width:30%;
-    height:48%;
-    background:#281919;
+  left:40px;
+  top:430px;
+  width:330px;
+  height:390px;
 }
 
 .lounge{
-    left:35%;
-    top:47%;
-    width:30%;
-    height:48%;
-    background:#151d38;
+  left:410px;
+  top:430px;
+  width:550px;
+  height:390px;
 }
 
 .garden{
-    left:68%;
-    top:47%;
-    width:30%;
-    height:48%;
-    background:#063024;
+  left:1000px;
+  top:430px;
+  width:350px;
+  height:390px;
+
+  background:
+    radial-gradient(circle at 20% 20%,rgba(0,255,170,.06),transparent 30%),
+    radial-gradient(circle at 80% 70%,rgba(0,150,255,.05),transparent 30%),
+    rgba(255,255,255,.025);
 }
 
-/* Party floor lights */
+/* ================= FLOOR DETAILS ================= */
 
 .floor-light{
-    position:absolute;
-    width:25px;
-    height:25px;
-    border-radius:4px;
-    background:#4a0f52;
-    box-shadow:0 0 15px rgba(255,0,200,.08);
+  position:absolute;
+  width:150px;
+  height:150px;
+  border-radius:50%;
+  background:radial-gradient(
+    circle,
+    rgba(255,40,150,.15),
+    transparent 70%
+  );
 }
 
-/* =========================
-   ALEX CHARACTER
-========================= */
+.l1{left:180px;top:100px;}
+.l2{left:390px;top:180px;}
+.l3{left:730px;top:100px;}
+.l4{left:1100px;top:150px;}
 
-#player{
-    position:absolute;
-
-    width:72px;
-    height:108px;
-
-    left:45%;
-    top:55%;
-
-    z-index:10;
-
-    transform:translate(-50%,-50%);
-    transition:transform .06s linear;
-
-    filter:drop-shadow(0 12px 7px rgba(0,0,0,.55));
+.sofa{
+  position:absolute;
+  width:150px;
+  height:55px;
+  border-radius:12px;
+  background:#242832;
+  border:2px solid #3b404c;
+  box-shadow:0 10px 20px rgba(0,0,0,.35);
 }
 
-/* character shadow */
-
-.player-shadow{
-    position:absolute;
-
-    width:62px;
-    height:18px;
-
-    left:5px;
-    bottom:0;
-
-    border-radius:50%;
-
-    background:rgba(0,0,0,.55);
-
-    filter:blur(5px);
+.sofa:before{
+  content:"";
+  position:absolute;
+  left:12px;
+  right:12px;
+  top:8px;
+  height:27px;
+  background:#303542;
+  border-radius:8px;
 }
 
-/* glow */
+.s1{left:60px;top:220px;}
+.s2{left:350px;top:100px;}
+.s3{left:250px;top:280px;}
 
-.player-glow{
-    position:absolute;
-
-    width:110px;
-    height:110px;
-
-    left:-19px;
-    top:-2px;
-
-    border-radius:50%;
-
-    background:radial-gradient(
-        circle,
-        rgba(0,217,255,.12),
-        transparent 65%
-    );
-
-    pointer-events:none;
+.table{
+  position:absolute;
+  width:110px;
+  height:65px;
+  border-radius:50%;
+  background:#22252d;
+  border:2px solid #3c404a;
 }
 
-/* head */
+.t1{left:250px;top:100px;}
+.t2{left:720px;top:220px;}
+.t3{left:1090px;top:220px;}
 
-.head{
-    position:absolute;
+/* ================= BAR ================= */
 
-    width:38px;
-    height:39px;
-
-    left:17px;
-    top:5px;
-
-    border-radius:45% 45% 48% 48%;
-
-    background:#b96d43;
-
-    z-index:5;
+.counter{
+  position:absolute;
+  left:25px;
+  right:25px;
+  bottom:55px;
+  height:80px;
+  background:#17191f;
+  border:2px solid #3b3e48;
+  border-radius:12px;
 }
 
-/* hair */
-
-.hair{
-    position:absolute;
-
-    width:40px;
-    height:22px;
-
-    left:16px;
-    top:1px;
-
-    background:#171116;
-
-    border-radius:60% 60% 35% 30%;
-
-    z-index:7;
-
-    transform:rotate(-3deg);
+.bottle{
+  position:absolute;
+  bottom:18px;
+  width:12px;
+  height:38px;
+  border-radius:4px 4px 3px 3px;
+  background:#777;
 }
 
-/* hair spikes */
+.b1{left:45px;}
+.b2{left:75px;height:45px;}
+.b3{left:105px;height:32px;}
+.b4{left:135px;height:42px;}
 
-.hair::after{
-    content:"";
+/* ================= GARDEN ================= */
 
-    position:absolute;
-
-    left:2px;
-    top:-5px;
-
-    width:13px;
-    height:15px;
-
-    background:#171116;
-
-    clip-path:polygon(
-        0 100%,
-        30% 0,
-        55% 65%,
-        78% 10%,
-        100% 100%
-    );
+.tree{
+  position:absolute;
+  width:75px;
+  height:75px;
+  border-radius:50%;
+  background:#173a32;
+  border:2px solid #286052;
+  box-shadow:0 0 20px rgba(0,255,170,.08);
 }
 
-/* glasses */
-
-.glasses{
-    position:absolute;
-
-    width:42px;
-    height:13px;
-
-    left:15px;
-    top:20px;
-
-    z-index:9;
+.tree:after{
+  content:"";
+  position:absolute;
+  width:14px;
+  height:40px;
+  background:#4a3326;
+  left:28px;
+  top:60px;
 }
 
-.glasses::before,
-.glasses::after{
-    content:"";
+.tr1{left:45px;top:65px;}
+.tr2{left:230px;top:80px;}
+.tr3{left:110px;top:250px;}
+.tr4{left:260px;top:270px;}
 
-    position:absolute;
+/* ================= OBJECTIVE ================= */
 
-    width:18px;
-    height:10px;
+#objective{
+  position:absolute;
+  width:38px;
+  height:38px;
+  border-radius:50%;
+  border:2px solid #ff2f81;
+  box-shadow:
+    0 0 10px #ff2f81,
+    0 0 30px rgba(255,47,129,.55);
 
-    background:#050609;
-
-    border:1px solid #555;
-
-    border-radius:4px;
+  transform:translate(-50%,-50%);
+  z-index:15;
+  animation:pulse 1.3s infinite;
 }
 
-.glasses::before{
-    left:0;
-}
-
-.glasses::after{
-    right:0;
-}
-
-.glass-line{
-    position:absolute;
-
-    left:17px;
-    top:4px;
-
-    width:8px;
-    height:2px;
-
-    background:#111;
-}
-
-/* neck */
-
-.neck{
-    position:absolute;
-
-    width:15px;
-    height:13px;
-
-    left:29px;
-    top:37px;
-
-    background:#a9613d;
-
-    z-index:3;
-}
-
-/* hoodie body */
-
-.body{
-    position:absolute;
-
-    left:12px;
-    top:42px;
-
-    width:48px;
-    height:48px;
-
-    background:#11151d;
-
-    border-radius:12px 12px 9px 9px;
-
-    border:1px solid #242b38;
-
-    z-index:4;
-}
-
-/* white shirt */
-
-.shirt{
-    position:absolute;
-
-    left:25px;
-    top:43px;
-
-    width:22px;
-    height:40px;
-
-    background:#f2f3f5;
-
-    clip-path:polygon(
-        28% 0,
-        72% 0,
-        100% 100%,
-        0 100%
-    );
-
-    z-index:5;
-}
-
-/* hoodie strings */
-
-.string{
-    position:absolute;
-
-    width:2px;
-    height:18px;
-
-    top:43px;
-
-    background:#bfc6d4;
-
-    z-index:8;
-}
-
-.string.left{
-    left:27px;
-}
-
-.string.right{
-    left:43px;
-}
-
-/* left arm */
-
-.arm{
-    position:absolute;
-
-    width:14px;
-    height:43px;
-
-    top:46px;
-
-    background:#151923;
-
-    border-radius:9px;
-
-    z-index:3;
-}
-
-.arm.left{
-    left:2px;
-    transform:rotate(5deg);
-}
-
-.arm.right{
-    right:2px;
-    transform:rotate(-5deg);
-}
-
-/* hands */
-
-.hand{
-    position:absolute;
-
-    width:12px;
-    height:13px;
-
-    top:82px;
-
-    border-radius:50%;
-
-    background:#b96d43;
-
-    z-index:5;
-}
-
-.hand.left{
-    left:3px;
-}
-
-.hand.right{
-    right:3px;
-}
-
-/* pants */
-
-.pants{
-    position:absolute;
-
-    left:17px;
-    top:85px;
-
-    width:38px;
-    height:25px;
-
-    z-index:3;
-}
-
-.leg{
-    position:absolute;
-
-    width:17px;
-    height:27px;
-
-    background:#1a202b;
-
-    border-radius:3px;
-
-    bottom:0;
-}
-
-.leg.left{
-    left:0;
-}
-
-.leg.right{
-    right:0;
-}
-
-/* shoes */
-
-.shoe{
-    position:absolute;
-
-    width:23px;
-    height:9px;
-
-    bottom:-2px;
-
-    background:#f4f5f7;
-
-    border-radius:5px 8px 4px 4px;
-
-    z-index:8;
-}
-
-.shoe.left{
-    left:11px;
-}
-
-.shoe.right{
-    right:8px;
-}
-
-/* walking animation */
-
-.walking .leg.left{
-    animation:walkLeft .18s infinite alternate;
-}
-
-.walking .leg.right{
-    animation:walkRight .18s infinite alternate;
-}
-
-.walking .arm.left{
-    animation:armLeft .18s infinite alternate;
-}
-
-.walking .arm.right{
-    animation:armRight .18s infinite alternate;
-}
-
-@keyframes walkLeft{
-    from{transform:translateY(0) rotate(8deg)}
-    to{transform:translateY(-3px) rotate(-8deg)}
-}
-
-@keyframes walkRight{
-    from{transform:translateY(-3px) rotate(-8deg)}
-    to{transform:translateY(0) rotate(8deg)}
-}
-
-@keyframes armLeft{
-    from{transform:rotate(12deg)}
-    to{transform:rotate(-12deg)}
-}
-
-@keyframes armRight{
-    from{transform:rotate(-12deg)}
-    to{transform:rotate(12deg)}
-}
-
-/* =========================
-   NAME TAG
-========================= */
-
-.name-tag{
-    position:absolute;
-
-    left:50%;
-    top:-26px;
-
-    transform:translateX(-50%);
-
-    padding:5px 10px;
-
-    background:rgba(3,5,10,.9);
-
-    border:1px solid rgba(0,217,255,.5);
-
-    border-radius:5px;
-
-    font-size:10px;
-    font-weight:bold;
-
-    color:#00d9ff;
-
-    white-space:nowrap;
-}
-
-/* =========================
-   OBJECTIVE
-========================= */
-
-.objective{
-    position:absolute;
-
-    width:25px;
-    height:25px;
-
-    border-radius:50%;
-
-    background:#ffc107;
-
-    box-shadow:
-        0 0 10px #ffc107,
-        0 0 30px rgba(255,193,7,.7);
-
-    z-index:4;
-
-    left:86%;
-    top:83%;
-
-    animation:pulse 1s infinite alternate;
+#objective:after{
+  content:"";
+  position:absolute;
+  inset:9px;
+  border-radius:50%;
+  background:#ff2f81;
 }
 
 @keyframes pulse{
-    from{transform:scale(.85)}
-    to{transform:scale(1.15)}
+  0%,100%{transform:translate(-50%,-50%) scale(1)}
+  50%{transform:translate(-50%,-50%) scale(1.18)}
 }
 
-/* =========================
-   BOTTOM UI
-========================= */
+/* ================= PLAYER ================= */
 
-#objectiveText{
-    position:absolute;
-
-    left:28px;
-    bottom:22px;
-
-    z-index:20;
+#player{
+  position:absolute;
+  width:70px;
+  height:110px;
+  z-index:30;
+  transform:translate(-50%,-50%);
+  filter:drop-shadow(0 14px 10px rgba(0,0,0,.6));
 }
 
-.obj-title{
-    color:#ffc107;
-    font-size:12px;
-    font-weight:900;
-    margin-bottom:5px;
+.shadow{
+  position:absolute;
+  width:62px;
+  height:16px;
+  bottom:0;
+  left:4px;
+  background:rgba(0,0,0,.65);
+  border-radius:50%;
+  filter:blur(4px);
 }
 
-.obj-desc{
-    color:#d8dce5;
-    font-size:14px;
+/* HEAD */
+
+.head{
+  position:absolute;
+  width:40px;
+  height:43px;
+  left:15px;
+  top:3px;
+  background:linear-gradient(145deg,#c98763,#8c513d);
+  border-radius:45% 45% 48% 48%;
+  z-index:5;
+  box-shadow:
+    inset -7px -5px 9px rgba(70,20,10,.28),
+    inset 5px 3px 7px rgba(255,220,190,.12);
 }
 
-/* =========================
-   MOBILE CONTROLS
-========================= */
+/* HAIR */
 
-#controls{
-    display:none;
+.hair{
+  position:absolute;
+  width:45px;
+  height:24px;
+  left:12px;
+  top:0;
+  z-index:8;
 
-    position:absolute;
+  background:#101115;
 
-    left:25px;
-    bottom:25px;
+  border-radius:
+    55% 60% 35% 30% /
+    75% 75% 30% 30%;
 
-    width:145px;
-    height:145px;
+  transform:rotate(-3deg);
 
-    z-index:30;
+  box-shadow:
+    inset 0 -5px 5px rgba(0,0,0,.5);
+}
+
+.hair:after{
+  content:"";
+  position:absolute;
+  width:17px;
+  height:12px;
+  left:2px;
+  bottom:-5px;
+  background:#101115;
+  transform:rotate(-15deg);
+  border-radius:0 0 50% 50%;
+}
+
+/* GLASSES */
+
+.glasses{
+  position:absolute;
+  z-index:12;
+  left:11px;
+  top:20px;
+  width:48px;
+  height:13px;
+}
+
+.glass{
+  position:absolute;
+  width:21px;
+  height:11px;
+  border-radius:4px;
+  background:#090a0c;
+  border:1px solid #777;
+  box-shadow:0 0 4px rgba(255,255,255,.15);
+}
+
+.glass.left{left:0;}
+.glass.right{right:0;}
+
+.glasses:after{
+  content:"";
+  position:absolute;
+  width:8px;
+  height:2px;
+  background:#111;
+  left:20px;
+  top:4px;
+}
+
+/* NECK */
+
+.neck{
+  position:absolute;
+  width:14px;
+  height:12px;
+  left:28px;
+  top:40px;
+  background:#9d5d45;
+  z-index:3;
+}
+
+/* BODY / HOODIE */
+
+.body{
+  position:absolute;
+  width:53px;
+  height:50px;
+  left:9px;
+  top:43px;
+  z-index:4;
+
+  background:linear-gradient(
+    100deg,
+    #090a0d,
+    #1a1c22 50%,
+    #08090c
+  );
+
+  border-radius:13px 13px 8px 8px;
+
+  box-shadow:
+    inset 0 0 8px rgba(255,255,255,.04);
+}
+
+/* WHITE SHIRT */
+
+.shirt{
+  position:absolute;
+  width:20px;
+  height:30px;
+  left:25px;
+  top:48px;
+  z-index:6;
+
+  background:#e6e7e9;
+
+  clip-path:polygon(
+    30% 0,
+    70% 0,
+    100% 100%,
+    0 100%
+  );
+}
+
+/* HOOD STRINGS */
+
+.string{
+  position:absolute;
+  z-index:10;
+  width:2px;
+  height:19px;
+  background:#c9c9c9;
+  top:53px;
+}
+
+.string.left{
+  left:27px;
+  transform:rotate(3deg);
+}
+
+.string.right{
+  left:36px;
+  transform:rotate(-3deg);
+}
+
+/* ARMS */
+
+.arm{
+  position:absolute;
+  width:14px;
+  height:42px;
+  top:48px;
+  background:#111318;
+  border-radius:9px;
+  z-index:3;
+}
+
+.arm.left{
+  left:1px;
+  transform:rotate(8deg);
+}
+
+.arm.right{
+  right:1px;
+  transform:rotate(-8deg);
+}
+
+.hand{
+  position:absolute;
+  width:13px;
+  height:13px;
+  background:#9d5d45;
+  border-radius:50%;
+  top:82px;
+  z-index:4;
+}
+
+.hand.left{left:0;}
+.hand.right{right:0;}
+
+/* PANTS */
+
+.pants{
+  position:absolute;
+  left:16px;
+  top:87px;
+  width:39px;
+  height:26px;
+  z-index:2;
+  background:#20242c;
+  border-radius:5px;
+}
+
+.leg{
+  position:absolute;
+  width:17px;
+  height:25px;
+  top:101px;
+  background:#171a20;
+  border-radius:4px;
+  z-index:1;
+}
+
+.leg.left{left:17px;}
+.leg.right{left:38px;}
+
+/* SHOES */
+
+.shoe{
+  position:absolute;
+  width:24px;
+  height:11px;
+  background:#f0f1f2;
+  border-radius:8px 8px 5px 5px;
+  z-index:4;
+  top:121px;
+}
+
+.shoe.left{left:11px;}
+.shoe.right{left:35px;}
+
+/* ================= NAME TAG ================= */
+
+.nameTag{
+  position:absolute;
+  left:50%;
+  top:-30px;
+  transform:translateX(-50%);
+  white-space:nowrap;
+
+  padding:5px 10px;
+  border-radius:7px;
+
+  background:rgba(5,6,9,.8);
+  border:1px solid rgba(255,47,129,.5);
+
+  font-size:10px;
+  font-weight:bold;
+  letter-spacing:1px;
+
+  box-shadow:0 0 12px rgba(255,47,129,.18);
+}
+
+/* ================= WALK ================= */
+
+.walking .leg.left{
+  animation:leg1 .18s infinite alternate;
+}
+
+.walking .leg.right{
+  animation:leg2 .18s infinite alternate;
+}
+
+.walking .arm.left{
+  animation:arm1 .18s infinite alternate;
+}
+
+.walking .arm.right{
+  animation:arm2 .18s infinite alternate;
+}
+
+@keyframes leg1{
+  from{transform:rotate(8deg);}
+  to{transform:rotate(-13deg);}
+}
+
+@keyframes leg2{
+  from{transform:rotate(-8deg);}
+  to{transform:rotate(13deg);}
+}
+
+@keyframes arm1{
+  from{transform:rotate(8deg);}
+  to{transform:rotate(-12deg);}
+}
+
+@keyframes arm2{
+  from{transform:rotate(-8deg);}
+  to{transform:rotate(12deg);}
+}
+
+/* ================= MOBILE CONTROLS ================= */
+
+#mobileControls{
+  position:absolute;
+  z-index:100;
+  left:20px;
+  bottom:22px;
+  width:170px;
+  height:170px;
+  display:none;
 }
 
 .control{
-    position:absolute;
+  position:absolute;
+  width:52px;
+  height:52px;
+  border-radius:15px;
 
-    width:48px;
-    height:48px;
+  border:1px solid rgba(255,255,255,.18);
+  background:rgba(20,22,29,.85);
 
-    border-radius:14px;
+  color:white;
+  font-size:22px;
 
-    border:1px solid rgba(0,217,255,.4);
+  display:flex;
+  justify-content:center;
+  align-items:center;
 
-    background:rgba(5,10,20,.8);
-
-    color:#00d9ff;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    font-size:20px;
-    font-weight:bold;
-
-    user-select:none;
-
-    -webkit-tap-highlight-color:transparent;
+  box-shadow:
+    0 7px 20px rgba(0,0,0,.4),
+    inset 0 0 10px rgba(255,255,255,.03);
 }
 
 .control:active{
-    background:rgba(0,217,255,.22);
-    transform:scale(.94);
+  transform:scale(.92);
+  background:rgba(255,47,129,.25);
 }
 
 .up{
-    left:49px;
-    top:0;
+  left:59px;
+  top:0;
 }
 
 .down{
-    left:49px;
-    bottom:0;
+  left:59px;
+  bottom:0;
 }
 
 .left{
-    left:0;
-    top:49px;
+  left:0;
+  top:59px;
 }
 
 .right{
-    right:0;
-    top:49px;
+  right:0;
+  top:59px;
 }
 
-/* action */
+#action{
+  position:absolute;
+  z-index:100;
+  right:25px;
+  bottom:35px;
 
-#actionBtn{
+  width:78px;
+  height:78px;
+
+  border-radius:50%;
+
+  border:2px solid rgba(255,47,129,.7);
+  background:rgba(255,47,129,.15);
+
+  color:white;
+  font-weight:900;
+  font-size:13px;
+
+  box-shadow:
+    0 0 25px rgba(255,47,129,.2),
+    inset 0 0 20px rgba(255,47,129,.08);
+
+  display:none;
+}
+
+/* ================= HINT ================= */
+
+#hint{
+  position:absolute;
+  z-index:60;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+
+  padding:8px 14px;
+
+  background:rgba(5,6,9,.78);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:8px;
+
+  color:#aaa;
+  font-size:11px;
+  letter-spacing:.5px;
+
+  pointer-events:none;
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:800px){
+
+  #topbar{
+    height:65px;
+    padding:8px 12px;
+  }
+
+  .logo{
+    font-size:15px;
+  }
+
+  .level{
+    font-size:9px;
+  }
+
+  .stat{
+    width:75px;
+  }
+
+  .stat label{
+    font-size:8px;
+  }
+
+  #map{
+    width:1000px;
+    height:700px;
+  }
+
+  #mobileControls,
+  #action{
+    display:block;
+  }
+
+  #hint{
     display:none;
-
-    position:absolute;
-
-    right:28px;
-    bottom:45px;
-
-    width:76px;
-    height:76px;
-
-    border-radius:50%;
-
-    border:2px solid rgba(255,21,147,.65);
-
-    background:rgba(255,21,147,.14);
-
-    color:#ff1593;
-
-    font-weight:900;
-
-    z-index:30;
+  }
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-
-@media(max-width:700px){
-
-    #topbar{
-        height:60px;
-        padding:0 14px;
-    }
-
-    .logo{
-        font-size:16px;
-    }
-
-    .level{
-        font-size:9px;
-    }
-
-    .stats{
-        gap:8px;
-    }
-
-    .stat{
-        min-width:75px;
-    }
-
-    .bar{
-        width:75px;
-        height:6px;
-    }
-
-    #map{
-        width:96vw;
-        height:75vh;
-
-        top:48%;
-    }
-
-    .room-title{
-        left:7px;
-        top:7px;
-
-        padding:5px 8px;
-
-        font-size:8px;
-    }
-
-    #controls{
-        display:block;
-    }
-
-    #actionBtn{
-        display:block;
-    }
-
-    #objectiveText{
-        left:14px;
-        bottom:12px;
-    }
-
-    .obj-title{
-        font-size:9px;
-    }
-
-    .obj-desc{
-        font-size:10px;
-    }
-
-    #player{
-        transform:translate(-50%,-50%) scale(.78);
-    }
-}
-
-@media(min-width:701px){
-    #map{
-        min-width:900px;
-    }
+@media(min-width:801px){
+  #hint{
+    display:block;
+  }
 }
 </style>
 </head>
@@ -934,351 +827,374 @@ html,body{
 
 <div id="game">
 
-    <!-- TOP BAR -->
-    <div id="topbar">
+  <!-- TOP UI -->
+  <div id="topbar">
 
-        <div>
-            <div class="logo">
-                PARTY NIGHT <span>CHAOS</span>
-            </div>
+    <div>
+      <div class="logo">PARTY NIGHT CHAOS</div>
+      <div class="level">LEVEL 01 • ALEX</div>
+    </div>
 
-            <div class="level">
-                NIGHT 01 • THE HOUSE PARTY
-            </div>
+    <div class="stats">
+
+      <div class="stat">
+        <label>HEALTH</label>
+        <div class="bar">
+          <div class="fill health"></div>
         </div>
+      </div>
 
-        <div class="stats">
-
-            <div class="stat">
-                <div class="stat-title">HEALTH</div>
-                <div class="bar">
-                    <div class="bar-fill hp"></div>
-                </div>
-            </div>
-
-            <div class="stat">
-                <div class="stat-title">ENERGY</div>
-                <div class="bar">
-                    <div class="bar-fill energy"></div>
-                </div>
-            </div>
-
+      <div class="stat">
+        <label>ENERGY</label>
+        <div class="bar">
+          <div class="fill energy"></div>
         </div>
+      </div>
 
     </div>
 
-
-    <!-- MAP -->
-
-    <div id="map">
-
-        <div class="room party">
-            <div class="room-title">PARTY HALL</div>
-
-            <div class="floor-light" style="left:18%;top:30%"></div>
-            <div class="floor-light" style="left:35%;top:30%"></div>
-            <div class="floor-light" style="left:52%;top:30%"></div>
-            <div class="floor-light" style="left:69%;top:30%"></div>
-
-            <div class="floor-light" style="left:18%;top:52%"></div>
-            <div class="floor-light" style="left:35%;top:52%"></div>
-            <div class="floor-light" style="left:52%;top:52%"></div>
-            <div class="floor-light" style="left:69%;top:52%"></div>
-
-        </div>
-
-        <div class="room kitchen">
-            <div class="room-title">KITCHEN</div>
-        </div>
-
-        <div class="room bedroom">
-            <div class="room-title">BEDROOM</div>
-        </div>
-
-        <div class="room bar">
-            <div class="room-title">BAR</div>
-        </div>
-
-        <div class="room lounge">
-            <div class="room-title">LOUNGE</div>
-        </div>
-
-        <div class="room garden">
-            <div class="room-title">GARDEN</div>
-        </div>
+  </div>
 
 
-        <!-- OBJECTIVE -->
+  <!-- MAP -->
+  <div id="map">
 
-        <div class="objective"></div>
+    <!-- PARTY -->
+    <div class="room party">
+      <h2>PARTY HALL</h2>
+
+      <div class="floor-light l1"></div>
+      <div class="floor-light l2"></div>
+
+      <div class="sofa s1"></div>
+      <div class="sofa s2"></div>
+      <div class="table t1"></div>
+    </div>
 
 
-        <!-- ALEX -->
+    <!-- KITCHEN -->
+    <div class="room kitchen">
+      <h2>KITCHEN</h2>
 
-        <div id="player">
+      <div class="counter"
+           style="top:70px;bottom:auto;"></div>
 
-            <div class="player-glow"></div>
+      <div class="table t2"></div>
+    </div>
 
-            <div class="name-tag">
-                ALEX • LV 01
-            </div>
 
-            <div class="player-shadow"></div>
+    <!-- BEDROOM -->
+    <div class="room bedroom">
+      <h2>BEDROOM</h2>
 
-            <div class="hair"></div>
+      <div class="sofa"
+           style="left:50px;top:100px;width:240px;"></div>
 
-            <div class="head"></div>
+      <div class="table t3"></div>
+    </div>
 
-            <div class="glasses">
-                <div class="glass-line"></div>
-            </div>
 
-            <div class="neck"></div>
+    <!-- BAR -->
+    <div class="room bar">
+      <h2>BAR</h2>
 
-            <div class="arm left"></div>
-            <div class="arm right"></div>
+      <div class="counter"></div>
 
-            <div class="body"></div>
+      <div class="bottle b1"></div>
+      <div class="bottle b2"></div>
+      <div class="bottle b3"></div>
+      <div class="bottle b4"></div>
+    </div>
 
-            <div class="shirt"></div>
 
-            <div class="string left"></div>
-            <div class="string right"></div>
+    <!-- LOUNGE -->
+    <div class="room lounge">
+      <h2>LOUNGE</h2>
 
-            <div class="hand left"></div>
-            <div class="hand right"></div>
+      <div class="sofa s1"></div>
+      <div class="sofa s2"></div>
+      <div class="sofa s3"></div>
+    </div>
 
-            <div class="pants">
-                <div class="leg left"></div>
-                <div class="leg right"></div>
-            </div>
 
-            <div class="shoe left"></div>
-            <div class="shoe right"></div>
+    <!-- GARDEN -->
+    <div class="room garden">
+      <h2>GARDEN</h2>
 
-        </div>
-
+      <div class="tree tr1"></div>
+      <div class="tree tr2"></div>
+      <div class="tree tr3"></div>
+      <div class="tree tr4"></div>
     </div>
 
 
     <!-- OBJECTIVE -->
+    <div id="objective"></div>
 
-    <div id="objectiveText">
-        <div class="obj-title">OBJECTIVE</div>
-        <div class="obj-desc">
-            Reach the yellow objective
-        </div>
+
+    <!-- PLAYER -->
+    <div id="player">
+
+      <div class="nameTag">ALEX • LV 01</div>
+
+      <div class="shadow"></div>
+
+      <div class="head"></div>
+      <div class="hair"></div>
+
+      <div class="glasses">
+        <div class="glass left"></div>
+        <div class="glass right"></div>
+      </div>
+
+      <div class="neck"></div>
+
+      <div class="body"></div>
+
+      <div class="shirt"></div>
+
+      <div class="string left"></div>
+      <div class="string right"></div>
+
+      <div class="arm left"></div>
+      <div class="arm right"></div>
+
+      <div class="hand left"></div>
+      <div class="hand right"></div>
+
+      <div class="pants"></div>
+
+      <div class="leg left"></div>
+      <div class="leg right"></div>
+
+      <div class="shoe left"></div>
+      <div class="shoe right"></div>
+
     </div>
 
+  </div>
 
-    <!-- MOBILE CONTROLS -->
 
-    <div id="controls">
+  <!-- MOBILE CONTROLS -->
 
-        <div class="control up" data-key="up">▲</div>
-        <div class="control left" data-key="left">◀</div>
-        <div class="control right" data-key="right">▶</div>
-        <div class="control down" data-key="down">▼</div>
+  <div id="mobileControls">
 
-    </div>
+    <button class="control up" data-dir="up">▲</button>
+    <button class="control down" data-dir="down">▼</button>
+    <button class="control left" data-dir="left">◀</button>
+    <button class="control right" data-dir="right">▶</button>
 
-    <button id="actionBtn">
-        ACTION
-    </button>
+  </div>
+
+  <button id="action">ACTION</button>
+
+  <div id="hint">
+    WASD / ARROW KEYS • MOVE ALEX • E = ACTION
+  </div>
 
 </div>
 
 
 <script>
 
-/* =====================================================
-   PARTY NIGHT CHAOS
-   ALEX CHARACTER CONTROLLER
-===================================================== */
+/* =========================================
+   PLAYER MOVEMENT
+========================================= */
 
 const player = document.getElementById("player");
+const objective = document.getElementById("objective");
 const map = document.getElementById("map");
+
+const keys = {
+  up:false,
+  down:false,
+  left:false,
+  right:false
+};
 
 let x = 45;
 let y = 55;
 
 let speed = 0.55;
 
-const keys = {
-    up:false,
-    down:false,
-    left:false,
-    right:false
-};
 
-
-/* =========================
+/* =========================================
    KEYBOARD
-========================= */
+========================================= */
 
 window.addEventListener("keydown",(e)=>{
 
-    const key = e.key.toLowerCase();
+  const key = e.key.toLowerCase();
 
-    if(key === "w" || key === "arrowup"){
-        keys.up = true;
-    }
+  if(key === "w" || key === "arrowup"){
+    keys.up = true;
+  }
 
-    if(key === "s" || key === "arrowdown"){
-        keys.down = true;
-    }
+  if(key === "s" || key === "arrowdown"){
+    keys.down = true;
+  }
 
-    if(key === "a" || key === "arrowleft"){
-        keys.left = true;
-    }
+  if(key === "a" || key === "arrowleft"){
+    keys.left = true;
+  }
 
-    if(key === "d" || key === "arrowright"){
-        keys.right = true;
-    }
+  if(key === "d" || key === "arrowright"){
+    keys.right = true;
+  }
+
+  if(key === "e"){
+    action();
+  }
 
 });
 
 
 window.addEventListener("keyup",(e)=>{
 
-    const key = e.key.toLowerCase();
+  const key = e.key.toLowerCase();
 
-    if(key === "w" || key === "arrowup"){
-        keys.up = false;
-    }
+  if(key === "w" || key === "arrowup"){
+    keys.up = false;
+  }
 
-    if(key === "s" || key === "arrowdown"){
-        keys.down = false;
-    }
+  if(key === "s" || key === "arrowdown"){
+    keys.down = false;
+  }
 
-    if(key === "a" || key === "arrowleft"){
-        keys.left = false;
-    }
+  if(key === "a" || key === "arrowleft"){
+    keys.left = false;
+  }
 
-    if(key === "d" || key === "arrowright"){
-        keys.right = false;
-    }
+  if(key === "d" || key === "arrowright"){
+    keys.right = false;
+  }
 
 });
 
 
-/* =========================
-   MOBILE
-========================= */
+/* =========================================
+   MOBILE BUTTONS
+========================================= */
 
 document.querySelectorAll(".control").forEach(button=>{
 
-    const direction = button.dataset.key;
+  const dir = button.dataset.dir;
 
-    const start = (e)=>{
-        e.preventDefault();
-        keys[direction] = true;
-    };
+  const start = (e)=>{
+    e.preventDefault();
+    keys[dir] = true;
+  };
 
-    const end = (e)=>{
-        e.preventDefault();
-        keys[direction] = false;
-    };
+  const stop = (e)=>{
+    e.preventDefault();
+    keys[dir] = false;
+  };
 
-    button.addEventListener("touchstart",start,{passive:false});
-    button.addEventListener("touchend",end,{passive:false});
-    button.addEventListener("touchcancel",end,{passive:false});
+  button.addEventListener("touchstart",start,{passive:false});
+  button.addEventListener("touchend",stop,{passive:false});
+  button.addEventListener("touchcancel",stop,{passive:false});
 
-    button.addEventListener("mousedown",start);
-    button.addEventListener("mouseup",end);
-    button.addEventListener("mouseleave",end);
+  button.addEventListener("mousedown",start);
+  button.addEventListener("mouseup",stop);
+  button.addEventListener("mouseleave",stop);
 
 });
 
 
-/* =========================
-   PLAYER MOVEMENT
-========================= */
+/* =========================================
+   ACTION
+========================================= */
+
+function action(){
+
+  const button = document.getElementById("action");
+
+  button.innerText = "✓";
+
+  setTimeout(()=>{
+    button.innerText = "ACTION";
+  },600);
+
+  console.log("ALEX ACTION");
+}
+
+document.getElementById("action")
+  .addEventListener("click",action);
+
+
+/* =========================================
+   GAME LOOP
+========================================= */
 
 function update(){
 
-    let moving = false;
+  let moving = false;
 
-    if(keys.up){
-        y -= speed;
-        moving = true;
-    }
+  if(keys.up){
+    y -= speed;
+    moving = true;
+  }
 
-    if(keys.down){
-        y += speed;
-        moving = true;
-    }
+  if(keys.down){
+    y += speed;
+    moving = true;
+  }
 
-    if(keys.left){
-        x -= speed;
-        moving = true;
+  if(keys.left){
+    x -= speed;
+    moving = true;
+  }
 
-        player.style.transform =
-            "translate(-50%,-50%) scaleX(-1)";
-    }
-
-    if(keys.right){
-        x += speed;
-        moving = true;
-
-        player.style.transform =
-            "translate(-50%,-50%) scaleX(1)";
-    }
+  if(keys.right){
+    x += speed;
+    moving = true;
+  }
 
 
-    /* boundaries */
+  /* BOUNDARIES */
 
-    x = Math.max(4,Math.min(96,x));
-    y = Math.max(9,Math.min(91,y));
-
-
-    player.style.left = x + "%";
-    player.style.top = y + "%";
+  x = Math.max(4,Math.min(96,x));
+  y = Math.max(9,Math.min(91,y));
 
 
-    if(moving){
-        player.classList.add("walking");
-    }else{
-        player.classList.remove("walking");
-    }
+  /* PLAYER POSITION */
+
+  player.style.left = x + "%";
+  player.style.top = y + "%";
 
 
-    requestAnimationFrame(update);
+  /* WALK ANIMATION */
+
+  if(moving){
+    player.classList.add("walking");
+  }else{
+    player.classList.remove("walking");
+  }
+
+
+  /* CHARACTER DIRECTION */
+
+  if(keys.left){
+    player.style.transform =
+      "translate(-50%,-50%) scaleX(-1)";
+  }
+
+  if(keys.right){
+    player.style.transform =
+      "translate(-50%,-50%) scaleX(1)";
+  }
+
+
+  /* OBJECTIVE */
+
+  objective.style.left = "78%";
+  objective.style.top = "48%";
+
+
+  requestAnimationFrame(update);
 }
 
 update();
-
-
-/* =========================
-   ACTION BUTTON
-========================= */
-
-document.getElementById("actionBtn").addEventListener("click",()=>{
-
-    const button = document.getElementById("actionBtn");
-
-    button.innerText = "✓";
-
-    setTimeout(()=>{
-        button.innerText = "ACTION";
-    },700);
-
-});
-
-
-/* =========================
-   DESKTOP ACTION
-========================= */
-
-window.addEventListener("keydown",(e)=>{
-
-    if(e.key === "e" || e.key === "E"){
-
-        console.log("Alex Action");
-
-    }
-
-});
 
 </script>
 
