@@ -2,1197 +2,1529 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>Party Night Chaos</title>
 
 <style>
 *{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  -webkit-tap-highlight-color:transparent;
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    -webkit-tap-highlight-color:transparent;
 }
 
 html,body{
-  width:100%;
-  height:100%;
-  overflow:hidden;
-  background:#08090d;
-  font-family:Arial,Helvetica,sans-serif;
-  color:white;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:#020409;
+    font-family:Arial,Helvetica,sans-serif;
+    color:#fff;
+    user-select:none;
 }
-
-body{
-  user-select:none;
-}
-
-/* ================= GAME ================= */
 
 #game{
-  position:relative;
-  width:100vw;
-  height:100vh;
-  overflow:hidden;
-  background:
-    radial-gradient(circle at 50% 45%,#20232d 0%,#101218 48%,#07080b 100%);
+    position:fixed;
+    inset:0;
+    overflow:hidden;
+    background:#020409;
 }
 
-/* ================= TOP BAR ================= */
-
-#topbar{
-  position:absolute;
-  z-index:50;
-  top:0;
-  left:0;
-  width:100%;
-  height:72px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:10px 22px;
-
-  background:linear-gradient(
-    180deg,
-    rgba(5,6,10,.96),
-    rgba(5,6,10,.72),
-    transparent
-  );
-
-  pointer-events:none;
-}
-
-.logo{
-  font-size:22px;
-  font-weight:900;
-  letter-spacing:2px;
-  text-shadow:0 0 14px #ff2f81;
-}
-
-.level{
-  font-size:12px;
-  color:#aaa;
-  margin-top:3px;
-  letter-spacing:1px;
-}
-
-.stats{
-  display:flex;
-  gap:10px;
-  align-items:center;
-}
-
-.stat{
-  width:120px;
-}
-
-.stat label{
-  display:block;
-  font-size:10px;
-  color:#aaa;
-  margin-bottom:4px;
-}
-
-.bar{
-  width:100%;
-  height:7px;
-  background:#252731;
-  border-radius:20px;
-  overflow:hidden;
-  border:1px solid #3b3d47;
-}
-
-.fill{
-  height:100%;
-  width:100%;
-  border-radius:20px;
-}
-
-.health{
-  background:linear-gradient(90deg,#ff1744,#ff4f70);
-}
-
-.energy{
-  background:linear-gradient(90deg,#00d9ff,#7b5cff);
-}
-
-/* ================= MAP ================= */
+/* =====================================================
+   MAP
+===================================================== */
 
 #map{
-  position:absolute;
-  width:1400px;
-  height:900px;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
+    position:absolute;
+    left:50%;
+    top:50%;
 
-  background:
-    linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px),
-    linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),
-    #15171d;
+    width:100vw;
+    height:100vh;
 
-  background-size:40px 40px;
+    transform:translate(-50%,-50%);
 
-  box-shadow:
-    0 0 100px rgba(0,0,0,.9),
-    inset 0 0 100px rgba(0,0,0,.65);
+    background-image:
+        linear-gradient(
+            rgba(0,0,0,.08),
+            rgba(0,0,0,.08)
+        ),
+        url("party-map.png");
 
-  border:2px solid #30333c;
+    background-size:cover;
+    background-position:center center;
+    background-repeat:no-repeat;
+
+    overflow:hidden;
 }
 
-/* ================= ROOMS ================= */
+/* =====================================================
+   DARK VIGNETTE
+===================================================== */
 
-.room{
-  position:absolute;
-  border:2px solid rgba(255,255,255,.12);
-  background:rgba(255,255,255,.025);
-  box-shadow:
-    inset 0 0 35px rgba(0,0,0,.45),
-    0 0 25px rgba(0,0,0,.25);
+#vignette{
+    position:absolute;
+    inset:0;
+    z-index:5;
+
+    pointer-events:none;
+
+    background:
+        radial-gradient(
+            ellipse at center,
+            transparent 45%,
+            rgba(0,0,0,.12) 70%,
+            rgba(0,0,0,.55) 100%
+        );
 }
 
-.room h2{
-  position:absolute;
-  top:14px;
-  left:16px;
-  font-size:13px;
-  letter-spacing:2px;
-  color:#888;
-  font-weight:900;
+/* =====================================================
+   TOP HUD
+===================================================== */
+
+#topHUD{
+    position:absolute;
+    z-index:50;
+
+    left:0;
+    right:0;
+    top:0;
+
+    height:68px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 24px;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0,5,12,.92),
+            rgba(0,5,12,.60),
+            rgba(0,5,12,0)
+        );
+
+    border-bottom:1px solid rgba(0,190,255,.18);
 }
 
-.party{
-  left:40px;
-  top:50px;
-  width:570px;
-  height:330px;
-  background:
-    radial-gradient(circle at 50% 50%,rgba(255,0,130,.09),transparent 60%),
-    rgba(255,255,255,.025);
+/* LOGO */
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
 }
 
-.kitchen{
-  left:650px;
-  top:50px;
-  width:310px;
-  height:330px;
+.logoMain{
+    font-family:Impact,Arial Black,sans-serif;
+    font-size:30px;
+    font-style:italic;
+    letter-spacing:-1px;
+
+    text-shadow:
+        0 2px 0 #111,
+        0 0 12px rgba(255,255,255,.12);
 }
 
-.bedroom{
-  left:1000px;
-  top:50px;
-  width:350px;
-  height:330px;
+.logoChaos{
+    color:#ff1aa8;
+
+    text-shadow:
+        0 0 8px rgba(255,0,160,.65),
+        0 0 18px rgba(255,0,160,.35);
 }
 
-.bar{
-  left:40px;
-  top:430px;
-  width:330px;
-  height:390px;
+.logoLine{
+    width:1px;
+    height:30px;
+    background:rgba(255,255,255,.28);
 }
 
-.lounge{
-  left:410px;
-  top:430px;
-  width:550px;
-  height:390px;
+.night{
+    font-size:13px;
+    font-weight:800;
+    letter-spacing:2px;
+    color:#ff1aa8;
 }
 
-.garden{
-  left:1000px;
-  top:430px;
-  width:350px;
-  height:390px;
+/* SCORE */
 
-  background:
-    radial-gradient(circle at 20% 20%,rgba(0,255,170,.06),transparent 30%),
-    radial-gradient(circle at 80% 70%,rgba(0,150,255,.05),transparent 30%),
-    rgba(255,255,255,.025);
+.rightHUD{
+    display:flex;
+    align-items:center;
+    gap:25px;
 }
 
-/* ================= FLOOR DETAILS ================= */
+.score{
+    display:flex;
+    align-items:center;
+    gap:13px;
 
-.floor-light{
-  position:absolute;
-  width:150px;
-  height:150px;
-  border-radius:50%;
-  background:radial-gradient(
-    circle,
-    rgba(255,40,150,.15),
-    transparent 70%
-  );
+    font-weight:900;
 }
 
-.l1{left:180px;top:100px;}
-.l2{left:390px;top:180px;}
-.l3{left:730px;top:100px;}
-.l4{left:1100px;top:150px;}
-
-.sofa{
-  position:absolute;
-  width:150px;
-  height:55px;
-  border-radius:12px;
-  background:#242832;
-  border:2px solid #3b404c;
-  box-shadow:0 10px 20px rgba(0,0,0,.35);
+.scoreTitle{
+    color:#00d8ff;
+    font-size:20px;
+    letter-spacing:1px;
 }
 
-.sofa:before{
-  content:"";
-  position:absolute;
-  left:12px;
-  right:12px;
-  top:8px;
-  height:27px;
-  background:#303542;
-  border-radius:8px;
+.scoreNumber{
+    font-size:18px;
 }
 
-.s1{left:60px;top:220px;}
-.s2{left:350px;top:100px;}
-.s3{left:250px;top:280px;}
+.iconBtn{
+    width:38px;
+    height:38px;
 
-.table{
-  position:absolute;
-  width:110px;
-  height:65px;
-  border-radius:50%;
-  background:#22252d;
-  border:2px solid #3c404a;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    color:#fff;
+    font-size:22px;
+
+    border-left:1px solid rgba(255,255,255,.15);
+    padding-left:20px;
 }
 
-.t1{left:250px;top:100px;}
-.t2{left:720px;top:220px;}
-.t3{left:1090px;top:220px;}
-
-/* ================= BAR ================= */
-
-.counter{
-  position:absolute;
-  left:25px;
-  right:25px;
-  bottom:55px;
-  height:80px;
-  background:#17191f;
-  border:2px solid #3b3e48;
-  border-radius:12px;
-}
-
-.bottle{
-  position:absolute;
-  bottom:18px;
-  width:12px;
-  height:38px;
-  border-radius:4px 4px 3px 3px;
-  background:#777;
-}
-
-.b1{left:45px;}
-.b2{left:75px;height:45px;}
-.b3{left:105px;height:32px;}
-.b4{left:135px;height:42px;}
-
-/* ================= GARDEN ================= */
-
-.tree{
-  position:absolute;
-  width:75px;
-  height:75px;
-  border-radius:50%;
-  background:#173a32;
-  border:2px solid #286052;
-  box-shadow:0 0 20px rgba(0,255,170,.08);
-}
-
-.tree:after{
-  content:"";
-  position:absolute;
-  width:14px;
-  height:40px;
-  background:#4a3326;
-  left:28px;
-  top:60px;
-}
-
-.tr1{left:45px;top:65px;}
-.tr2{left:230px;top:80px;}
-.tr3{left:110px;top:250px;}
-.tr4{left:260px;top:270px;}
-
-/* ================= OBJECTIVE ================= */
-
-#objective{
-  position:absolute;
-  width:38px;
-  height:38px;
-  border-radius:50%;
-  border:2px solid #ff2f81;
-  box-shadow:
-    0 0 10px #ff2f81,
-    0 0 30px rgba(255,47,129,.55);
-
-  transform:translate(-50%,-50%);
-  z-index:15;
-  animation:pulse 1.3s infinite;
-}
-
-#objective:after{
-  content:"";
-  position:absolute;
-  inset:9px;
-  border-radius:50%;
-  background:#ff2f81;
-}
-
-@keyframes pulse{
-  0%,100%{transform:translate(-50%,-50%) scale(1)}
-  50%{transform:translate(-50%,-50%) scale(1.18)}
-}
-
-/* ================= PLAYER ================= */
+/* =====================================================
+   ALEX
+===================================================== */
 
 #player{
-  position:absolute;
-  width:70px;
-  height:110px;
-  z-index:30;
-  transform:translate(-50%,-50%);
-  filter:drop-shadow(0 14px 10px rgba(0,0,0,.6));
+    position:absolute;
+
+    left:46%;
+    top:48%;
+
+    width:54px;
+    height:88px;
+
+    z-index:30;
+
+    transform:translate(-50%,-50%);
+
+    transition:
+        left .025s linear,
+        top .025s linear;
 }
 
-.shadow{
-  position:absolute;
-  width:62px;
-  height:16px;
-  bottom:0;
-  left:4px;
-  background:rgba(0,0,0,.65);
-  border-radius:50%;
-  filter:blur(4px);
+/* BLUE GLOW */
+
+.playerGlow{
+    position:absolute;
+
+    width:62px;
+    height:62px;
+
+    left:50%;
+    top:76px;
+
+    transform:translate(-50%,-50%);
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(0,210,255,.45),
+            rgba(0,210,255,.12) 45%,
+            transparent 70%
+        );
+
+    filter:blur(2px);
 }
 
-/* HEAD */
+/* RING */
 
-.head{
-  position:absolute;
-  width:40px;
-  height:43px;
-  left:15px;
-  top:3px;
-  background:linear-gradient(145deg,#c98763,#8c513d);
-  border-radius:45% 45% 48% 48%;
-  z-index:5;
-  box-shadow:
-    inset -7px -5px 9px rgba(70,20,10,.28),
-    inset 5px 3px 7px rgba(255,220,190,.12);
+.playerRing{
+    position:absolute;
+
+    width:46px;
+    height:14px;
+
+    left:50%;
+    top:78px;
+
+    transform:translateX(-50%);
+
+    border:2px solid #00d9ff;
+    border-radius:50%;
+
+    box-shadow:
+        0 0 8px #00d9ff,
+        0 0 22px rgba(0,210,255,.8);
 }
 
-/* HAIR */
+/* BODY */
 
-.hair{
-  position:absolute;
-  width:45px;
-  height:24px;
-  left:12px;
-  top:0;
-  z-index:8;
+.alexBody{
+    position:absolute;
 
-  background:#101115;
+    left:50%;
+    top:29px;
 
-  border-radius:
-    55% 60% 35% 30% /
-    75% 75% 30% 30%;
+    width:27px;
+    height:35px;
 
-  transform:rotate(-3deg);
+    transform:translateX(-50%);
 
-  box-shadow:
-    inset 0 -5px 5px rgba(0,0,0,.5);
-}
+    background:
+        linear-gradient(
+            90deg,
+            #05070a,
+            #252a31,
+            #080a0d
+        );
 
-.hair:after{
-  content:"";
-  position:absolute;
-  width:17px;
-  height:12px;
-  left:2px;
-  bottom:-5px;
-  background:#101115;
-  transform:rotate(-15deg);
-  border-radius:0 0 50% 50%;
-}
+    border-radius:7px 7px 5px 5px;
 
-/* GLASSES */
-
-.glasses{
-  position:absolute;
-  z-index:12;
-  left:11px;
-  top:20px;
-  width:48px;
-  height:13px;
-}
-
-.glass{
-  position:absolute;
-  width:21px;
-  height:11px;
-  border-radius:4px;
-  background:#090a0c;
-  border:1px solid #777;
-  box-shadow:0 0 4px rgba(255,255,255,.15);
-}
-
-.glass.left{left:0;}
-.glass.right{right:0;}
-
-.glasses:after{
-  content:"";
-  position:absolute;
-  width:8px;
-  height:2px;
-  background:#111;
-  left:20px;
-  top:4px;
-}
-
-/* NECK */
-
-.neck{
-  position:absolute;
-  width:14px;
-  height:12px;
-  left:28px;
-  top:40px;
-  background:#9d5d45;
-  z-index:3;
-}
-
-/* BODY / HOODIE */
-
-.body{
-  position:absolute;
-  width:53px;
-  height:50px;
-  left:9px;
-  top:43px;
-  z-index:4;
-
-  background:linear-gradient(
-    100deg,
-    #090a0d,
-    #1a1c22 50%,
-    #08090c
-  );
-
-  border-radius:13px 13px 8px 8px;
-
-  box-shadow:
-    inset 0 0 8px rgba(255,255,255,.04);
+    box-shadow:
+        0 5px 10px rgba(0,0,0,.8);
 }
 
 /* WHITE SHIRT */
 
-.shirt{
-  position:absolute;
-  width:20px;
-  height:30px;
-  left:25px;
-  top:48px;
-  z-index:6;
+.alexShirt{
+    position:absolute;
 
-  background:#e6e7e9;
+    left:50%;
+    top:32px;
 
-  clip-path:polygon(
-    30% 0,
-    70% 0,
-    100% 100%,
-    0 100%
-  );
+    width:10px;
+    height:23px;
+
+    transform:translateX(-50%);
+
+    background:#f2f4f4;
+
+    clip-path:
+        polygon(
+            25% 0,
+            75% 0,
+            100% 100%,
+            0 100%
+        );
 }
 
-/* HOOD STRINGS */
+/* HEAD */
 
-.string{
-  position:absolute;
-  z-index:10;
-  width:2px;
-  height:19px;
-  background:#c9c9c9;
-  top:53px;
+.alexHead{
+    position:absolute;
+
+    left:50%;
+    top:7px;
+
+    width:21px;
+    height:23px;
+
+    transform:translateX(-50%);
+
+    background:
+        linear-gradient(
+            145deg,
+            #d79a72,
+            #8c503d
+        );
+
+    border-radius:48% 48% 45% 45%;
+
+    z-index:5;
 }
 
-.string.left{
-  left:27px;
-  transform:rotate(3deg);
+/* HAIR */
+
+.alexHair{
+    position:absolute;
+
+    left:50%;
+    top:3px;
+
+    width:25px;
+    height:13px;
+
+    transform:translateX(-50%) rotate(-4deg);
+
+    background:#0a0b0e;
+
+    border-radius:
+        60% 55% 25% 25%;
+
+    z-index:8;
 }
 
-.string.right{
-  left:36px;
-  transform:rotate(-3deg);
+/* GLASSES */
+
+.alexGlasses{
+    position:absolute;
+
+    left:50%;
+    top:15px;
+
+    width:25px;
+    height:7px;
+
+    transform:translateX(-50%);
+
+    z-index:10;
 }
 
-/* ARMS */
+.alexGlasses span{
+    position:absolute;
 
-.arm{
-  position:absolute;
-  width:14px;
-  height:42px;
-  top:48px;
-  background:#111318;
-  border-radius:9px;
-  z-index:3;
+    width:10px;
+    height:6px;
+
+    background:#050608;
+
+    border:1px solid #89919b;
+
+    border-radius:2px;
 }
 
-.arm.left{
-  left:1px;
-  transform:rotate(8deg);
+.alexGlasses span:first-child{
+    left:0;
 }
 
-.arm.right{
-  right:1px;
-  transform:rotate(-8deg);
+.alexGlasses span:last-child{
+    right:0;
 }
 
-.hand{
-  position:absolute;
-  width:13px;
-  height:13px;
-  background:#9d5d45;
-  border-radius:50%;
-  top:82px;
-  z-index:4;
+.alexGlasses i{
+    position:absolute;
+
+    left:10px;
+    top:2px;
+
+    width:5px;
+    height:1px;
+
+    background:#777;
 }
 
-.hand.left{left:0;}
-.hand.right{right:0;}
-
-/* PANTS */
-
-.pants{
-  position:absolute;
-  left:16px;
-  top:87px;
-  width:39px;
-  height:26px;
-  z-index:2;
-  background:#20242c;
-  border-radius:5px;
-}
+/* LEGS */
 
 .leg{
-  position:absolute;
-  width:17px;
-  height:25px;
-  top:101px;
-  background:#171a20;
-  border-radius:4px;
-  z-index:1;
+    position:absolute;
+
+    top:59px;
+
+    width:9px;
+    height:20px;
+
+    background:#15181d;
+
+    border-radius:2px;
+
+    z-index:2;
 }
 
-.leg.left{left:17px;}
-.leg.right{left:38px;}
+.legLeft{
+    left:17px;
+}
+
+.legRight{
+    left:28px;
+}
 
 /* SHOES */
 
 .shoe{
-  position:absolute;
-  width:24px;
-  height:11px;
-  background:#f0f1f2;
-  border-radius:8px 8px 5px 5px;
-  z-index:4;
-  top:121px;
+    position:absolute;
+
+    top:77px;
+
+    width:13px;
+    height:6px;
+
+    background:#eee;
+
+    border-radius:5px;
+
+    z-index:3;
 }
 
-.shoe.left{left:11px;}
-.shoe.right{left:35px;}
+.shoeLeft{
+    left:12px;
+}
 
-/* ================= NAME TAG ================= */
+.shoeRight{
+    left:28px;
+}
+
+/* WALK */
+
+.walking .legLeft{
+    animation:
+        walkLeft .16s infinite alternate;
+}
+
+.walking .legRight{
+    animation:
+        walkRight .16s infinite alternate;
+}
+
+@keyframes walkLeft{
+    from{
+        transform:rotate(9deg);
+    }
+
+    to{
+        transform:rotate(-12deg);
+    }
+}
+
+@keyframes walkRight{
+    from{
+        transform:rotate(-9deg);
+    }
+
+    to{
+        transform:rotate(12deg);
+    }
+}
+
+/* =====================================================
+   NAME
+===================================================== */
 
 .nameTag{
-  position:absolute;
-  left:50%;
-  top:-30px;
-  transform:translateX(-50%);
-  white-space:nowrap;
+    position:absolute;
 
-  padding:5px 10px;
-  border-radius:7px;
+    left:50%;
+    top:-17px;
 
-  background:rgba(5,6,9,.8);
-  border:1px solid rgba(255,47,129,.5);
+    transform:translateX(-50%);
 
-  font-size:10px;
-  font-weight:bold;
-  letter-spacing:1px;
+    white-space:nowrap;
 
-  box-shadow:0 0 12px rgba(255,47,129,.18);
+    padding:4px 8px;
+
+    border-radius:4px;
+
+    background:rgba(0,8,15,.85);
+
+    border:1px solid rgba(0,210,255,.45);
+
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:1px;
+
+    color:#dffaff;
 }
 
-/* ================= WALK ================= */
+/* =====================================================
+   OBJECTIVE PANEL
+===================================================== */
 
-.walking .leg.left{
-  animation:leg1 .18s infinite alternate;
+#objective{
+    position:absolute;
+
+    z-index:60;
+
+    left:20px;
+    bottom:48px;
+
+    width:480px;
+    min-height:74px;
+
+    display:flex;
+    align-items:center;
+
+    padding:10px 18px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(0,8,18,.94),
+            rgba(0,10,20,.76),
+            rgba(0,10,20,.2)
+        );
+
+    border-top:1px solid rgba(0,205,255,.35);
+    border-right:1px solid rgba(0,205,255,.15);
 }
 
-.walking .leg.right{
-  animation:leg2 .18s infinite alternate;
+.objectiveIcon{
+    width:44px;
+    height:44px;
+
+    border:3px solid #ffd400;
+
+    border-radius:50%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    color:#ffd400;
+
+    font-size:25px;
+    font-weight:900;
+
+    margin-right:16px;
+
+    box-shadow:
+        0 0 12px rgba(255,210,0,.3);
 }
 
-.walking .arm.left{
-  animation:arm1 .18s infinite alternate;
+.objectiveTitle{
+    color:#ffd400;
+    font-size:13px;
+    font-weight:900;
+    margin-bottom:6px;
 }
 
-.walking .arm.right{
-  animation:arm2 .18s infinite alternate;
+.objectiveText{
+    font-size:15px;
+    font-weight:700;
 }
 
-@keyframes leg1{
-  from{transform:rotate(8deg);}
-  to{transform:rotate(-13deg);}
+/* =====================================================
+   MOBILE JOYSTICK
+===================================================== */
+
+#joystick{
+    position:absolute;
+
+    z-index:80;
+
+    left:32px;
+    bottom:45px;
+
+    width:160px;
+    height:160px;
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(10,35,55,.86),
+            rgba(4,14,24,.78)
+        );
+
+    border:2px solid rgba(205,230,255,.5);
+
+    box-shadow:
+        inset 0 0 30px rgba(0,0,0,.55),
+        0 8px 30px rgba(0,0,0,.45);
 }
 
-@keyframes leg2{
-  from{transform:rotate(-8deg);}
-  to{transform:rotate(13deg);}
+.jbtn{
+    position:absolute;
+
+    width:42px;
+    height:42px;
+
+    border:none;
+
+    background:transparent;
+
+    color:#b8d9ed;
+
+    font-size:27px;
+    font-weight:900;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
 }
 
-@keyframes arm1{
-  from{transform:rotate(8deg);}
-  to{transform:rotate(-12deg);}
+.jbtn:active{
+    color:#00d9ff;
+    transform:scale(.9);
 }
 
-@keyframes arm2{
-  from{transform:rotate(-8deg);}
-  to{transform:rotate(12deg);}
+.jup{
+    left:59px;
+    top:7px;
 }
 
-/* ================= MOBILE CONTROLS ================= */
-
-#mobileControls{
-  position:absolute;
-  z-index:100;
-  left:20px;
-  bottom:22px;
-  width:170px;
-  height:170px;
-  display:none;
+.jdown{
+    left:59px;
+    bottom:7px;
 }
 
-.control{
-  position:absolute;
-  width:52px;
-  height:52px;
-  border-radius:15px;
-
-  border:1px solid rgba(255,255,255,.18);
-  background:rgba(20,22,29,.85);
-
-  color:white;
-  font-size:22px;
-
-  display:flex;
-  justify-content:center;
-  align-items:center;
-
-  box-shadow:
-    0 7px 20px rgba(0,0,0,.4),
-    inset 0 0 10px rgba(255,255,255,.03);
+.jleft{
+    left:7px;
+    top:59px;
 }
 
-.control:active{
-  transform:scale(.92);
-  background:rgba(255,47,129,.25);
+.jright{
+    right:7px;
+    top:59px;
 }
 
-.up{
-  left:59px;
-  top:0;
+/* CENTER */
+
+.jcenter{
+    position:absolute;
+
+    left:50%;
+    top:50%;
+
+    width:58px;
+    height:58px;
+
+    transform:translate(-50%,-50%);
+
+    border-radius:50%;
+
+    background:
+        radial-gradient(
+            circle at 35% 30%,
+            #31e9ff,
+            #008fca 70%
+        );
+
+    border:2px solid white;
+
+    box-shadow:
+        0 0 16px rgba(0,215,255,.75),
+        inset 0 0 12px rgba(255,255,255,.25);
 }
 
-.down{
-  left:59px;
-  bottom:0;
-}
-
-.left{
-  left:0;
-  top:59px;
-}
-
-.right{
-  right:0;
-  top:59px;
-}
+/* =====================================================
+   ACTION
+===================================================== */
 
 #action{
-  position:absolute;
-  z-index:100;
-  right:25px;
-  bottom:35px;
+    position:absolute;
 
-  width:78px;
-  height:78px;
+    z-index:80;
 
-  border-radius:50%;
+    right:40px;
+    bottom:48px;
 
-  border:2px solid rgba(255,47,129,.7);
-  background:rgba(255,47,129,.15);
+    width:118px;
+    height:118px;
 
-  color:white;
-  font-weight:900;
-  font-size:13px;
+    border-radius:50%;
 
-  box-shadow:
-    0 0 25px rgba(255,47,129,.2),
-    inset 0 0 20px rgba(255,47,129,.08);
+    border:2px solid #ff0da7;
 
-  display:none;
+    background:
+        radial-gradient(
+            circle,
+            rgba(255,0,160,.55),
+            rgba(95,0,60,.75)
+        );
+
+    color:white;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+
+    font-weight:900;
+
+    box-shadow:
+        0 0 25px rgba(255,0,170,.5),
+        inset 0 0 25px rgba(255,0,170,.25);
+
+    cursor:pointer;
 }
 
-/* ================= HINT ================= */
-
-#hint{
-  position:absolute;
-  z-index:60;
-  left:50%;
-  bottom:18px;
-  transform:translateX(-50%);
-
-  padding:8px 14px;
-
-  background:rgba(5,6,9,.78);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:8px;
-
-  color:#aaa;
-  font-size:11px;
-  letter-spacing:.5px;
-
-  pointer-events:none;
+.actionHand{
+    font-size:37px;
+    line-height:38px;
 }
 
-/* ================= RESPONSIVE ================= */
+.actionText{
+    font-size:13px;
+    margin-top:4px;
+}
+
+/* =====================================================
+   CONTROLS HELP
+===================================================== */
+
+#help{
+    position:absolute;
+
+    z-index:70;
+
+    right:25px;
+    bottom:28px;
+
+    width:390px;
+    height:66px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    gap:15px;
+
+    background:
+        rgba(0,8,16,.82);
+
+    border-top:1px solid rgba(0,190,255,.2);
+}
+
+.keys{
+    display:grid;
+
+    grid-template-columns:
+        repeat(3,25px);
+
+    grid-template-rows:
+        repeat(2,25px);
+
+    gap:3px;
+}
+
+.key{
+    width:25px;
+    height:25px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:1px solid #9bb1c0;
+    border-radius:4px;
+
+    font-size:10px;
+    font-weight:900;
+}
+
+.keyW{
+    grid-column:2;
+}
+
+.keyA{
+    grid-column:1;
+    grid-row:2;
+}
+
+.keyS{
+    grid-column:2;
+    grid-row:2;
+}
+
+.keyD{
+    grid-column:3;
+    grid-row:2;
+}
+
+.helpText{
+    font-size:12px;
+    color:#ddd;
+}
+
+.helpDivider{
+    width:1px;
+    height:35px;
+    background:rgba(255,255,255,.25);
+}
+
+/* =====================================================
+   DESKTOP
+===================================================== */
+
+@media(min-width:801px){
+
+    #joystick{
+        display:none;
+    }
+
+}
+
+/* =====================================================
+   MOBILE
+===================================================== */
 
 @media(max-width:800px){
 
-  #topbar{
-    height:65px;
-    padding:8px 12px;
-  }
+    #topHUD{
+        height:58px;
+        padding:0 12px;
+    }
 
-  .logo{
-    font-size:15px;
-  }
+    .logoMain{
+        font-size:19px;
+    }
 
-  .level{
-    font-size:9px;
-  }
+    .logoLine{
+        height:22px;
+    }
 
-  .stat{
-    width:75px;
-  }
+    .night{
+        font-size:8px;
+        letter-spacing:1px;
+    }
 
-  .stat label{
-    font-size:8px;
-  }
+    .scoreTitle{
+        font-size:12px;
+    }
 
-  #map{
-    width:1000px;
-    height:700px;
-  }
+    .scoreNumber{
+        font-size:13px;
+    }
 
-  #mobileControls,
-  #action{
-    display:block;
-  }
+    .rightHUD{
+        gap:10px;
+    }
 
-  #hint{
-    display:none;
-  }
+    .iconBtn{
+        font-size:17px;
+        width:25px;
+        padding-left:10px;
+    }
+
+    #objective{
+        left:12px;
+        bottom:14px;
+
+        width:calc(100% - 24px);
+
+        min-height:55px;
+
+        padding:8px 10px;
+
+        opacity:.92;
+    }
+
+    .objectiveIcon{
+        width:35px;
+        height:35px;
+        min-width:35px;
+
+        font-size:19px;
+
+        margin-right:9px;
+    }
+
+    .objectiveTitle{
+        font-size:9px;
+        margin-bottom:3px;
+    }
+
+    .objectiveText{
+        font-size:11px;
+    }
+
+    #joystick{
+        left:18px;
+        bottom:80px;
+
+        width:135px;
+        height:135px;
+    }
+
+    .jup{
+        left:47px;
+        top:4px;
+    }
+
+    .jdown{
+        left:47px;
+        bottom:4px;
+    }
+
+    .jleft{
+        left:4px;
+        top:47px;
+    }
+
+    .jright{
+        right:4px;
+        top:47px;
+    }
+
+    .jcenter{
+        width:50px;
+        height:50px;
+    }
+
+    #action{
+        right:18px;
+        bottom:80px;
+
+        width:100px;
+        height:100px;
+    }
+
+    .actionHand{
+        font-size:30px;
+    }
+
+    .actionText{
+        font-size:11px;
+    }
+
+    #help{
+        display:none;
+    }
 }
 
-@media(min-width:801px){
-  #hint{
-    display:block;
-  }
+/* =====================================================
+   SMALL MOBILE
+===================================================== */
+
+@media(max-width:480px){
+
+    #joystick{
+        transform:scale(.86);
+        transform-origin:bottom left;
+    }
+
+    #action{
+        transform:scale(.86);
+        transform-origin:bottom right;
+    }
+
 }
 </style>
 </head>
+
 
 <body>
 
 <div id="game">
 
-  <!-- TOP UI -->
-  <div id="topbar">
+    <!-- MAP -->
+    <div id="map">
 
-    <div>
-      <div class="logo">PARTY NIGHT CHAOS</div>
-      <div class="level">LEVEL 01 • ALEX</div>
-    </div>
+        <!-- ALEX -->
 
-    <div class="stats">
+        <div id="player">
 
-      <div class="stat">
-        <label>HEALTH</label>
-        <div class="bar">
-          <div class="fill health"></div>
+            <div class="nameTag">
+                ALEX • LV 01
+            </div>
+
+            <div class="playerGlow"></div>
+
+            <div class="playerRing"></div>
+
+            <div class="alexHead"></div>
+
+            <div class="alexHair"></div>
+
+            <div class="alexGlasses">
+                <span></span>
+                <i></i>
+                <span></span>
+            </div>
+
+            <div class="alexBody"></div>
+
+            <div class="alexShirt"></div>
+
+            <div class="leg legLeft"></div>
+            <div class="leg legRight"></div>
+
+            <div class="shoe shoeLeft"></div>
+            <div class="shoe shoeRight"></div>
+
         </div>
-      </div>
 
-      <div class="stat">
-        <label>ENERGY</label>
-        <div class="bar">
-          <div class="fill energy"></div>
+    </div>
+
+
+    <!-- VIGNETTE -->
+    <div id="vignette"></div>
+
+
+    <!-- TOP HUD -->
+
+    <div id="topHUD">
+
+        <div class="logo">
+
+            <div class="logoMain">
+                PARTY NIGHT
+                <span class="logoChaos">
+                    CHAOS
+                </span>
+            </div>
+
+            <div class="logoLine"></div>
+
+            <div class="night">
+                PROTOTYPE • NIGHT 01
+            </div>
+
         </div>
-      </div>
-
-    </div>
-
-  </div>
 
 
-  <!-- MAP -->
-  <div id="map">
+        <div class="rightHUD">
 
-    <!-- PARTY -->
-    <div class="room party">
-      <h2>PARTY HALL</h2>
+            <div class="score">
 
-      <div class="floor-light l1"></div>
-      <div class="floor-light l2"></div>
+                <div class="scoreTitle">
+                    SCORE
+                </div>
 
-      <div class="sofa s1"></div>
-      <div class="sofa s2"></div>
-      <div class="table t1"></div>
-    </div>
+                <div
+                    class="scoreNumber"
+                    id="score">
+                    0
+                </div>
 
+            </div>
 
-    <!-- KITCHEN -->
-    <div class="room kitchen">
-      <h2>KITCHEN</h2>
+            <div class="iconBtn">
+                ⚙
+            </div>
 
-      <div class="counter"
-           style="top:70px;bottom:auto;"></div>
+            <div class="iconBtn">
+                ⏸
+            </div>
 
-      <div class="table t2"></div>
-    </div>
+        </div>
 
-
-    <!-- BEDROOM -->
-    <div class="room bedroom">
-      <h2>BEDROOM</h2>
-
-      <div class="sofa"
-           style="left:50px;top:100px;width:240px;"></div>
-
-      <div class="table t3"></div>
-    </div>
-
-
-    <!-- BAR -->
-    <div class="room bar">
-      <h2>BAR</h2>
-
-      <div class="counter"></div>
-
-      <div class="bottle b1"></div>
-      <div class="bottle b2"></div>
-      <div class="bottle b3"></div>
-      <div class="bottle b4"></div>
-    </div>
-
-
-    <!-- LOUNGE -->
-    <div class="room lounge">
-      <h2>LOUNGE</h2>
-
-      <div class="sofa s1"></div>
-      <div class="sofa s2"></div>
-      <div class="sofa s3"></div>
-    </div>
-
-
-    <!-- GARDEN -->
-    <div class="room garden">
-      <h2>GARDEN</h2>
-
-      <div class="tree tr1"></div>
-      <div class="tree tr2"></div>
-      <div class="tree tr3"></div>
-      <div class="tree tr4"></div>
     </div>
 
 
     <!-- OBJECTIVE -->
-    <div id="objective"></div>
 
+    <div id="objective">
 
-    <!-- PLAYER -->
-    <div id="player">
+        <div class="objectiveIcon">
+            !
+        </div>
 
-      <div class="nameTag">ALEX • LV 01</div>
+        <div>
 
-      <div class="shadow"></div>
+            <div class="objectiveTitle">
+                CURRENT OBJECTIVE
+            </div>
 
-      <div class="head"></div>
-      <div class="hair"></div>
+            <div class="objectiveText">
+                Find the VIP guest in the party hall
+            </div>
 
-      <div class="glasses">
-        <div class="glass left"></div>
-        <div class="glass right"></div>
-      </div>
-
-      <div class="neck"></div>
-
-      <div class="body"></div>
-
-      <div class="shirt"></div>
-
-      <div class="string left"></div>
-      <div class="string right"></div>
-
-      <div class="arm left"></div>
-      <div class="arm right"></div>
-
-      <div class="hand left"></div>
-      <div class="hand right"></div>
-
-      <div class="pants"></div>
-
-      <div class="leg left"></div>
-      <div class="leg right"></div>
-
-      <div class="shoe left"></div>
-      <div class="shoe right"></div>
+        </div>
 
     </div>
 
-  </div>
+
+    <!-- JOYSTICK -->
+
+    <div id="joystick">
+
+        <button
+            class="jbtn jup"
+            data-key="up">
+            ▲
+        </button>
+
+        <button
+            class="jbtn jleft"
+            data-key="left">
+            ◀
+        </button>
+
+        <div class="jcenter"></div>
+
+        <button
+            class="jbtn jright"
+            data-key="right">
+            ▶
+        </button>
+
+        <button
+            class="jbtn jdown"
+            data-key="down">
+            ▼
+        </button>
+
+    </div>
 
 
-  <!-- MOBILE CONTROLS -->
+    <!-- ACTION -->
 
-  <div id="mobileControls">
+    <button id="action">
 
-    <button class="control up" data-dir="up">▲</button>
-    <button class="control down" data-dir="down">▼</button>
-    <button class="control left" data-dir="left">◀</button>
-    <button class="control right" data-dir="right">▶</button>
+        <div class="actionHand">
+            🖐
+        </div>
 
-  </div>
+        <div class="actionText">
+            ACTION
+        </div>
 
-  <button id="action">ACTION</button>
+    </button>
 
-  <div id="hint">
-    WASD / ARROW KEYS • MOVE ALEX • E = ACTION
-  </div>
+
+    <!-- DESKTOP HELP -->
+
+    <div id="help">
+
+        <div class="keys">
+
+            <div class="key keyW">
+                W
+            </div>
+
+            <div class="key keyA">
+                A
+            </div>
+
+            <div class="key keyS">
+                S
+            </div>
+
+            <div class="key keyD">
+                D
+            </div>
+
+        </div>
+
+        <div class="helpText">
+            Move
+        </div>
+
+        <div class="helpDivider"></div>
+
+        <div style="font-size:27px;">
+            🖱
+        </div>
+
+        <div class="helpText">
+            Interact
+        </div>
+
+        <div class="helpDivider"></div>
+
+        <div style="font-size:23px;">
+            📱
+        </div>
+
+        <div class="helpText">
+            (Mobile)
+        </div>
+
+    </div>
 
 </div>
 
 
 <script>
 
-/* =========================================
-   PLAYER MOVEMENT
-========================================= */
+/* =====================================================
+   GAME STATE
+===================================================== */
 
-const player = document.getElementById("player");
-const objective = document.getElementById("objective");
-const map = document.getElementById("map");
+const player =
+    document.getElementById("player");
+
+const scoreElement =
+    document.getElementById("score");
+
+const actionButton =
+    document.getElementById("action");
+
 
 const keys = {
-  up:false,
-  down:false,
-  left:false,
-  right:false
+    up:false,
+    down:false,
+    left:false,
+    right:false
 };
 
-let x = 45;
-let y = 55;
 
-let speed = 0.55;
+let x = 46;
+let y = 48;
+
+let speed = 0.42;
+
+let score = 0;
 
 
-/* =========================================
+/* =====================================================
    KEYBOARD
-========================================= */
+===================================================== */
 
-window.addEventListener("keydown",(e)=>{
+window.addEventListener(
+    "keydown",
+    function(e){
 
-  const key = e.key.toLowerCase();
+        const k =
+            e.key.toLowerCase();
 
-  if(key === "w" || key === "arrowup"){
-    keys.up = true;
-  }
+        if(
+            k === "w" ||
+            k === "arrowup"
+        ){
+            keys.up = true;
+        }
 
-  if(key === "s" || key === "arrowdown"){
-    keys.down = true;
-  }
+        if(
+            k === "s" ||
+            k === "arrowdown"
+        ){
+            keys.down = true;
+        }
 
-  if(key === "a" || key === "arrowleft"){
-    keys.left = true;
-  }
+        if(
+            k === "a" ||
+            k === "arrowleft"
+        ){
+            keys.left = true;
+        }
 
-  if(key === "d" || key === "arrowright"){
-    keys.right = true;
-  }
+        if(
+            k === "d" ||
+            k === "arrowright"
+        ){
+            keys.right = true;
+        }
 
-  if(key === "e"){
-    action();
-  }
+        if(k === "e"){
+            interact();
+        }
+
+    }
+);
+
+
+window.addEventListener(
+    "keyup",
+    function(e){
+
+        const k =
+            e.key.toLowerCase();
+
+        if(
+            k === "w" ||
+            k === "arrowup"
+        ){
+            keys.up = false;
+        }
+
+        if(
+            k === "s" ||
+            k === "arrowdown"
+        ){
+            keys.down = false;
+        }
+
+        if(
+            k === "a" ||
+            k === "arrowleft"
+        ){
+            keys.left = false;
+        }
+
+        if(
+            k === "d" ||
+            k === "arrowright"
+        ){
+            keys.right = false;
+        }
+
+    }
+);
+
+
+/* =====================================================
+   MOBILE JOYSTICK
+===================================================== */
+
+document
+.querySelectorAll(".jbtn")
+.forEach(function(button){
+
+    const direction =
+        button.dataset.key;
+
+
+    function start(e){
+
+        e.preventDefault();
+
+        keys[direction] = true;
+    }
+
+
+    function stop(e){
+
+        e.preventDefault();
+
+        keys[direction] = false;
+    }
+
+
+    button.addEventListener(
+        "touchstart",
+        start,
+        {passive:false}
+    );
+
+    button.addEventListener(
+        "touchend",
+        stop,
+        {passive:false}
+    );
+
+    button.addEventListener(
+        "touchcancel",
+        stop,
+        {passive:false}
+    );
+
+
+    button.addEventListener(
+        "mousedown",
+        start
+    );
+
+    button.addEventListener(
+        "mouseup",
+        stop
+    );
+
+    button.addEventListener(
+        "mouseleave",
+        stop
+    );
 
 });
 
 
-window.addEventListener("keyup",(e)=>{
-
-  const key = e.key.toLowerCase();
-
-  if(key === "w" || key === "arrowup"){
-    keys.up = false;
-  }
-
-  if(key === "s" || key === "arrowdown"){
-    keys.down = false;
-  }
-
-  if(key === "a" || key === "arrowleft"){
-    keys.left = false;
-  }
-
-  if(key === "d" || key === "arrowright"){
-    keys.right = false;
-  }
-
-});
-
-
-/* =========================================
-   MOBILE BUTTONS
-========================================= */
-
-document.querySelectorAll(".control").forEach(button=>{
-
-  const dir = button.dataset.dir;
-
-  const start = (e)=>{
-    e.preventDefault();
-    keys[dir] = true;
-  };
-
-  const stop = (e)=>{
-    e.preventDefault();
-    keys[dir] = false;
-  };
-
-  button.addEventListener("touchstart",start,{passive:false});
-  button.addEventListener("touchend",stop,{passive:false});
-  button.addEventListener("touchcancel",stop,{passive:false});
-
-  button.addEventListener("mousedown",start);
-  button.addEventListener("mouseup",stop);
-  button.addEventListener("mouseleave",stop);
-
-});
-
-
-/* =========================================
+/* =====================================================
    ACTION
-========================================= */
+===================================================== */
 
-function action(){
+function interact(){
 
-  const button = document.getElementById("action");
+    score += 10;
 
-  button.innerText = "✓";
+    scoreElement.innerText =
+        score;
 
-  setTimeout(()=>{
-    button.innerText = "ACTION";
-  },600);
+    actionButton.style.transform =
+        "scale(.90)";
 
-  console.log("ALEX ACTION");
+    setTimeout(function(){
+
+        actionButton.style.transform =
+            "";
+
+    },120);
+
 }
 
-document.getElementById("action")
-  .addEventListener("click",action);
+
+actionButton.addEventListener(
+    "click",
+    interact
+);
 
 
-/* =========================================
-   GAME LOOP
-========================================= */
+/* =====================================================
+   UPDATE PLAYER
+===================================================== */
 
 function update(){
 
-  let moving = false;
-
-  if(keys.up){
-    y -= speed;
-    moving = true;
-  }
-
-  if(keys.down){
-    y += speed;
-    moving = true;
-  }
-
-  if(keys.left){
-    x -= speed;
-    moving = true;
-  }
-
-  if(keys.right){
-    x += speed;
-    moving = true;
-  }
+    let moving = false;
 
 
-  /* BOUNDARIES */
+    if(keys.up){
 
-  x = Math.max(4,Math.min(96,x));
-  y = Math.max(9,Math.min(91,y));
+        y -= speed;
 
-
-  /* PLAYER POSITION */
-
-  player.style.left = x + "%";
-  player.style.top = y + "%";
+        moving = true;
+    }
 
 
-  /* WALK ANIMATION */
+    if(keys.down){
 
-  if(moving){
-    player.classList.add("walking");
-  }else{
-    player.classList.remove("walking");
-  }
+        y += speed;
 
-
-  /* CHARACTER DIRECTION */
-
-  if(keys.left){
-    player.style.transform =
-      "translate(-50%,-50%) scaleX(-1)";
-  }
-
-  if(keys.right){
-    player.style.transform =
-      "translate(-50%,-50%) scaleX(1)";
-  }
+        moving = true;
+    }
 
 
-  /* OBJECTIVE */
+    if(keys.left){
 
-  objective.style.left = "78%";
-  objective.style.top = "48%";
+        x -= speed;
+
+        moving = true;
+
+        player.style.transform =
+            "translate(-50%,-50%) scaleX(-1)";
+    }
 
 
-  requestAnimationFrame(update);
+    if(keys.right){
+
+        x += speed;
+
+        moving = true;
+
+        player.style.transform =
+            "translate(-50%,-50%) scaleX(1)";
+    }
+
+
+    /* BOUNDARY */
+
+    x =
+        Math.max(
+            3,
+            Math.min(
+                97,
+                x
+            )
+        );
+
+
+    y =
+        Math.max(
+            10,
+            Math.min(
+                91,
+                y
+            )
+        );
+
+
+    /* POSITION */
+
+    player.style.left =
+        x + "%";
+
+    player.style.top =
+        y + "%";
+
+
+    /* WALKING */
+
+    if(moving){
+
+        player.classList.add(
+            "walking"
+        );
+
+    }else{
+
+        player.classList.remove(
+            "walking"
+        );
+
+    }
+
+
+    requestAnimationFrame(
+        update
+    );
 }
+
 
 update();
 
