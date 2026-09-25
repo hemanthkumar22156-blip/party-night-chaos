@@ -2,32 +2,50 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+>
 
 <title>Party Night: Chaos</title>
 
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 
 <style>
+
 * {
     box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
 }
 
 html,
 body {
     margin: 0;
     padding: 0;
+
     width: 100%;
     height: 100%;
+
     overflow: hidden;
+
     background: #05060a;
+
+    touch-action: none;
 }
 
 #game {
     width: 100%;
     height: 100%;
 }
+
+canvas {
+    display: block;
+}
+
 </style>
+
 </head>
 
 <body>
@@ -36,247 +54,406 @@ body {
 
 <script>
 
+/* =========================================================
+   PARTY NIGHT: CHAOS
+   VERSION 2
+   PC + MOBILE
+========================================================= */
+
+
+const GAME_WIDTH = 1280;
+const GAME_HEIGHT = 720;
+
+
+/* =========================================================
+   GAME CONFIG
+========================================================= */
+
 const config = {
+
     type: Phaser.AUTO,
 
-    width: 1280,
-    height: 720,
+    width: GAME_WIDTH,
+    height: GAME_HEIGHT,
 
     parent: "game",
 
     backgroundColor: "#05060a",
 
     physics: {
+
         default: "arcade",
+
         arcade: {
+
             gravity: {
                 y: 0
             },
+
             debug: false
+
         }
+
     },
 
     scale: {
-        mode: Phaser.Scale.RESIZE,
-        autoCenter: Phaser.Scale.CENTER_BOTH
+
+        mode: Phaser.Scale.FIT,
+
+        autoCenter: Phaser.Scale.CENTER_BOTH,
+
+        width: GAME_WIDTH,
+
+        height: GAME_HEIGHT
+
     },
 
     scene: {
+
         create: create,
+
         update: update
+
     }
+
 };
 
-const game = new Phaser.Game(config);
+
+const game =
+    new Phaser.Game(config);
+
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
 
 let player;
+
 let walls;
-let cursors;
-let keys;
 
 let npcs = [];
 
 let objective;
+
 let score = 0;
 
 let scoreText;
+
 let missionText;
 
+let interactButton;
 
-/* =====================================================
+let joystickBase;
+
+let joystickThumb;
+
+let joystickActive = false;
+
+let joystickPointerId = null;
+
+let joystickX = 0;
+
+let joystickY = 0;
+
+let cursors;
+
+let keys;
+
+
+/* =========================================================
    CREATE
-===================================================== */
+========================================================= */
 
 function create() {
 
     const scene = this;
 
-    /* ===============================
-       MAP BACKGROUND
-    =============================== */
+
+    /* =====================================================
+       BACKGROUND
+    ===================================================== */
 
     scene.add.rectangle(
-        640,
-        360,
-        1280,
-        720,
+
+        GAME_WIDTH / 2,
+        GAME_HEIGHT / 2,
+
+        GAME_WIDTH,
+        GAME_HEIGHT,
+
         0x05060a
+
     );
 
 
-    /* ===============================
-       ROOMS
-    =============================== */
+    /* =====================================================
+       MAP
+    ===================================================== */
 
     createRoom(
+
         scene,
+
         70,
         80,
         330,
         270,
+
         0x29113f,
+
         "PARTY HALL"
+
     );
 
+
     createRoom(
+
         scene,
+
         450,
         80,
         380,
         270,
+
         0x15313a,
+
         "KITCHEN"
+
     );
 
+
     createRoom(
+
         scene,
+
         880,
         80,
         330,
         270,
+
         0x291c35,
+
         "BEDROOM"
+
     );
 
+
     createRoom(
+
         scene,
+
         450,
         390,
         380,
         250,
+
         0x171e34,
+
         "LOUNGE"
+
     );
 
+
     createRoom(
+
         scene,
+
         880,
         390,
         330,
         250,
+
         0x102d22,
+
         "GARDEN"
+
     );
 
 
-    /* ===============================
+    /* =====================================================
        WALLS
-    =============================== */
+    ===================================================== */
 
-    walls = scene.physics.add.staticGroup();
-
-    addWall(scene, 640, 45, 1180, 25);
-    addWall(scene, 640, 675, 1180, 25);
-
-    addWall(scene, 45, 360, 25, 630);
-    addWall(scene, 1235, 360, 25, 630);
-
-    addWall(scene, 430, 210, 20, 260);
-    addWall(scene, 430, 560, 20, 150);
-
-    addWall(scene, 860, 210, 20, 260);
-    addWall(scene, 860, 560, 20, 150);
+    walls =
+        scene.physics.add.staticGroup();
 
 
-    /* ===============================
+    addWall(
+        scene,
+        640,
+        45,
+        1180,
+        25
+    );
+
+
+    addWall(
+        scene,
+        640,
+        675,
+        1180,
+        25
+    );
+
+
+    addWall(
+        scene,
+        45,
+        360,
+        25,
+        630
+    );
+
+
+    addWall(
+        scene,
+        1235,
+        360,
+        25,
+        630
+    );
+
+
+    addWall(
+        scene,
+        430,
+        210,
+        20,
+        260
+    );
+
+
+    addWall(
+        scene,
+        430,
+        560,
+        20,
+        150
+    );
+
+
+    addWall(
+        scene,
+        860,
+        210,
+        20,
+        260
+    );
+
+
+    addWall(
+        scene,
+        860,
+        560,
+        20,
+        150
+    );
+
+
+    /* =====================================================
        PLAYER
-    =============================== */
+    ===================================================== */
 
-    player = scene.add.circle(
-        180,
-        540,
-        17,
-        0x00d9ff
-    );
+    player =
+        createPlayer(
 
-    player.setStrokeStyle(
-        4,
-        0xffffff,
-        0.9
-    );
+            scene,
 
-    scene.physics.add.existing(
-        player
-    );
+            180,
 
-    player.body.setCircle(
-        17
-    );
+            540
 
-    player.body.setCollideWorldBounds(
-        true
-    );
+        );
+
 
     scene.physics.add.collider(
+
         player,
+
         walls
+
     );
 
 
-    /* ===============================
-       PLAYER GLOW
-    =============================== */
+    /* =====================================================
+       NPCS
+    ===================================================== */
 
-    const playerGlow =
-        scene.add.circle(
-            180,
-            540,
-            38,
-            0x00d9ff,
-            0.10
-        );
-
-    scene.tweens.add({
-
-        targets: playerGlow,
-
-        scale: 1.4,
-
-        alpha: 0.02,
-
-        duration: 900,
-
-        yoyo: true,
-
-        repeat: -1
-
-    });
-
-    player.glow = playerGlow;
+    createNPC(
+        scene,
+        180,
+        180,
+        0xff3d8d
+    );
 
 
-    /* ===============================
-       NPCs
-    =============================== */
-
-    createNPC(scene, 180, 180, 0xff3d8d);
-
-    createNPC(scene, 300, 250, 0xff3d8d);
-
-    createNPC(scene, 550, 180, 0xffc107);
-
-    createNPC(scene, 720, 250, 0xffc107);
-
-    createNPC(scene, 980, 180, 0x8d5cff);
-
-    createNPC(scene, 1080, 500, 0x00ff9d);
+    createNPC(
+        scene,
+        300,
+        250,
+        0xff3d8d
+    );
 
 
-    /* ===============================
+    createNPC(
+        scene,
+        550,
+        180,
+        0xffc107
+    );
+
+
+    createNPC(
+        scene,
+        720,
+        250,
+        0xffc107
+    );
+
+
+    createNPC(
+        scene,
+        980,
+        180,
+        0x8d5cff
+    );
+
+
+    createNPC(
+        scene,
+        1080,
+        500,
+        0x00ff9d
+    );
+
+
+    /* =====================================================
        OBJECTIVE
-    =============================== */
+    ===================================================== */
 
     objective =
+
         scene.add.circle(
+
             1080,
+
             570,
+
             15,
+
             0xffd000
+
         );
 
+
     objective.setStrokeStyle(
+
         3,
-        0xffffff
+
+        0xffffff,
+
+        0.9
+
     );
 
 
@@ -284,7 +461,7 @@ function create() {
 
         targets: objective,
 
-        scale: 1.4,
+        scale: 1.45,
 
         alpha: 0.45,
 
@@ -297,34 +474,64 @@ function create() {
     });
 
 
-    /* ===============================
-       CONTROLS
-    =============================== */
+    /* =====================================================
+       PC CONTROLS
+    ===================================================== */
 
     cursors =
         scene.input.keyboard.createCursorKeys();
 
+
     keys =
         scene.input.keyboard.addKeys({
+
             W: Phaser.Input.Keyboard.KeyCodes.W,
+
             A: Phaser.Input.Keyboard.KeyCodes.A,
+
             S: Phaser.Input.Keyboard.KeyCodes.S,
+
             D: Phaser.Input.Keyboard.KeyCodes.D
+
         });
 
 
-    /* ===============================
+    /* =====================================================
        UI
-    =============================== */
+    ===================================================== */
 
     createUI(scene);
+
+
+    /* =====================================================
+       MOBILE CONTROLS
+    ===================================================== */
+
+    createMobileControls(scene);
+
+
+    /* =====================================================
+       RESIZE
+    ===================================================== */
+
+    scene.scale.on(
+
+        "resize",
+
+        function () {
+
+            resizeMobileControls(scene);
+
+        }
+
+    );
 
 }
 
 
-/* =====================================================
+/* =========================================================
    UPDATE
-===================================================== */
+========================================================= */
 
 function update(time, delta) {
 
@@ -334,44 +541,90 @@ function update(time, delta) {
 
 
     let x = 0;
+
     let y = 0;
+
 
     const speed = 220;
 
 
+    /* =====================================================
+       KEYBOARD
+    ===================================================== */
+
     if (
+
         cursors.left.isDown ||
+
         keys.A.isDown
+
     ) {
-        x = -1;
+
+        x -= 1;
+
     }
 
+
     if (
+
         cursors.right.isDown ||
+
         keys.D.isDown
+
     ) {
-        x = 1;
+
+        x += 1;
+
     }
 
+
     if (
+
         cursors.up.isDown ||
+
         keys.W.isDown
+
     ) {
-        y = -1;
+
+        y -= 1;
+
     }
 
+
     if (
+
         cursors.down.isDown ||
+
         keys.S.isDown
+
     ) {
-        y = 1;
+
+        y += 1;
+
+    }
+
+
+    /* =====================================================
+       MOBILE JOYSTICK
+    ===================================================== */
+
+    if (joystickActive) {
+
+        x = joystickX;
+
+        y = joystickY;
+
     }
 
 
     const direction =
+
         new Phaser.Math.Vector2(
+
             x,
+
             y
+
         );
 
 
@@ -379,58 +632,82 @@ function update(time, delta) {
 
         direction.normalize();
 
+
         player.body.setVelocity(
+
             direction.x * speed,
+
             direction.y * speed
+
         );
+
+
+        player.walking = true;
+
 
     } else {
 
         player.body.setVelocity(
+
             0,
+
             0
+
         );
 
-    }
 
-
-    /* ===============================
-       MOVE PLAYER GLOW
-    =============================== */
-
-    if (player.glow) {
-
-        player.glow.x =
-            player.x;
-
-        player.glow.y =
-            player.y;
+        player.walking = false;
 
     }
 
 
-    /* ===============================
-       OBJECTIVE CHECK
-    =============================== */
+    /* =====================================================
+       WALK ANIMATION
+    ===================================================== */
+
+    animatePlayer(
+
+        player,
+
+        time
+
+    );
+
+
+    /* =====================================================
+       OBJECTIVE
+    ===================================================== */
 
     const distance =
+
         Phaser.Math.Distance.Between(
+
             player.x,
+
             player.y,
+
             objective.x,
+
             objective.y
+
         );
 
 
-    if (distance < 45) {
+    if (distance < 48) {
 
         missionText.setText(
+
             "MISSION COMPLETE  +100"
+
         );
 
+
         missionText.setColor(
+
             "#00ff9d"
+
         );
+
 
         if (!objective.completed) {
 
@@ -438,153 +715,696 @@ function update(time, delta) {
 
             score += 100;
 
+
             scoreText.setText(
+
                 "SCORE  " + score
+
             );
 
         }
 
-    } else {
+    }
+
+    else {
 
         missionText.setText(
+
             "Reach the yellow objective"
+
         );
 
+
         missionText.setColor(
+
             "#ffffff"
+
         );
 
     }
 
 
-    /* ===============================
-       NPC MOVEMENT
-    =============================== */
+    /* =====================================================
+       NPC AI
+    ===================================================== */
 
-    npcs.forEach(npc => {
+    npcs.forEach(
 
-        npc.timer -= delta;
+        function (npc) {
+
+            npc.timer -= delta;
 
 
-        if (npc.timer <= 0) {
+            if (npc.timer <= 0) {
 
-            npc.timer =
-                Phaser.Math.Between(
-                    1200,
-                    3000
+                npc.timer =
+
+                    Phaser.Math.Between(
+
+                        1200,
+
+                        3000
+
+                    );
+
+
+                npc.targetX =
+
+                    Phaser.Math.Between(
+
+                        100,
+
+                        1150
+
+                    );
+
+
+                npc.targetY =
+
+                    Phaser.Math.Between(
+
+                        120,
+
+                        600
+
+                    );
+
+            }
+
+
+            const angle =
+
+                Phaser.Math.Angle.Between(
+
+                    npc.x,
+
+                    npc.y,
+
+                    npc.targetX,
+
+                    npc.targetY
+
                 );
 
-            npc.targetX =
-                Phaser.Math.Between(
-                    100,
-                    1150
-                );
 
-            npc.targetY =
-                Phaser.Math.Between(
-                    120,
-                    600
-                );
+            npc.body.setVelocity(
+
+                Math.cos(angle) * 35,
+
+                Math.sin(angle) * 35
+
+            );
 
         }
 
-
-        const angle =
-            Phaser.Math.Angle.Between(
-                npc.x,
-                npc.y,
-                npc.targetX,
-                npc.targetY
-            );
-
-
-        npc.body.setVelocity(
-            Math.cos(angle) * 35,
-            Math.sin(angle) * 35
-        );
-
-    });
+    );
 
 }
 
 
-/* =====================================================
-   ROOM
-===================================================== */
+/* =========================================================
+   PLAYER
+========================================================= */
+
+function createPlayer(
+
+    scene,
+
+    x,
+
+    y
+
+) {
+
+    const container =
+
+        scene.add.container(
+
+            x,
+
+            y
+
+        );
+
+
+    /* SHADOW */
+
+    const shadow =
+
+        scene.add.ellipse(
+
+            0,
+
+            23,
+
+            42,
+
+            15,
+
+            0x000000,
+
+            0.55
+
+        );
+
+
+    /* BODY */
+
+    const body =
+
+        scene.add.rectangle(
+
+            0,
+
+            0,
+
+            32,
+
+            44,
+
+            0x11141d
+
+        );
+
+
+    body.setStrokeStyle(
+
+        2,
+
+        0x00d9ff,
+
+        0.9
+
+    );
+
+
+    /* HOODIE */
+
+    const hoodie =
+
+        scene.add.rectangle(
+
+            0,
+
+            -5,
+
+            38,
+
+            30,
+
+            0x171b26
+
+        );
+
+
+    hoodie.setStrokeStyle(
+
+        2,
+
+        0x273246
+
+    );
+
+
+    /* HEAD */
+
+    const head =
+
+        scene.add.circle(
+
+            0,
+
+            -31,
+
+            15,
+
+            0xd69b72
+
+        );
+
+
+    /* HAIR */
+
+    const hair =
+
+        scene.add.arc(
+
+            0,
+
+            -35,
+
+            17,
+
+            180,
+
+            360,
+
+            false,
+
+            0x17131a
+
+        );
+
+
+    /* SUNGLASSES */
+
+    const glasses =
+
+        scene.add.rectangle(
+
+            0,
+
+            -31,
+
+            27,
+
+            7,
+
+            0x050505
+
+        );
+
+
+    /* NECKLACE */
+
+    const necklace =
+
+        scene.add.circle(
+
+            0,
+
+            -15,
+
+            3,
+
+            0xffffff
+
+        );
+
+
+    /* LEFT SHOE */
+
+    const shoe1 =
+
+        scene.add.rectangle(
+
+            -10,
+
+            25,
+
+            15,
+
+            8,
+
+            0xffffff
+
+        );
+
+
+    /* RIGHT SHOE */
+
+    const shoe2 =
+
+        scene.add.rectangle(
+
+            10,
+
+            25,
+
+            15,
+
+            8,
+
+            0xffffff
+
+        );
+
+
+    container.add([
+
+        shadow,
+
+        body,
+
+        hoodie,
+
+        head,
+
+        hair,
+
+        glasses,
+
+        necklace,
+
+        shoe1,
+
+        shoe2
+
+    ]);
+
+
+    scene.physics.world.enable(
+
+        container
+
+    );
+
+
+    container.body.setCircle(
+
+        16,
+
+        -16,
+
+        -16
+
+    );
+
+
+    container.body.setCollideWorldBounds(
+
+        true
+
+    );
+
+
+    /* GLOW */
+
+    const glow =
+
+        scene.add.circle(
+
+            x,
+
+            y,
+
+            48,
+
+            0x00d9ff,
+
+            0.07
+
+        );
+
+
+    glow.setDepth(-1);
+
+
+    container.glow = glow;
+
+    container.shadow = shadow;
+
+    container.walking = false;
+
+
+    return container;
+
+}
+
+
+/* =========================================================
+   PLAYER ANIMATION
+========================================================= */
+
+function animatePlayer(
+
+    player,
+
+    time
+
+) {
+
+    if (!player) {
+        return;
+    }
+
+
+    if (player.walking) {
+
+        const bob =
+
+            Math.sin(
+
+                time * 0.012
+
+            ) * 2;
+
+
+        player.y += bob * 0.08;
+
+
+        player.rotation =
+
+            Math.sin(
+
+                time * 0.012
+
+            ) * 0.015;
+
+    }
+
+    else {
+
+        player.rotation =
+
+            Math.sin(
+
+                time * 0.002
+
+            ) * 0.008;
+
+    }
+
+
+    if (player.glow) {
+
+        player.glow.x =
+
+            player.x;
+
+
+        player.glow.y =
+
+            player.y;
+
+    }
+
+}
+
+
+/* =========================================================
+   NPC
+========================================================= */
+
+function createNPC(
+
+    scene,
+
+    x,
+
+    y,
+
+    color
+
+) {
+
+    const npc =
+
+        scene.add.circle(
+
+            x,
+
+            y,
+
+            13,
+
+            color
+
+        );
+
+
+    npc.setStrokeStyle(
+
+        2,
+
+        0xffffff,
+
+        0.7
+
+    );
+
+
+    scene.physics.add.existing(
+
+        npc
+
+    );
+
+
+    npc.body.setCircle(
+
+        13
+
+    );
+
+
+    npc.body.setCollideWorldBounds(
+
+        true
+
+    );
+
+
+    scene.physics.add.collider(
+
+        npc,
+
+        walls
+
+    );
+
+
+    npc.targetX = x;
+
+    npc.targetY = y;
+
+    npc.timer = 0;
+
+
+    npcs.push(npc);
+
+}
+
+
+/* =========================================================
+   MAP ROOM
+========================================================= */
 
 function createRoom(
+
     scene,
+
     x,
+
     y,
+
     width,
+
     height,
+
     color,
+
     title
+
 ) {
 
     const room =
+
         scene.add.rectangle(
+
             x + width / 2,
+
             y + height / 2,
+
             width,
+
             height,
+
             color
+
         );
 
+
     room.setStrokeStyle(
+
         2,
+
         0x4f5a72,
+
         0.8
+
     );
 
-
-    /* Room title */
 
     scene.add.text(
+
         x + 15,
+
         y + 15,
+
         title,
+
         {
+
             fontFamily: "Arial",
+
             fontSize: "16px",
+
             fontStyle: "bold",
+
             color: "#ffffff",
+
             backgroundColor: "#05060acc",
+
             padding: {
+
                 left: 8,
+
                 right: 8,
+
                 top: 5,
+
                 bottom: 5
+
             }
+
         }
+
     );
 
 
-    /* Party floor */
+    /* PARTY FLOOR */
 
     if (title === "PARTY HALL") {
 
         for (
+
             let px = x + 70;
+
             px < x + width - 40;
+
             px += 45
+
         ) {
 
             for (
+
                 let py = y + 80;
+
                 py < y + height - 30;
+
                 py += 45
+
             ) {
 
                 const tile =
+
                     scene.add.rectangle(
+
                         px,
+
                         py,
+
                         30,
+
                         30,
+
                         0xff238d,
+
                         0.15
+
                     );
+
 
                 scene.tweens.add({
 
@@ -593,9 +1413,13 @@ function createRoom(
                     alpha: 0.35,
 
                     duration:
+
                         Phaser.Math.Between(
+
                             700,
+
                             1500
+
                         ),
 
                     yoyo: true,
@@ -613,213 +1437,763 @@ function createRoom(
 }
 
 
-/* =====================================================
+/* =========================================================
    WALL
-===================================================== */
+========================================================= */
 
 function addWall(
+
     scene,
+
     x,
+
     y,
+
     width,
+
     height
+
 ) {
 
     const wall =
+
         scene.add.rectangle(
+
             x,
+
             y,
+
             width,
+
             height,
+
             0x070a12
+
         );
 
 
     wall.setStrokeStyle(
+
         2,
+
         0x35405a
+
     );
 
 
     scene.physics.add.existing(
+
         wall,
+
         true
+
     );
 
 
     walls.add(
+
         wall
+
     );
 
 }
 
 
-/* =====================================================
-   NPC
-===================================================== */
-
-function createNPC(
-    scene,
-    x,
-    y,
-    color
-) {
-
-    const npc =
-        scene.add.circle(
-            x,
-            y,
-            13,
-            color
-        );
-
-
-    npc.setStrokeStyle(
-        2,
-        0xffffff,
-        0.7
-    );
-
-
-    scene.physics.add.existing(
-        npc
-    );
-
-
-    npc.body.setCircle(
-        13
-    );
-
-
-    npc.body.setCollideWorldBounds(
-        true
-    );
-
-
-    scene.physics.add.collider(
-        npc,
-        walls
-    );
-
-
-    npc.targetX = x;
-    npc.targetY = y;
-
-    npc.timer = 0;
-
-
-    npcs.push(npc);
-
-}
-
-
-/* =====================================================
+/* =========================================================
    UI
-===================================================== */
+========================================================= */
 
 function createUI(scene) {
 
-    /* Top bar */
+    /* TOP BAR */
 
     scene.add.rectangle(
+
         640,
+
         30,
+
         1280,
+
         60,
+
         0x05060a,
+
         0.94
+
     );
 
 
     scene.add.text(
+
         25,
+
         17,
+
         "PARTY NIGHT: CHAOS",
+
         {
+
             fontFamily: "Arial",
+
             fontSize: "23px",
+
             fontStyle: "bold",
+
             color: "#ffffff"
+
         }
+
     );
 
 
     scene.add.text(
+
         280,
+
         21,
+
         "PROTOTYPE • NIGHT 01",
+
         {
+
             fontFamily: "Arial",
+
             fontSize: "13px",
+
             color: "#ff238d"
+
         }
+
     );
 
 
     scoreText =
+
         scene.add.text(
+
             1080,
+
             18,
+
             "SCORE  0",
+
             {
+
                 fontFamily: "Arial",
+
                 fontSize: "20px",
+
                 fontStyle: "bold",
+
                 color: "#00d9ff"
+
             }
+
         );
 
 
-    /* Bottom bar */
+    /* BOTTOM BAR */
 
     scene.add.rectangle(
+
         640,
+
         685,
+
         1280,
+
         70,
+
         0x05060a,
+
         0.94
+
     );
 
 
     scene.add.text(
+
         25,
+
         660,
+
         "OBJECTIVE",
+
         {
+
             fontFamily: "Arial",
+
             fontSize: "13px",
+
             fontStyle: "bold",
+
             color: "#ffd000"
+
         }
+
     );
 
 
     missionText =
+
         scene.add.text(
+
             25,
+
             680,
+
             "Reach the yellow objective",
+
             {
+
                 fontFamily: "Arial",
+
                 fontSize: "16px",
+
                 color: "#ffffff"
+
             }
+
         );
 
 
     scene.add.text(
-        950,
-        678,
-        "WASD / ARROWS  •  MOVE",
+
+        940,
+
+        680,
+
+        "WASD / ARROWS",
+
         {
+
             fontFamily: "Arial",
+
             fontSize: "13px",
+
             color: "#9aa4b5"
+
         }
+
     );
 
 }
+
+
+/* =========================================================
+   MOBILE CONTROLS
+========================================================= */
+
+function createMobileControls(scene) {
+
+
+    /* =====================================================
+       JOYSTICK BASE
+    ===================================================== */
+
+    joystickBase =
+
+        scene.add.circle(
+
+            115,
+
+            585,
+
+            65,
+
+            0x111827,
+
+            0.65
+
+        );
+
+
+    joystickBase.setStrokeStyle(
+
+        3,
+
+        0x00d9ff,
+
+        0.65
+
+    );
+
+
+    joystickThumb =
+
+        scene.add.circle(
+
+            115,
+
+            585,
+
+            30,
+
+            0x00d9ff,
+
+            0.75
+
+        );
+
+
+    joystickThumb.setStrokeStyle(
+
+        3,
+
+        0xffffff,
+
+        0.7
+
+    );
+
+
+    joystickBase.setScrollFactor(0);
+
+    joystickThumb.setScrollFactor(0);
+
+
+    /* =====================================================
+       JOYSTICK TOUCH START
+    ===================================================== */
+
+    joystickBase.setInteractive({
+
+        useHandCursor: false
+
+    });
+
+
+    joystickBase.on(
+
+        "pointerdown",
+
+        function(pointer) {
+
+            joystickActive = true;
+
+            joystickPointerId =
+                pointer.id;
+
+            updateJoystick(pointer);
+
+        }
+
+    );
+
+
+    /* =====================================================
+       POINTER MOVE
+    ===================================================== */
+
+    scene.input.on(
+
+        "pointermove",
+
+        function(pointer) {
+
+            if (
+
+                joystickActive &&
+
+                pointer.id === joystickPointerId
+
+            ) {
+
+                updateJoystick(pointer);
+
+            }
+
+        }
+
+    );
+
+
+    /* =====================================================
+       POINTER UP
+    ===================================================== */
+
+    scene.input.on(
+
+        "pointerup",
+
+        function(pointer) {
+
+            if (
+
+                pointer.id === joystickPointerId
+
+            ) {
+
+                joystickActive = false;
+
+                joystickPointerId = null;
+
+                joystickX = 0;
+
+                joystickY = 0;
+
+
+                joystickThumb.x =
+                    joystickBase.x;
+
+                joystickThumb.y =
+                    joystickBase.y;
+
+            }
+
+        }
+
+    );
+
+
+    /* =====================================================
+       ACTION BUTTON
+    ===================================================== */
+
+    interactButton =
+
+        scene.add.circle(
+
+            1135,
+
+            585,
+
+            55,
+
+            0xff238d,
+
+            0.72
+
+        );
+
+
+    interactButton.setStrokeStyle(
+
+        3,
+
+        0xffffff,
+
+        0.75
+
+    );
+
+
+    interactButton.setInteractive();
+
+
+    interactButton.on(
+
+        "pointerdown",
+
+        function() {
+
+            actionPressed(scene);
+
+        }
+
+    );
+
+
+    scene.add.text(
+
+        1135,
+
+        585,
+
+        "ACTION",
+
+        {
+
+            fontFamily: "Arial",
+
+            fontSize: "13px",
+
+            fontStyle: "bold",
+
+            color: "#ffffff"
+
+        }
+
+    ).setOrigin(0.5);
+
+
+    resizeMobileControls(scene);
+
+}
+
+
+/* =========================================================
+   UPDATE JOYSTICK
+========================================================= */
+
+function updateJoystick(pointer) {
+
+    const dx =
+
+        pointer.x -
+
+        joystickBase.x;
+
+
+    const dy =
+
+        pointer.y -
+
+        joystickBase.y;
+
+
+    const distance =
+
+        Math.sqrt(
+
+            dx * dx +
+
+            dy * dy
+
+        );
+
+
+    const maxDistance = 45;
+
+
+    let finalX = dx;
+
+    let finalY = dy;
+
+
+    if (distance > maxDistance) {
+
+        finalX =
+
+            (dx / distance) *
+
+            maxDistance;
+
+
+        finalY =
+
+            (dy / distance) *
+
+            maxDistance;
+
+    }
+
+
+    joystickThumb.x =
+
+        joystickBase.x +
+
+        finalX;
+
+
+    joystickThumb.y =
+
+        joystickBase.y +
+
+        finalY;
+
+
+    joystickX =
+
+        finalX / maxDistance;
+
+
+    joystickY =
+
+        finalY / maxDistance;
+
+}
+
+
+/* =========================================================
+   ACTION
+========================================================= */
+
+function actionPressed(scene) {
+
+    const distance =
+
+        Phaser.Math.Distance.Between(
+
+            player.x,
+
+            player.y,
+
+            objective.x,
+
+            objective.y
+
+        );
+
+
+    if (distance < 80) {
+
+        objective.completed = true;
+
+        score += 100;
+
+
+        scoreText.setText(
+
+            "SCORE  " + score
+
+        );
+
+
+        missionText.setText(
+
+            "MISSION COMPLETE!"
+
+        );
+
+
+        missionText.setColor(
+
+            "#00ff9d"
+
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE POSITION
+========================================================= */
+
+function resizeMobileControls(scene) {
+
+    if (!joystickBase) {
+
+        return;
+
+    }
+
+
+    const width =
+
+        scene.scale.gameSize.width;
+
+
+    const height =
+
+        scene.scale.gameSize.height;
+
+
+    joystickBase.x =
+
+        105;
+
+
+    joystickBase.y =
+
+        height - 110;
+
+
+    joystickThumb.x =
+
+        joystickBase.x;
+
+
+    joystickThumb.y =
+
+        joystickBase.y;
+
+
+    if (interactButton) {
+
+        interactButton.x =
+
+            width - 105;
+
+
+        interactButton.y =
+
+            height - 110;
+
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE DETECTION
+========================================================= */
+
+function isMobileDevice() {
+
+    return (
+
+        /Android|iPhone|iPad|iPod/i.test(
+
+            navigator.userAgent
+
+        )
+
+    );
+
+}
+
+
+/* =========================================================
+   HIDE MOBILE CONTROLS ON PC
+========================================================= */
+
+window.addEventListener(
+
+    "load",
+
+    function() {
+
+        setTimeout(
+
+            function() {
+
+                if (!isMobileDevice()) {
+
+                    if (joystickBase) {
+
+                        joystickBase.setVisible(
+                            false
+                        );
+
+                        joystickBase.disableInteractive();
+
+                    }
+
+
+                    if (joystickThumb) {
+
+                        joystickThumb.setVisible(
+                            false
+                        );
+
+                    }
+
+
+                    if (interactButton) {
+
+                        interactButton.setVisible(
+                            false
+                        );
+
+                        interactButton.disableInteractive();
+
+                    }
+
+                }
+
+            },
+
+            500
+
+        );
+
+    }
+
+);
 
 </script>
 
