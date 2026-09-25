@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Party Night: Chaos</title>
+
+<script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #05060a;
+        font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #game {
+        width: 100%;
+        height: 100%;
+    }
+
+    canvas {
+        display: block;
+        margin: auto;
+    }
+</style>
+</head>
+
+<body>
+
+<div id="game"></div>
+
+<script>
+
+/* =========================================================
+   PARTY NIGHT: CHAOS
+   PHASE 1 - PLAYABLE PROTOTYPE
+========================================================= */
+
+const GAME_WIDTH = 1280;
+const GAME_HEIGHT = 720;
+
+const config = {
+    type: Phaser.AUTO,
+
+    width: GAME_WIDTH,
+    height: GAME_HEIGHT,
+
+    parent: "game",
+
+    backgroundColor: "#070910",
+
+    physics: {
+        default: "arcade",
+        arcade: {
+            gravity: {
+                y: 0
+            },
+            debug: false
+        }
+    },
+
+    scene: {
+        preload: preload,
+        create: create,
+        update: update
+    },
+
+    scale: {
+        mode: Phaser.Scale.RESIZE,
+        autoCenter: Phaser.Scale.CENTER_BOTH
+    }
+};
+
+const game = new Phaser.Game(config);
+
+
+/* =========================================================
+   GLOBAL VARIABLES
+========================================================= */
+
+let player;
+let cursors;
+let keys;
+
+let walls;
+let npcs = [];
+
+let objective;
+let objectiveText;
+
+let score = 0;
+let scoreText;
+
+let statusText;
+
+let interactKey;
+
+let mapGraphics;
+
+
+/* =========================================================
+   PRELOAD
+========================================================= */
+
+function preload() {
+
+}
+
+
+/* =========================================================
+   CREATE
+========================================================= */
+
+function create() {
+
+    const scene = this;
+
+    /* ---------- BACKGROUND ---------- */
+
+    scene.add.rectangle(
+        GAME_WIDTH / 2,
+        GAME_HEIGHT / 2,
+        GAME_WIDTH,
+        GAME_HEIGHT,
+        0x05060a
+    );
+
+
+    /* ---------- MAP ---------- */
+
+    createMap(scene);
+
+
+    /* ---------- WALL GROUP ---------- */
+
+    walls = scene.physics.add.staticGroup();
+
+
+    createWall(scene, 30, 30, 1220, 30);
+    createWall(scene, 30, 690, 1220, 30);
+
+    createWall(scene, 30, 30, 30, 660);
+    createWall(scene, 1250, 30, 30, 660);
+
+
+    /* ---------- ROOM WALLS ---------- */
+
+    createWall(scene, 420, 80, 20, 300);
+    createWall(scene, 420, 500, 20, 140);
+
+    createWall(scene, 850, 80, 20, 300);
+    createWall(scene, 850, 500, 20, 140);
+
+    createWall(scene, 440, 360, 170, 20);
+    createWall(scene, 690, 360, 160, 20);
+
+
+    /* ---------- PLAYER ---------- */
+
+    player = createPlayer(scene, 180, 550);
+
+    scene.physics.add.collider(player, walls);
+
+
+    /* ---------- NPCs ---------- */
+
+    createNPC(scene, 220, 220);
+    createNPC(scene, 330, 280);
+    createNPC(scene, 560, 200);
+    createNPC(scene, 760, 260);
+    createNPC(scene, 1010, 210);
+    createNPC(scene, 1080, 500);
+
+
+    /* ---------- OBJECTIVE ---------- */
+
+    objective = scene.add.circle(
+        1050,
+        570,
+        16,
+        0xffd000,
+        1
+    );
+
+    objective.setStrokeStyle(
+        3,
+        0xffffff,
+        0.9
+    );
+
+
+    /* ---------- INPUT ---------- */
+
+    cursors = scene.input.keyboard.createCursorKeys();
+
+    keys = scene.input.keyboard.addKeys({
+        W: Phaser.Input.Keyboard.KeyCodes.W,
+        A: Phaser.Input.Keyboard.KeyCodes.A,
+        S: Phaser.Input.Keyboard.KeyCodes.S,
+        D: Phaser.Input.Keyboard.KeyCodes.D
+    });
+
+    interactKey = scene.input.keyboard.addKey(
+        Phaser.Input.Keyboard.KeyCodes.E
+    );
+
+
+    /* ---------- UI ---------- */
+
+    createUI(scene);
+
+
+    /* ---------- CAMERA ---------- */
+
+    scene.cameras.main.setBackgroundColor("#05060a");
+
+}
+
+
+/* =========================================================
+   UPDATE
+========================================================= */
+
+function update(time, delta) {
+
+    if (!player) {
+        return;
+    }
+
+
+    /* ---------- PLAYER MOVEMENT ---------- */
+
+    let velocityX = 0;
+    let velocityY = 0;
+
+    const speed = 210;
+
+
+    if (
+        cursors.left.isDown ||
+        keys.A.isDown
+    ) {
+        velocityX = -speed;
+    }
+
+    if (
+        cursors.right.isDown ||
+        keys.D.isDown
+    ) {
+        velocityX = speed;
+    }
+
+    if (
+        cursors.up.isDown ||
+        keys.W.isDown
+    ) {
+        velocityY = -speed;
+    }
+
+    if (
+        cursors.down.isDown ||
+        keys.S.isDown
+    ) {
+        velocityY = speed;
+    }
+
+
+    /* ---------- NORMALIZE DIAGONAL ---------- */
+
+    const vector = new Phaser.Math.Vector2(
+        velocityX,
+        velocityY
+    );
+
+    if (vector.length() > speed) {
+        vector.normalize().scale(speed);
+    }
+
+    player.setVelocity(
+        vector.x,
+        vector.y
+    );
+
+
+    /* ---------- PLAYER ANIMATION EFFECT ---------- */
+
+    if (vector.length() > 0) {
+
+        player.rotation += 0.001;
+
+    }
+
+
+    /* ---------- OBJECTIVE ---------- */
+
+    const distance = Phaser.Math.Distance.Between(
+        player.x,
+        player.y,
+        objective.x,
+        objective.y
+    );
+
+
+    if (distance < 45) {
+
+        objectiveText.setText(
+            "OBJECTIVE COMPLETE!"
+        );
+
+        statusText.setText(
+            "MISSION COMPLETE  +100"
+        );
+
+        score += 100;
+
+        scoreText.setText(
+            "SCORE  " + score
+        );
+
+        objective.setFillStyle(
+            0x00ff9d
+        );
+
+    } else {
+
+        objectiveText.setText(
+            "OBJECTIVE"
+        );
+
+        statusText.setText(
+            "Reach the marked location"
+        );
+
+    }
+
+
+    /* ---------- NPC MOVEMENT ---------- */
+
+    npcs.forEach(npc => {
+
+        npc.moveTimer -= delta;
+
+        if (npc.moveTimer <= 0) {
+
+            npc.moveTimer =
+                Phaser.Math.Between(1000, 3000);
+
+            npc.targetX =
+                Phaser.Math.Between(
+                    npc.minX,
+                    npc.maxX
+                );
+
+            npc.targetY =
+                Phaser.Math.Between(
+                    npc.minY,
+                    npc.maxY
+                );
+        }
+
+
+        const angle = Phaser.Math.Angle.Between(
+            npc.x,
+            npc.y,
+            npc.targetX,
+            npc.targetY
+        );
+
+
+        npc.setVelocity(
+            Math.cos(angle) * 35,
+            Math.sin(angle) * 35
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   CREATE MAP
+========================================================= */
+
+function createMap(scene) {
+
+    mapGraphics = scene.add.graphics();
+
+    /* Main floor */
+
+    mapGraphics.fillStyle(
+        0x111522,
+        1
+    );
+
+    mapGraphics.fillRect(
+        30,
+        30,
+        1220,
+        660
+    );
+
+
+    /* Party Hall */
+
+    mapGraphics.fillStyle(
+        0x24103b,
+        1
+    );
+
+    mapGraphics.fillRect(
+        70,
+        80,
+        330,
+        280
+    );
+
+
+    /* Kitchen */
+
+    mapGraphics.fillStyle(
+        0x172b32,
+        1
+    );
+
+    mapGraphics.fillRect(
+        450,
+        80,
+        380,
+        250
+    );
+
+
+    /* Bedroom */
+
+    mapGraphics.fillStyle(
+        0x251b2d,
+        1
+    );
+
+    mapGraphics.fillRect(
+        880,
+        80,
+        330,
+        250
+    );
+
+
+    /* Lounge */
+
+    mapGraphics.fillStyle(
+        0x171d30,
+        1
+    );
+
+    mapGraphics.fillRect(
+        450,
+        390,
+        380,
+        250
+    );
+
+
+    /* Garden */
+
+    mapGraphics.fillStyle(
+        0x10251d,
+        1
+    );
+
+    mapGraphics.fillRect(
+        880,
+        390,
+        330,
+        250
+    );
+
+
+    /* ---------- FLOOR DETAILS ---------- */
+
+    for (let x = 90; x < 390; x += 45) {
+
+        for (let y = 100; y < 340; y += 45) {
+
+            mapGraphics.fillStyle(
+                0x35204c,
+                0.45
+            );
+
+            mapGraphics.fillRect(
+                x,
+                y,
+                32,
+                32
+            );
+        }
+    }
+
+
+    /* ---------- NEON LIGHTS ---------- */
+
+    addGlow(scene, 230, 190, 0xff238d);
+    addGlow(scene, 300, 270, 0x00d9ff);
+    addGlow(scene, 650, 180, 0xff238d);
+    addGlow(scene, 1000, 180, 0x8d5cff);
+    addGlow(scene, 1050, 500, 0x00ff9d);
+
+
+    /* ---------- ROOM LABELS ---------- */
+
+    addLabel(
+        scene,
+        110,
+        100,
+        "PARTY HALL"
+    );
+
+    addLabel(
+        scene,
+        475,
+        100,
+        "KITCHEN"
+    );
+
+    addLabel(
+        scene,
+        905,
+        100,
+        "BEDROOM"
+    );
+
+    addLabel(
+        scene,
+        475,
+        410,
+        "LOUNGE"
+    );
+
+    addLabel(
+        scene,
+        905,
+        410,
+        "GARDEN"
+    );
+
+}
+
+
+/* =========================================================
+   WALL
+========================================================= */
+
+function createWall(
+    scene,
+    x,
+    y,
+    width,
+    height
+) {
+
+    const wall = walls.create(
+        x + width / 2,
+        y + height / 2,
+        "wall"
+    );
+
+    wall.setSize(
+        width,
+        height
+    );
+
+    wall.setDisplaySize(
+        width,
+        height
+    );
+
+    wall.setVisible(false);
+
+}
+
+
+/* =========================================================
+   PLAYER
+========================================================= */
+
+function createPlayer(
+    scene,
+    x,
+    y
+) {
+
+    const container =
+        scene.add.container(x, y);
+
+
+    /* shadow */
+
+    const shadow =
+        scene.add.ellipse(
+            0,
+            15,
+            34,
+            12,
+            0x000000,
+            0.55
+        );
+
+
+    /* body */
+
+    const body =
+        scene.add.rectangle(
+            0,
+            0,
+            25,
+            38,
+            0x11131b
+        );
+
+
+    body.setStrokeStyle(
+        2,
+        0x00d9ff
+    );
+
+
+    /* head */
+
+    const head =
+        scene.add.circle(
+            0,
+            -25,
+            13,
+            0xd69b72
+        );
+
+
+    /* hair */
+
+    const hair =
+        scene.add.arc(
+            0,
+            -29,
+            14,
+            0,
+            180,
+            false,
+            0x17131a
+        );
+
+
+    /* hoodie */
+
+    const hoodie =
+        scene.add.rectangle(
+            0,
+            -4,
+            30,
+            22,
+            0x151a25
+        );
+
+
+    hoodie.setStrokeStyle(
+        2,
+        0x00d9ff
+    );
+
+
+    /* shoes */
+
+    const shoe1 =
+        scene.add.rectangle(
+            -8,
+            22,
+            11,
+            7,
+            0xffffff
+        );
+
+    const shoe2 =
+        scene.add.rectangle(
+            8,
+            22,
+            11,
+            7,
+            0xffffff
+        );
+
+
+    container.add([
+        shadow,
+        body,
+        hoodie,
+        head,
+        hair,
+        shoe1,
+        shoe2
+    ]);
+
+
+    scene.physics.world.enable(
+        container
+    );
+
+
+    container.body.setCircle(
+        15,
+        -15,
+        -15
+    );
+
+
+    container.body.setCollideWorldBounds(
+        true
+    );
+
+
+    return container;
+
+}
+
+
+/* =========================================================
+   NPC
+========================================================= */
+
+function createNPC(
+    scene,
+    x,
+    y
+) {
+
+    const npc =
+        scene.add.circle(
+            x,
+            y,
+            13,
+            0xff3d78
+        );
+
+
+    npc.setStrokeStyle(
+        2,
+        0xffffff,
+        0.7
+    );
+
+
+    scene.physics.world.enable(
+        npc
+    );
+
+
+    npc.body.setCircle(
+        13
+    );
+
+
+    npc.body.setCollideWorldBounds(
+        true
+    );
+
+
+    scene.physics.add.collider(
+        npc,
+        walls
+    );
+
+
+    npc.targetX = x;
+    npc.targetY = y;
+
+    npc.minX = 80;
+    npc.maxX = 1180;
+
+    npc.minY = 90;
+    npc.maxY = 620;
+
+    npc.moveTimer = 0;
+
+
+    npcs.push(npc);
+
+}
+
+
+/* =========================================================
+   UI
+========================================================= */
+
+function createUI(scene) {
+
+    /* Top bar */
+
+    scene.add.rectangle(
+        640,
+        28,
+        1280,
+        56,
+        0x05060a,
+        0.92
+    );
+
+
+    scene.add.text(
+        25,
+        14,
+        "PARTY NIGHT: CHAOS",
+        {
+            fontFamily: "Arial",
+            fontSize: "22px",
+            fontStyle: "bold",
+            color: "#ffffff"
+        }
+    );
+
+
+    scoreText =
+        scene.add.text(
+            1050,
+            15,
+            "SCORE  0",
+            {
+                fontFamily: "Arial",
+                fontSize: "20px",
+                fontStyle: "bold",
+                color: "#00d9ff"
+            }
+        );
+
+
+    /* Objective */
+
+    objectiveText =
+        scene.add.text(
+            70,
+            650,
+            "OBJECTIVE",
+            {
+                fontFamily: "Arial",
+                fontSize: "18px",
+                fontStyle: "bold",
+                color: "#ffd000"
+            }
+        );
+
+
+    statusText =
+        scene.add.text(
+            230,
+            650,
+            "Reach the marked location",
+            {
+                fontFamily: "Arial",
+                fontSize: "17px",
+                color: "#ffffff"
+            }
+        );
+
+
+    /* Controls */
+
+    scene.add.text(
+        970,
+        650,
+        "WASD / ARROWS  •  MOVE",
+        {
+            fontFamily: "Arial",
+            fontSize: "14px",
+            color: "#9aa4b5"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   LABEL
+========================================================= */
+
+function addLabel(
+    scene,
+    x,
+    y,
+    text
+) {
+
+    scene.add.text(
+        x,
+        y,
+        text,
+        {
+            fontFamily: "Arial",
+            fontSize: "13px",
+            fontStyle: "bold",
+            color: "#ffffff",
+            backgroundColor: "#05060acc",
+            padding: {
+                left: 8,
+                right: 8,
+                top: 5,
+                bottom: 5
+            }
+        }
+    );
+
+}
+
+
+/* =========================================================
+   GLOW
+========================================================= */
+
+function addGlow(
+    scene,
+    x,
+    y,
+    color
+) {
+
+    const glow =
+        scene.add.circle(
+            x,
+            y,
+            70,
+            color,
+            0.07
+        );
+
+
+    scene.tweens.add({
+
+        targets: glow,
+
+        scale: 1.35,
+
+        alpha: 0.02,
+
+        duration: 1800,
+
+        yoyo: true,
+
+        repeat: -1,
+
+        ease: "Sine.easeInOut"
+
+    });
+
+}
+
+</script>
+
+</body>
+</html>
