@@ -2,29 +2,20 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport"
-      content="width=device-width, initial-scale=1.0,
-      maximum-scale=1.0, user-scalable=no">
-
+      content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
 <title>Party Night: Chaos</title>
 
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
 
 <style>
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
-    user-select:none;
-}
-
 html,body{
     margin:0;
     padding:0;
     width:100%;
     height:100%;
     overflow:hidden;
-    background:#05060a;
+    background:#050608;
     touch-action:none;
 }
 
@@ -47,17 +38,18 @@ canvas{
 
 /* =========================================================
    PARTY NIGHT: CHAOS
-   STEP 3 — MAIN CHARACTER UPGRADE
+   LEVEL 1 — THE MANSION PARTY
 ========================================================= */
 
-const GAME_WIDTH = 1280;
-const GAME_HEIGHT = 720;
+const WORLD_W = 2400;
+const WORLD_H = 1400;
 
 let player;
 let walls;
 let npcs = [];
 
 let objective;
+let objectiveDone = false;
 
 let score = 0;
 
@@ -66,32 +58,34 @@ let missionText;
 
 let joystickBase;
 let joystickThumb;
-let interactButton;
+let actionButton;
 
 let joystickActive = false;
-let joystickPointerId = null;
+let joystickId = null;
 
-let joystickX = 0;
-let joystickY = 0;
+let joyX = 0;
+let joyY = 0;
 
 let cursors;
 let keys;
 
+let sceneRef;
+
 
 /* =========================================================
-   GAME
+   CONFIG
 ========================================================= */
 
 const config = {
 
     type: Phaser.AUTO,
 
-    width: GAME_WIDTH,
-    height: GAME_HEIGHT,
-
     parent: "game",
 
-    backgroundColor: "#05060a",
+    width: 1280,
+    height: 720,
+
+    backgroundColor: "#050608",
 
     physics:{
         default:"arcade",
@@ -107,9 +101,8 @@ const config = {
     scale:{
         mode:Phaser.Scale.FIT,
         autoCenter:Phaser.Scale.CENTER_BOTH,
-
-        width:GAME_WIDTH,
-        height:GAME_HEIGHT
+        width:1280,
+        height:720
     },
 
     scene:{
@@ -118,96 +111,67 @@ const config = {
     }
 };
 
-const game =
-    new Phaser.Game(config);
+new Phaser.Game(config);
 
 
 /* =========================================================
    CREATE
 ========================================================= */
 
-function create(){     const scene = this;
+function create(){
 
-    /* BACKGROUND */
+    const scene = this;
+
+    sceneRef = scene;
+
+    scene.physics.world.setBounds(
+        0,
+        0,
+        WORLD_W,
+        WORLD_H
+    );
+
+    scene.cameras.main.setBounds(
+        0,
+        0,
+        WORLD_W,
+        WORLD_H
+    );
+
+
+    /* WORLD BACKGROUND */
 
     scene.add.rectangle(
-        640,
-        360,
-        1280,
-        720,
-        0x05060a
+        WORLD_W / 2,
+        WORLD_H / 2,
+        WORLD_W,
+        WORLD_H,
+        0x080a0e
     );
 
 
-    /* ROOMS */
-
-    createRoom(
-        scene,
-        70,80,
-        330,270,
-        0x29113f,
-        "PARTY HALL"
-    );
-
-    createRoom(
-        scene,
-        450,80,
-        380,270,
-        0x15313a,
-        "KITCHEN"
-    );
-
-    createRoom(
-        scene,
-        880,80,
-        330,270,
-        0x291c35,
-        "BEDROOM"
-    );
-
-    createRoom(
-        scene,
-        450,390,
-        380,250,
-        0x171e34,
-        "LOUNGE"
-    );
-
-    createRoom(
-        scene,
-        880,390,
-        330,250,
-        0x102d22,
-        "GARDEN"
-    );
-
-
-    /* WALLS */
+    createFloor(scene);
 
     walls =
         scene.physics.add.staticGroup();
 
-    addWall(scene,640,45,1180,25);
-    addWall(scene,640,675,1180,25);
 
-    addWall(scene,45,360,25,630);
-    addWall(scene,1235,360,25,630);
+    createArchitecture(scene);
 
-    addWall(scene,430,210,20,260);
-    addWall(scene,430,560,20,150);
+    createFurniture(scene);
 
-    addWall(scene,860,210,20,260);
-    addWall(scene,860,560,20,150);
+    createPartyDetails(scene);
 
 
-    /* MAIN CHARACTER */
+    /* PLAYER */
 
     player =
         createPlayer(
             scene,
-            180,
-            540
+            1180,
+            760
         );
+
 
     scene.physics.add.collider(
         player,
@@ -215,46 +179,79 @@ function create(){     const scene = this;
     );
 
 
-    /* NPC */
+    /* NPCs */
 
-    createNPC(scene,180,180,0xff3d8d);
-    createNPC(scene,300,250,0xff3d8d);
+    createNPC(scene,700,300,0xff3d8d);
+    createNPC(scene,900,350,0x00d9ff);
+    createNPC(scene,1100,300,0xffc107);
+    createNPC(scene,1450,320,0x9d6cff);
 
-    createNPC(scene,550,180,0xffc107);
-    createNPC(scene,720,250,0xffc107);
+    createNPC(scene,500,750,0xff4d8d);
+    createNPC(scene,750,820,0xffc107);
+    createNPC(scene,1550,760,0x00e5a0);
 
-    createNPC(scene,980,180,0x8d5cff);
-    createNPC(scene,1080,500,0x00ff9d);
+    createNPC(scene,1750,980,0xff4d8d);
+    createNPC(scene,1950,1050,0xffc107);
+    createNPC(scene,2150,850,0x9d6cff);
+
+    createNPC(scene,500,1100,0x00d9ff);
+    createNPC(scene,850,1120,0xff3d8d);
+
+
+    /* NPC COLLISION */
+
+    npcs.forEach(npc => {
+
+        scene.physics.add.collider(
+            npc,
+            walls
+        );
+
+    });
 
 
     /* OBJECTIVE */
 
     objective =
         scene.add.circle(
-            1080,
-            570,
-            15,
+            760,
+            250,
+            18,
             0xffd000
         );
 
     objective.setStrokeStyle(
-        3,
+        4,
         0xffffff,
         0.9
     );
+
 
     scene.tweens.add({
 
         targets:objective,
 
-        scale:1.45,
+        scale:1.5,
+
         alpha:0.45,
 
-        duration:700,
+        duration:650,
 
         yoyo:true,
+
         repeat:-1
+
     });
+
+
+    /* CAMERA */
+
+    scene.cameras.main.startFollow(
+        player,
+        true,
+        0.08,
+        0.08
+    );
 
 
     /* KEYBOARD */
@@ -264,7 +261,6 @@ function create(){     const scene = this;
 
     keys =
         scene.input.keyboard.addKeys({
-
             W:Phaser.Input.Keyboard.KeyCodes.W,
             A:Phaser.Input.Keyboard.KeyCodes.A,
             S:Phaser.Input.Keyboard.KeyCodes.S,
@@ -272,12 +268,7 @@ function create(){     const scene = this;
         });
 
 
-    /* UI */
-
-    createUI(scene);
-
-
-    /* MOBILE */
+    createHUD(scene);
 
     createMobileControls(scene);
 
@@ -290,14 +281,10 @@ function create(){     const scene = this;
 
 function update(time,delta){
 
-    if(!player){
-        return;
-    }
+    if(!player) return;
 
     let x = 0;
     let y = 0;
-
-    const speed = 220;
 
 
     /* KEYBOARD */
@@ -335,50 +322,43 @@ function update(time,delta){
 
     if(joystickActive){
 
-        x = joystickX;
-        y = joystickY;
+        x = joyX;
+        y = joyY;
 
     }
 
 
-    const direction =
+    const movement =
         new Phaser.Math.Vector2(
             x,
             y
         );
 
 
-    if(direction.length() > 0){
+    const speed = 240;
 
-        direction.normalize();
+
+    if(movement.length() > 0){
+
+        movement.normalize();
 
         player.body.setVelocity(
-            direction.x * speed,
-            direction.y * speed
+            movement.x * speed,
+            movement.y * speed
         );
 
         player.walking = true;
 
 
-        /* DIRECTION */
+        if(movement.x < -0.1){
 
-        if(direction.x < -0.1){
-
-            player.scaleX =
-                -1;
-
-            player.facing =
-                "left";
+            player.scaleX = -1;
 
         }
 
-        else if(direction.x > 0.1){
+        else if(movement.x > 0.1){
 
-            player.scaleX =
-                1;
-
-            player.facing =
-                "right";
+            player.scaleX = 1;
 
         }
 
@@ -413,72 +393,66 @@ function update(time,delta){
         );
 
 
-    if(distance < 48){
+    if(
+        distance < 55 &&
+        !objectiveDone
+    ){
+
+        objectiveDone = true;
+
+        score += 100;
+
+        scoreText.setText(
+            "SCORE  " + score
+        );
 
         missionText.setText(
-            "MISSION COMPLETE  +100"
+            "VIP FOUND  •  MISSION COMPLETE"
         );
 
         missionText.setColor(
             "#00ff9d"
         );
 
-        if(!objective.completed){
-
-            objective.completed = true;
-
-            score += 100;
-
-            scoreText.setText(
-                "SCORE  " + score
-            );
-        }
-
-    }
-
-    else{
-
-        missionText.setText(
-            "Reach the yellow objective"
-        );
-
-        missionText.setColor(
-            "#ffffff"
+        objective.setFillStyle(
+            0x00ff9d
         );
 
     }
 
 
-    /* NPC AI */
+    /* NPC MOVEMENT */
 
-    npcs.forEach(function(npc){
+    npcs.forEach(npc => {
 
         npc.timer -= delta;
+
 
         if(npc.timer <= 0){
 
             npc.timer =
                 Phaser.Math.Between(
                     1200,
-                    3000
+                    3500
                 );
 
             npc.targetX =
                 Phaser.Math.Between(
-                    100,
-                    1150
+                    180,
+                    WORLD_W - 180
                 );
 
             npc.targetY =
                 Phaser.Math.Between(
-                    120,
-                    600
+                    180,
+                    WORLD_H - 180
                 );
+
         }
 
 
-        const angle =
-            Phaser.Math.Angle.Between(
+        const distance =
+            Phaser.Math.Distance.Between(
                 npc.x,
                 npc.y,
                 npc.targetX,
@@ -486,12 +460,922 @@ function update(time,delta){
             );
 
 
-        npc.body.setVelocity(
-            Math.cos(angle) * 35,
-            Math.sin(angle) * 35
-        );
+        if(distance < 25){
+
+            npc.body.setVelocity(
+                0,
+                0
+            );
+
+        }
+
+        else{
+
+            const angle =
+                Phaser.Math.Angle.Between(
+                    npc.x,
+                    npc.y,
+                    npc.targetX,
+                    npc.targetY
+                );
+
+
+            npc.body.setVelocity(
+                Math.cos(angle) * 35,
+                Math.sin(angle) * 35
+            );
+
+        }
 
     });
+
+}
+
+
+/* =========================================================
+   FLOOR
+========================================================= */
+
+function createFloor(scene){
+
+    /* MAIN FLOOR */
+
+    scene.add.rectangle(
+        1200,
+        700,
+        2250,
+        1250,
+        0x17191e
+    );
+
+
+    /* FLOOR GRID */
+
+    const graphics =
+        scene.add.graphics();
+
+
+    graphics.lineStyle(
+        1,
+        0x292d35,
+        0.45
+    );
+
+
+    for(
+        let x = 80;
+        x < WORLD_W;
+        x += 80
+    ){
+
+        graphics.lineBetween(
+            x,
+            70,
+            x,
+            WORLD_H - 70
+        );
+
+    }
+
+
+    for(
+        let y = 70;
+        y < WORLD_H;
+        y += 80
+    ){
+
+        graphics.lineBetween(
+            70,
+            y,
+            WORLD_W - 70,
+            y
+        );
+
+    }
+
+
+    /* OUTER BORDER */
+
+    scene.add.rectangle(
+        1200,
+        700,
+        2250,
+        1250
+    ).setStrokeStyle(
+        8,
+        0x313846
+    );
+
+}
+
+
+/* =========================================================
+   ARCHITECTURE
+========================================================= */
+
+function createArchitecture(scene){
+
+    /* PARTY HALL */
+
+    createRoom(
+        scene,
+        120,
+        120,
+        600,
+        430,
+        0x24143a,
+        "PARTY HALL"
+    );
+
+
+    /* KITCHEN / BAR */
+
+    createRoom(
+        scene,
+        760,
+        120,
+        520,
+        430,
+        0x172d34,
+        "BAR & KITCHEN"
+    );
+
+
+    /* BEDROOM */
+
+    createRoom(
+        scene,
+        1320,
+        120,
+        560,
+        430,
+        0x292033,
+        "BEDROOM"
+    );
+
+
+    /* BATHROOM */
+
+    createRoom(
+        scene,
+        1920,
+        120,
+        330,
+        300,
+        0x17262c,
+        "BATHROOM"
+    );
+
+
+    /* LOUNGE */
+
+    createRoom(
+        scene,
+        120,
+        650,
+        560,
+        430,
+        0x191f36,
+        "LOUNGE"
+    );
+
+
+    /* MAIN CORRIDOR */
+
+    createRoom(
+        scene,
+        720,
+        610,
+        1160,
+        300,
+        0x11161d,
+        "MAIN CORRIDOR"
+    );
+
+
+    /* GARDEN */
+
+    createRoom(
+        scene,
+        760,
+        960,
+        780,
+        300,
+        0x102b22,
+        "GARDEN"
+    );
+
+
+    /* POOL */
+
+    createRoom(
+        scene,
+        1580,
+        960,
+        500,
+        300,
+        0x102632,
+        "POOL"
+    );
+
+
+    /* STORAGE */
+
+    createRoom(
+        scene,
+        2100,
+        650,
+        180,
+        610,
+        0x191919,
+        "STORAGE"
+    );
+
+
+    /* WALLS / ROOM DIVIDERS */
+
+    addWall(scene,80,700,35,1180);
+    addWall(scene,2320,700,35,1180);
+
+    addWall(scene,1200,75,2250,35);
+    addWall(scene,1200,1325,2250,35);
+
+
+    addWall(scene,740,335,30,430);
+    addWall(scene,1300,335,30,430);
+    addWall(scene,1900,270,30,300);
+
+
+    addWall(scene,740,760,30,300);
+    addWall(scene,1880,760,30,300);
+
+
+    /* DOOR GAPS ARE LEFT OPEN */
+
+}
+
+
+/* =========================================================
+   ROOM
+========================================================= */
+
+function createRoom(
+    scene,
+    x,
+    y,
+    w,
+    h,
+    color,
+    label
+){
+
+    const room =
+        scene.add.rectangle(
+            x + w / 2,
+            y + h / 2,
+            w,
+            h,
+            color
+        );
+
+
+    room.setStrokeStyle(
+        4,
+        0x3b4353,
+        0.9
+    );
+
+
+    scene.add.text(
+        x + 25,
+        y + 22,
+        label,
+        {
+            fontFamily:"Arial",
+            fontSize:"22px",
+            fontStyle:"bold",
+            color:"#ffffff",
+            backgroundColor:"#07090dcc",
+            padding:{
+                left:12,
+                right:12,
+                top:8,
+                bottom:8
+            }
+        }
+    );
+
+}
+
+
+/* =========================================================
+   WALL
+========================================================= */
+
+function addWall(
+    scene,
+    x,
+    y,
+    w,
+    h
+){
+
+    const wall =
+        scene.add.rectangle(
+            x,
+            y,
+            w,
+            h,
+            0x090b10
+        );
+
+
+    wall.setStrokeStyle(
+        2,
+        0x47516a
+    );
+
+
+    scene.physics.add.existing(
+        wall,
+        true
+    );
+
+
+    walls.add(
+        wall
+    );
+
+}
+
+
+/* =========================================================
+   FURNITURE
+========================================================= */
+
+function createFurniture(scene){
+
+    /* PARTY HALL DJ */
+
+    createDJ(
+        scene,
+        420,
+        220
+    );
+
+
+    /* PARTY TABLES */
+
+    createTable(scene,220,400);
+    createTable(scene,550,400);
+
+    createTable(scene,930,450);
+    createTable(scene,1130,450);
+
+
+    /* KITCHEN COUNTERS */
+
+    for(
+        let x = 820;
+        x < 1220;
+        x += 110
+    ){
+
+        createCounter(
+            scene,
+            x,
+            220
+        );
+
+    }
+
+
+    /* BED */
+
+    createBed(
+        scene,
+        1550,
+        300
+    );
+
+
+    /* SOFA LOUNGE */
+
+    createSofa(
+        scene,
+        330,
+        820
+    );
+
+
+    createSofa(
+        scene,
+        500,
+        960
+    );
+
+
+    /* GARDEN TABLES */
+
+    createOutdoorTable(
+        scene,
+        980,
+        1080
+    );
+
+
+    createOutdoorTable(
+        scene,
+        1270,
+        1160
+    );
+
+
+    /* POOL */
+
+    createPool(
+        scene,
+        1830,
+        1110
+    );
+
+
+    /* STORAGE BOXES */
+
+    for(
+        let i = 0;
+        i < 6;
+        i++
+    ){
+
+        scene.add.rectangle(
+            2180,
+            720 + i * 80,
+            80,
+            55,
+            0x493526
+        ).setStrokeStyle(
+            2,
+            0x7a5a3c
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PARTY DETAILS
+========================================================= */
+
+function createPartyDetails(scene){
+
+    /* LIGHTS */
+
+    const lightPositions = [
+
+        [180,170],
+        [350,170],
+        [520,170],
+
+        [820,170],
+        [1050,170],
+        [1220,170],
+
+        [1400,170],
+        [1650,170],
+        [1820,170],
+
+        [180,700],
+        [500,700],
+
+        [800,650],
+        [1100,650],
+        [1400,650],
+        [1700,650],
+
+        [850,1010],
+        [1150,1010],
+        [1400,1010],
+
+        [1650,1010],
+        [2000,1010]
+    ];
+
+
+    lightPositions.forEach(
+        ([x,y],index) => {
+
+            const glow =
+                scene.add.circle(
+                    x,
+                    y,
+                    18,
+                    index % 2
+                    ? 0xff238d
+                    : 0x00d9ff,
+                    0.12
+                );
+
+
+            scene.tweens.add({
+
+                targets:glow,
+
+                scale:1.6,
+
+                alpha:0.03,
+
+                duration:800 +
+                    index * 40,
+
+                yoyo:true,
+
+                repeat:-1
+
+            });
+
+
+            scene.add.circle(
+                x,
+                y,
+                5,
+                index % 2
+                ? 0xff238d
+                : 0x00d9ff
+            );
+
+        }
+    );
+
+
+    /* PLANTS */
+
+    const plants = [
+
+        [150,150],
+        [690,150],
+        [1340,150],
+        [1870,150],
+
+        [150,1030],
+        [690,1030],
+        [800,1240],
+        [1510,1240]
+    ];
+
+
+    plants.forEach(
+        ([x,y]) => createPlant(scene,x,y)
+    );
+
+
+    /* PARTY CONFETTI */
+
+    for(
+        let i = 0;
+        i < 80;
+        i++
+    ){
+
+        const x =
+            Phaser.Math.Between(
+                130,
+                1880
+            );
+
+        const y =
+            Phaser.Math.Between(
+                140,
+                550
+            );
+
+
+        scene.add.rectangle(
+            x,
+            y,
+            3,
+            7,
+            [
+                0xff238d,
+                0x00d9ff,
+                0xffd000,
+                0xffffff
+            ][i % 4],
+            0.7
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   TABLE
+========================================================= */
+
+function createTable(scene,x,y){
+
+    scene.add.circle(
+        x,
+        y,
+        35,
+        0x2b2520
+    ).setStrokeStyle(
+        3,
+        0x715943
+    );
+
+
+    for(
+        let i = 0;
+        i < 4;
+        i++
+    ){
+
+        const a =
+            (Math.PI * 2 / 4) * i;
+
+        scene.add.rectangle(
+            x + Math.cos(a) * 55,
+            y + Math.sin(a) * 55,
+            25,
+            25,
+            0x302821
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   COUNTER
+========================================================= */
+
+function createCounter(scene,x,y){
+
+    scene.add.rectangle(
+        x,
+        y,
+        90,
+        45,
+        0x22272b
+    ).setStrokeStyle(
+        2,
+        0x69747c
+    );
+
+
+    scene.add.circle(
+        x,
+        y - 3,
+        7,
+        0xffd000
+    );
+
+}
+
+
+/* =========================================================
+   SOFA
+========================================================= */
+
+function createSofa(scene,x,y){
+
+    scene.add.rectangle(
+        x,
+        y,
+        180,
+        70,
+        0x30253d
+    ).setStrokeStyle(
+        3,
+        0x68527c
+    );
+
+
+    scene.add.rectangle(
+        x,
+        y - 38,
+        180,
+        30,
+        0x30253d
+    );
+
+}
+
+
+/* =========================================================
+   BED
+========================================================= */
+
+function createBed(scene,x,y){
+
+    scene.add.rectangle(
+        x,
+        y,
+        230,
+        150,
+        0x31262a
+    ).setStrokeStyle(
+        4,
+        0x77606a
+    );
+
+
+    scene.add.rectangle(
+        x,
+        y + 10,
+        200,
+        110,
+        0x5b4651
+    );
+
+
+    scene.add.rectangle(
+        x - 70,
+        y - 40,
+        60,
+        35,
+        0xe6e0db
+    );
+
+
+    scene.add.rectangle(
+        x + 20,
+        y - 40,
+        60,
+        35,
+        0xe6e0db
+    );
+
+}
+
+
+/* =========================================================
+   DJ
+========================================================= */
+
+function createDJ(scene,x,y){
+
+    scene.add.rectangle(
+        x,
+        y,
+        180,
+        70,
+        0x08090d
+    ).setStrokeStyle(
+        3,
+        0xff238d
+    );
+
+
+    scene.add.rectangle(
+        x,
+        y - 55,
+        120,
+        25,
+        0x11141b
+    );
+
+
+    for(
+        let i = 0;
+        i < 3;
+        i++
+    ){
+
+        scene.add.circle(
+            x - 50 + i * 50,
+            y,
+            15,
+            i % 2
+            ? 0x00d9ff
+            : 0xff238d
+        );
+
+    }
+
+
+    scene.add.text(
+        x - 55,
+        y - 100,
+        "DJ",
+        {
+            fontSize:"22px",
+            fontStyle:"bold",
+            color:"#ff238d"
+        }
+    );
+
+}
+
+
+/* =========================================================
+   OUTDOOR TABLE
+========================================================= */
+
+function createOutdoorTable(scene,x,y){
+
+    scene.add.circle(
+        x,
+        y,
+        32,
+        0x493a2c
+    ).setStrokeStyle(
+        3,
+        0x806548
+    );
+
+
+    scene.add.circle(
+        x,
+        y,
+        8,
+        0xff8a00
+    );
+
+}
+
+
+/* =========================================================
+   POOL
+========================================================= */
+
+function createPool(scene,x,y){
+
+    scene.add.rectangle(
+        x,
+        y,
+        380,
+        210,
+        0x087ea3
+    ).setStrokeStyle(
+        7,
+        0x8defff
+    );
+
+
+    for(
+        let i = 0;
+        i < 8;
+        i++
+    ){
+
+        scene.add.line(
+            0,
+            0,
+            x - 150,
+            y - 70 + i * 20,
+            x + 150,
+            y - 70 + i * 20,
+            0xffffff,
+            0.16
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PLANT
+========================================================= */
+
+function createPlant(scene,x,y){
+
+    scene.add.rectangle(
+        x,
+        y + 18,
+        28,
+        28,
+        0x5c3c2b
+    );
+
+
+    scene.add.circle(
+        x - 12,
+        y,
+        15,
+        0x1c7a49
+    );
+
+
+    scene.add.circle(
+        x + 10,
+        y - 5,
+        16,
+        0x238d55
+    );
+
+
+    scene.add.circle(
+        x,
+        y - 15,
+        15,
+        0x2fae65
+    );
 
 }
 
@@ -502,583 +1386,210 @@ function update(time,delta){
 
 function createPlayer(scene,x,y){
 
-    const container =
+    const c =
         scene.add.container(
             x,
             y
         );
 
 
-    /* =====================================================
-       GLOW
-    ===================================================== */
+    const shadow =
+        scene.add.ellipse(
+            0,
+            38,
+            55,
+            18,
+            0x000000,
+            0.65
+        );
+
 
     const glow =
         scene.add.circle(
             0,
-            5,
+            0,
             55,
             0x00d9ff,
             0.07
         );
 
 
-    glow.setDepth(-2);
-
-
-    /* =====================================================
-       SHADOW
-    ===================================================== */
-
-    const shadow =
-        scene.add.ellipse(
+    const legs =
+        scene.add.rectangle(
             0,
+            20,
             34,
-            50,
-            16,
-            0x000000,
-            0.60
+            45,
+            0x12151c
         );
 
 
-    /* =====================================================
-       BACK HOOD
-    ===================================================== */
+    legs.setStrokeStyle(
+        2,
+        0x343c4c
+    );
 
-    const hoodBack =
+
+    const body =
+        scene.add.rectangle(
+            0,
+            -10,
+            52,
+            60,
+            0x10141b
+        );
+
+
+    body.setStrokeStyle(
+        3,
+        0x00d9ff,
+        0.7
+    );
+
+
+    const shirt =
+        scene.add.rectangle(
+            0,
+            -13,
+            22,
+            42,
+            0xf2f2f2
+        );
+
+
+    const head =
+        scene.add.circle(
+            0,
+            -57,
+            21,
+            0xd89a70
+        );
+
+
+    head.setStrokeStyle(
+        2,
+        0xa96e52
+    );
+
+
+    const hair =
         scene.add.arc(
             0,
-            -17,
+            -62,
             24,
             180,
             360,
             false,
-            0x0b0e16
+            0x111216
         );
 
 
-    hoodBack.setStrokeStyle(
-        2,
-        0x26334a
+    hair.setStrokeStyle(
+        3,
+        0x2d3039
     );
 
 
-    /* =====================================================
-       LEGS
-    ===================================================== */
-
-    const leftLeg =
+    const glasses =
         scene.add.rectangle(
-            -9,
-            21,
-            11,
-            28,
-            0x121722
-        );
-
-
-    leftLeg.setStrokeStyle(
-        2,
-        0x202a3a
-    );
-
-
-    const rightLeg =
-        scene.add.rectangle(
+            0,
+            -58,
+            38,
             9,
-            21,
-            11,
-            28,
-            0x121722
+            0x050608
         );
 
 
-    rightLeg.setStrokeStyle(
+    glasses.setStrokeStyle(
         2,
-        0x202a3a
+        0x7d8795
     );
 
 
-    /* =====================================================
-       SHOES
-    ===================================================== */
+    const leftArm =
+        scene.add.rectangle(
+            -31,
+            -5,
+            11,
+            45,
+            0x10141b
+        );
+
+
+    const rightArm =
+        scene.add.rectangle(
+            31,
+            -5,
+            11,
+            45,
+            0x10141b
+        );
+
 
     const leftShoe =
         scene.add.ellipse(
-            -11,
-            36,
-            22,
-            9,
+            -13,
+            45,
+            27,
+            12,
             0xffffff
         );
 
 
     const rightShoe =
         scene.add.ellipse(
-            11,
-            36,
-            22,
-            9,
+            13,
+            45,
+            27,
+            12,
             0xffffff
         );
 
 
-    leftShoe.setStrokeStyle(
-        2,
-        0xb8c7d9
-    );
-
-
-    rightShoe.setStrokeStyle(
-        2,
-        0xb8c7d9
-    );
-
-
-    /* =====================================================
-       BODY / HOODIE
-    ===================================================== */
-
-    const body =
-        scene.add.roundRectangle
-        ? scene.add.roundRectangle(
-            0,
-            -4,
-            43,
-            48,
-            8,
-            0x11151f
-        )
-        :
-        scene.add.rectangle(
-            0,
-            -4,
-            42,
-            47,
-            0x11151f
-        );
-
-
-    body.setStrokeStyle(
-        2,
-        0x00d9ff,
-        0.85
-    );
-
-
-    /* =====================================================
-       HOODIE ZIP
-    ===================================================== */
-
-    const zipper =
-        scene.add.rectangle(
-            0,
-            0,
-            2,
-            34,
-            0x596579
-        );
-
-
-    /* =====================================================
-       HOODIE POCKET
-    ===================================================== */
-
-    const pocket =
-        scene.add.rectangle(
-            0,
-            8,
-            24,
-            9,
-            0x080a10
-        );
-
-
-    pocket.setStrokeStyle(
-        1,
-        0x3b465b
-    );
-
-
-    /* =====================================================
-       LEFT ARM
-    ===================================================== */
-
-    const leftArm =
-        scene.add.rectangle(
-            -24,
-            0,
-            10,
-            31,
-            0x11151f
-        );
-
-
-    leftArm.setStrokeStyle(
-        2,
-        0x00d9ff,
-        0.6
-    );
-
-
-    /* =====================================================
-       RIGHT ARM
-    ===================================================== */
-
-    const rightArm =
-        scene.add.rectangle(
-            24,
-            0,
-            10,
-            31,
-            0x11151f
-        );
-
-
-    rightArm.setStrokeStyle(
-        2,
-        0x00d9ff,
-        0.6
-    );
-
-
-    /* =====================================================
-       HANDS
-    ===================================================== */
-
-    const leftHand =
-        scene.add.circle(
-            -24,
-            17,
-            6,
-            0xd69b72
-        );
-
-
-    const rightHand =
-        scene.add.circle(
-            24,
-            17,
-            6,
-            0xd69b72
-        );
-
-
-    /* =====================================================
-       NECK
-    ===================================================== */
-
-    const neck =
-        scene.add.rectangle(
-            0,
-            -23,
-            10,
-            9,
-            0xc78561
-        );
-
-
-    /* =====================================================
-       HEAD
-    ===================================================== */
-
-    const head =
-        scene.add.circle(
-            0,
-            -38,
-            18,
-            0xd69b72
-        );
-
-
-    head.setStrokeStyle(
-        2,
-        0xa9684d
-    );
-
-
-    /* =====================================================
-       HAIR
-    ===================================================== */
-
-    const hair =
-        scene.add.arc(
-            0,
-            -43,
-            20,
-            180,
-            360,
-            false,
-            0x101116
-        );
-
-
-    hair.setStrokeStyle(
-        2,
-        0x262b36
-    );
-
-
-    /* =====================================================
-       HAIR SIDE
-    ===================================================== */
-
-    const hairSide =
-        scene.add.rectangle(
-            -15,
-            -38,
-            7,
-            15,
-            0x101116
-        );
-
-
-    /* =====================================================
-       EARS
-    ===================================================== */
-
-    const leftEar =
-        scene.add.circle(
-            -18,
-            -37,
-            4,
-            0xc78561
-        );
-
-
-    const rightEar =
-        scene.add.circle(
-            18,
-            -37,
-            4,
-            0xc78561
-        );
-
-
-    /* =====================================================
-       SUNGLASSES
-    ===================================================== */
-
-    const glasses =
-        scene.add.rectangle(
-            0,
-            -39,
-            32,
-            8,
-            0x030303
-        );
-
-
-    glasses.setStrokeStyle(
-        2,
-        0x6d778a
-    );
-
-
-    /* GLASSES REFLECTION */
-
-    const glassReflection1 =
-        scene.add.rectangle(
-            -9,
-            -40,
-            4,
-            2,
-            0x9eeaff
-        );
-
-
-    const glassReflection2 =
-        scene.add.rectangle(
-            9,
-            -40,
-            4,
-            2,
-            0x9eeaff
-        );
-
-
-    /* =====================================================
-       NOSE
-    ===================================================== */
-
-    const nose =
-        scene.add.triangle(
-            0,
-            -33,
-            0,
-            0,
-            5,
-            8,
-            -5,
-            8,
-            0xc07859
-        );
-
-
-    /* =====================================================
-       MOUTH
-    ===================================================== */
-
-    const mouth =
-        scene.add.rectangle(
-            0,
-            -28,
-            8,
-            2,
-            0x6e3030
-        );
-
-
-    /* =====================================================
-       CHAIN
-    ===================================================== */
-
-    const chain =
-        scene.add.circle(
-            0,
-            -19,
-            3,
-            0xffd76a
-        );
-
-
-    chain.setStrokeStyle(
-        1,
-        0xffffff
-    );
-
-
-    /* =====================================================
-       ADD EVERYTHING
-    ===================================================== */
-
-    container.add([
+    c.add([
 
         glow,
-
         shadow,
 
-        hoodBack,
-
-        leftLeg,
-        rightLeg,
-
-        leftShoe,
-        rightShoe,
+        legs,
 
         body,
-
-        zipper,
-        pocket,
+        shirt,
 
         leftArm,
         rightArm,
 
-        leftHand,
-        rightHand,
-
-        neck,
-
         head,
-
         hair,
-        hairSide,
-
-        leftEar,
-        rightEar,
-
         glasses,
 
-        glassReflection1,
-        glassReflection2,
-
-        nose,
-        mouth,
-
-        chain
+        leftShoe,
+        rightShoe
 
     ]);
 
 
-    /* =====================================================
-       PHYSICS
-    ===================================================== */
+    scene.physics.world.enable(c);
 
-    scene.physics.world.enable(
-        container
+
+    c.body.setCircle(
+        20
     );
 
 
-    container.body.setCircle(
-        17
-    );
-
-
-    container.body.setCollideWorldBounds(
+    c.body.setCollideWorldBounds(
         true
     );
 
 
-    /* =====================================================
-       DATA
-    ===================================================== */
+    c.walking = false;
+    c.walkCycle = 0;
 
-    container.glow =
-        glow;
+    c.glow = glow;
+    c.leftArm = leftArm;
+    c.rightArm = rightArm;
 
-    container.shadow =
-        shadow;
-
-    container.leftLeg =
-        leftLeg;
-
-    container.rightLeg =
-        rightLeg;
-
-    container.leftShoe =
-        leftShoe;
-
-    container.rightShoe =
-        rightShoe;
-
-    container.leftArm =
-        leftArm;
-
-    container.rightArm =
-        rightArm;
-
-    container.walking =
-        false;
-
-    container.facing =
-        "right";
-
-    container.walkCycle =
-        0;
-
-
-    /* =====================================================
-       GLOW ANIMATION
-    ===================================================== */
-
-    scene.tweens.add({
-
-        targets:glow,
-
-        scale:1.15,
-
-        alpha:0.03,
-
-        duration:900,
-
-        yoyo:true,
-
-        repeat:-1
-
-    });
-
-
-    return container;
+    return c;
 
 }
 
@@ -1089,90 +1600,37 @@ function createPlayer(scene,x,y){
 
 function animatePlayer(player,time){
 
-    if(!player){
-        return;
-    }
-
-
     if(player.walking){
 
         player.walkCycle += 0.22;
 
-
-        const walk =
+        const swing =
             Math.sin(
                 player.walkCycle
             );
 
 
-        /* BODY BOB */
-
-        player.y +=
-            Math.sin(
-                time * 0.025
-            ) * 0.04;
-
-
-        /* ARMS */
-
         player.leftArm.rotation =
-            walk * 0.18;
+            swing * 0.2;
 
         player.rightArm.rotation =
-            -walk * 0.18;
-
-
-        /* LEGS */
-
-        player.leftLeg.rotation =
-            walk * 0.12;
-
-        player.rightLeg.rotation =
-            -walk * 0.12;
-
-
-        /* SHOES */
-
-        player.leftShoe.rotation =
-            walk * 0.10;
-
-        player.rightShoe.rotation =
-            -walk * 0.10;
+            -swing * 0.2;
 
     }
 
     else{
 
-        /* IDLE BREATHING */
-
-        const breathe =
-            Math.sin(
-                time * 0.003
-            ) * 0.8;
-
-
-        player.leftArm.rotation =
-            breathe * 0.01;
-
-        player.rightArm.rotation =
-            -breathe * 0.01;
-
-
-        player.leftLeg.rotation = 0;
-        player.rightLeg.rotation = 0;
+        player.leftArm.rotation = 0;
+        player.rightArm.rotation = 0;
 
     }
 
 
-    /* GLOW FOLLOW */
-
     if(player.glow){
 
-        player.glow.x =
-            player.x;
-
-        player.glow.y =
-            player.y;
+        player.glow.alpha =
+            0.05 +
+            Math.sin(time * 0.004) * 0.025;
 
     }
 
@@ -1194,13 +1652,13 @@ function createNPC(
         scene.add.circle(
             x,
             y,
-            13,
+            15,
             color
         );
 
 
     npc.setStrokeStyle(
-        2,
+        3,
         0xffffff,
         0.7
     );
@@ -1212,7 +1670,7 @@ function createNPC(
 
 
     npc.body.setCircle(
-        13
+        15
     );
 
 
@@ -1221,16 +1679,14 @@ function createNPC(
     );
 
 
-    scene.physics.add.collider(
-        npc,
-        walls
-    );
-
-
     npc.targetX = x;
     npc.targetY = y;
 
-    npc.timer = 0;
+    npc.timer =
+        Phaser.Math.Between(
+            500,
+            2500
+        );
 
 
     npcs.push(npc);
@@ -1239,208 +1695,48 @@ function createNPC(
 
 
 /* =========================================================
-   ROOM
+   HUD
 ========================================================= */
 
-function createRoom(
-    scene,
-    x,
-    y,
-    width,
-    height,
-    color,
-    title
-){
+function createHUD(scene){
 
-    const room =
+    const top =
         scene.add.rectangle(
-            x + width / 2,
-            y + height / 2,
-            width,
-            height,
-            color
+            640,
+            32,
+            1280,
+            64,
+            0x050608,
+            0.94
         );
 
 
-    room.setStrokeStyle(
-        2,
-        0x4f5a72,
-        0.8
-    );
-
-
-    scene.add.text(
-        x + 15,
-        y + 15,
-        title,
-        {
-
-            fontFamily:"Arial",
-
-            fontSize:"16px",
-
-            fontStyle:"bold",
-
-            color:"#ffffff",
-
-            backgroundColor:"#05060acc",
-
-            padding:{
-                left:8,
-                right:8,
-                top:5,
-                bottom:5
-            }
-
-        }
-    );
-
-
-    /* DANCE FLOOR */
-
-    if(title === "PARTY HALL"){
-
-        for(
-            let px = x + 70;
-            px < x + width - 40;
-            px += 45
-        ){
-
-            for(
-                let py = y + 80;
-                py < y + height - 30;
-                py += 45
-            ){
-
-                const tile =
-                    scene.add.rectangle(
-                        px,
-                        py,
-                        30,
-                        30,
-                        0xff238d,
-                        0.15
-                    );
-
-
-                scene.tweens.add({
-
-                    targets:tile,
-
-                    alpha:0.35,
-
-                    duration:
-                        Phaser.Math.Between(
-                            700,
-                            1500
-                        ),
-
-                    yoyo:true,
-
-                    repeat:-1
-
-                });
-
-            }
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   WALL
-========================================================= */
-
-function addWall(
-    scene,
-    x,
-    y,
-    width,
-    height
-){
-
-    const wall =
-        scene.add.rectangle(
-            x,
-            y,
-            width,
-            height,
-            0x070a12
-        );
-
-
-    wall.setStrokeStyle(
-        2,
-        0x35405a
-    );
-
-
-    scene.physics.add.existing(
-        wall,
-        true
-    );
-
-
-    walls.add(
-        wall
-    );
-
-}
-
-
-/* =========================================================
-   UI
-========================================================= */
-
-function createUI(scene){
-
-    /* TOP */
-
-    scene.add.rectangle(
-        640,
-        30,
-        1280,
-        60,
-        0x05060a,
-        0.94
-    );
+    top.setScrollFactor(0);
 
 
     scene.add.text(
         25,
-        17,
+        15,
         "PARTY NIGHT: CHAOS",
         {
-
             fontFamily:"Arial",
-
-            fontSize:"23px",
-
+            fontSize:"25px",
             fontStyle:"bold",
-
             color:"#ffffff"
-
         }
-    );
+    ).setScrollFactor(0);
 
 
     scene.add.text(
-        280,
-        21,
-        "PROTOTYPE • NIGHT 01",
+        300,
+        20,
+        "LEVEL 01  •  THE MANSION PARTY",
         {
-
             fontFamily:"Arial",
-
-            fontSize:"13px",
-
+            fontSize:"14px",
             color:"#ff238d"
-
         }
-    );
+    ).setScrollFactor(0);
 
 
     scoreText =
@@ -1449,80 +1745,55 @@ function createUI(scene){
             18,
             "SCORE  0",
             {
-
                 fontFamily:"Arial",
-
-                fontSize:"20px",
-
+                fontSize:"22px",
                 fontStyle:"bold",
-
                 color:"#00d9ff"
-
             }
         );
+
+
+    scoreText.setScrollFactor(0);
 
 
     /* BOTTOM */
 
     scene.add.rectangle(
         640,
-        685,
+        690,
         1280,
-        70,
-        0x05060a,
+        60,
+        0x050608,
         0.94
-    );
-
-
-    scene.add.text(
-        25,
-        660,
-        "OBJECTIVE",
-        {
-
-            fontFamily:"Arial",
-
-            fontSize:"13px",
-
-            fontStyle:"bold",
-
-            color:"#ffd000"
-
-        }
-    );
+    ).setScrollFactor(0);
 
 
     missionText =
         scene.add.text(
             25,
             680,
-            "Reach the yellow objective",
+            "OBJECTIVE  •  Find the VIP guest in the party hall",
             {
-
                 fontFamily:"Arial",
-
                 fontSize:"16px",
-
                 color:"#ffffff"
-
             }
         );
 
 
+    missionText.setScrollFactor(0);
+
+
     scene.add.text(
-        940,
-        680,
+        1010,
+        682,
         "WASD / ARROWS",
         {
-
             fontFamily:"Arial",
-
             fontSize:"13px",
-
-            color:"#9aa4b5"
-
+            color:"#8f99a9"
         }
-    );
+    ).setScrollFactor(0);
 
 }
 
@@ -1533,40 +1804,36 @@ function createUI(scene){
 
 function createMobileControls(scene){
 
-    /* JOYSTICK */
-
     joystickBase =
         scene.add.circle(
             105,
-            610,
+            605,
             65,
             0x111827,
-            0.68
+            0.75
         );
 
+
+    joystickBase.setScrollFactor(0);
 
     joystickBase.setStrokeStyle(
         3,
         0x00d9ff,
-        0.65
+        0.7
     );
 
 
     joystickThumb =
         scene.add.circle(
             105,
-            610,
-            30,
+            605,
+            29,
             0x00d9ff,
-            0.78
+            0.8
         );
 
 
-    joystickThumb.setStrokeStyle(
-        3,
-        0xffffff,
-        0.7
-    );
+    joystickThumb.setScrollFactor(0);
 
 
     joystickBase.setInteractive();
@@ -1574,14 +1841,16 @@ function createMobileControls(scene){
 
     joystickBase.on(
         "pointerdown",
-        function(pointer){
+        pointer => {
 
             joystickActive = true;
 
-            joystickPointerId =
+            joystickId =
                 pointer.id;
 
-            updateJoystick(pointer);
+            updateJoystick(
+                pointer
+            );
 
         }
     );
@@ -1589,14 +1858,16 @@ function createMobileControls(scene){
 
     scene.input.on(
         "pointermove",
-        function(pointer){
+        pointer => {
 
             if(
                 joystickActive &&
-                pointer.id === joystickPointerId
+                pointer.id === joystickId
             ){
 
-                updateJoystick(pointer);
+                updateJoystick(
+                    pointer
+                );
 
             }
 
@@ -1606,18 +1877,18 @@ function createMobileControls(scene){
 
     scene.input.on(
         "pointerup",
-        function(pointer){
+        pointer => {
 
             if(
-                pointer.id === joystickPointerId
+                pointer.id === joystickId
             ){
 
                 joystickActive = false;
 
-                joystickPointerId = null;
+                joystickId = null;
 
-                joystickX = 0;
-                joystickY = 0;
+                joyX = 0;
+                joyY = 0;
 
                 joystickThumb.x =
                     joystickBase.x;
@@ -1633,67 +1904,63 @@ function createMobileControls(scene){
 
     /* ACTION */
 
-    interactButton =
+    actionButton =
         scene.add.circle(
             1175,
-            610,
-            55,
+            605,
+            58,
             0xff238d,
-            0.75
+            0.82
         );
 
 
-    interactButton.setStrokeStyle(
+    actionButton.setScrollFactor(0);
+
+
+    actionButton.setStrokeStyle(
         3,
         0xffffff,
         0.75
     );
 
 
-    interactButton.setInteractive();
+    actionButton.setInteractive();
 
 
-    interactButton.on(
+    actionButton.on(
         "pointerdown",
-        function(){
-
-            actionPressed();
-
-        }
+        actionPressed
     );
 
 
     scene.add.text(
         1175,
-        610,
+        605,
         "ACTION",
         {
-
             fontFamily:"Arial",
-
             fontSize:"13px",
-
             fontStyle:"bold",
-
             color:"#ffffff"
-
         }
-    ).setOrigin(0.5);
+    )
+    .setOrigin(0.5)
+    .setScrollFactor(0);
 
 
-    /* HIDE ON DESKTOP */
+    /* HIDE MOBILE UI ON DESKTOP */
 
-    setTimeout(function(){
+    if(
+        !/Android|iPhone|iPad|iPod/i.test(
+            navigator.userAgent
+        )
+    ){
 
-        if(!isMobileDevice()){
+        joystickBase.setVisible(false);
+        joystickThumb.setVisible(false);
+        actionButton.setVisible(false);
 
-            joystickBase.setVisible(false);
-            joystickThumb.setVisible(false);
-            interactButton.setVisible(false);
-
-        }
-
-    },300);
+    }
 
 }
 
@@ -1708,7 +1975,6 @@ function updateJoystick(pointer){
         pointer.x -
         joystickBase.x;
 
-
     const dy =
         pointer.y -
         joystickBase.y;
@@ -1721,42 +1987,36 @@ function updateJoystick(pointer){
         );
 
 
-    const maxDistance = 45;
+    const max = 45;
 
 
-    let finalX = dx;
-    let finalY = dy;
+    let px = dx;
+    let py = dy;
 
 
-    if(distance > maxDistance){
+    if(distance > max){
 
-        finalX =
-            (dx / distance) *
-            maxDistance;
+        px =
+            dx / distance * max;
 
-        finalY =
-            (dy / distance) *
-            maxDistance;
+        py =
+            dy / distance * max;
 
     }
 
 
     joystickThumb.x =
-        joystickBase.x +
-        finalX;
-
+        joystickBase.x + px;
 
     joystickThumb.y =
-        joystickBase.y +
-        finalY;
+        joystickBase.y + py;
 
 
-    joystickX =
-        finalX / maxDistance;
+    joyX =
+        px / max;
 
-
-    joystickY =
-        finalY / maxDistance;
+    joyY =
+        py / max;
 
 }
 
@@ -1767,6 +2027,10 @@ function updateJoystick(pointer){
 
 function actionPressed(){
 
+    if(!player || !objective)
+        return;
+
+
     const distance =
         Phaser.Math.Distance.Between(
             player.x,
@@ -1776,45 +2040,32 @@ function actionPressed(){
         );
 
 
-    if(distance < 80){
+    if(
+        distance < 100 &&
+        !objectiveDone
+    ){
 
-        if(!objective.completed){
+        objectiveDone = true;
 
-            objective.completed = true;
-
-            score += 100;
-
-        }
-
+        score += 100;
 
         scoreText.setText(
             "SCORE  " + score
         );
 
-
         missionText.setText(
-            "MISSION COMPLETE!"
+            "MISSION COMPLETE  •  VIP FOUND"
         );
-
 
         missionText.setColor(
             "#00ff9d"
         );
 
+        objective.setFillStyle(
+            0x00ff9d
+        );
+
     }
-
-}
-
-
-/* =========================================================
-   MOBILE CHECK
-========================================================= */
-
-function isMobileDevice(){
-
-    return /Android|iPhone|iPad|iPod/i.test(
-        navigator.userAgent
-    );
 
 }
 
