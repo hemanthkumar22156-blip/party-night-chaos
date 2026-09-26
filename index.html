@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport"
       content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+
 <title>Party Night: Chaos</title>
 
 <script src="https://cdn.jsdelivr.net/npm/phaser@3.80.1/dist/phaser.min.js"></script>
@@ -36,11 +37,6 @@ canvas{
 
 <script>
 
-/* =========================================================
-   PARTY NIGHT: CHAOS
-   LEVEL 1 — THE MANSION PARTY
-========================================================= */
-
 const WORLD_W = 2400;
 const WORLD_H = 1400;
 
@@ -71,29 +67,21 @@ let keys;
 
 let sceneRef;
 
-
-/* =========================================================
-   CONFIG
-========================================================= */
-
 const config = {
 
     type: Phaser.AUTO,
 
-    parent: "game",
+    parent:"game",
 
-    width: 1280,
-    height: 720,
+    width:1280,
+    height:720,
 
-    backgroundColor: "#050608",
+    backgroundColor:"#050608",
 
     physics:{
         default:"arcade",
-
         arcade:{
-            gravity:{
-                y:0
-            },
+            gravity:{y:0},
             debug:false
         }
     },
@@ -120,105 +108,82 @@ new Phaser.Game(config);
 
 function create(){
 
-    const scene = this;
+    const scene=this;
 
-    sceneRef = scene;
+    sceneRef=scene;
 
     scene.physics.world.setBounds(
-        0,
-        0,
-        WORLD_W,
-        WORLD_H
+        0,0,WORLD_W,WORLD_H
     );
 
     scene.cameras.main.setBounds(
-        0,
-        0,
-        WORLD_W,
-        WORLD_H
+        0,0,WORLD_W,WORLD_H
     );
 
-
-    /* WORLD BACKGROUND */
-
     scene.add.rectangle(
-        WORLD_W / 2,
-        WORLD_H / 2,
+        WORLD_W/2,
+        WORLD_H/2,
         WORLD_W,
         WORLD_H,
         0x080a0e
     );
 
-
     createFloor(scene);
 
-    walls =
-        scene.physics.add.staticGroup();
-
+    walls=scene.physics.add.staticGroup();
 
     createArchitecture(scene);
-
     createFurniture(scene);
-
     createPartyDetails(scene);
-
 
     /* PLAYER */
 
-    player =
-        createPlayer(
-            scene,
-            1180,
-            760
-        );
-
+    player=createPlayer(
+        scene,
+        1180,
+        760
+    );
 
     scene.physics.add.collider(
         player,
         walls
     );
 
+    /* =====================================================
+       REALISTIC NPCS
+    ===================================================== */
 
-    /* NPCs */
+    createNPC(scene,700,300,0);
+    createNPC(scene,900,350,1);
+    createNPC(scene,1100,300,2);
+    createNPC(scene,1450,320,3);
 
-    createNPC(scene,700,300,0xff3d8d);
-    createNPC(scene,900,350,0x00d9ff);
-    createNPC(scene,1100,300,0xffc107);
-    createNPC(scene,1450,320,0x9d6cff);
+    createNPC(scene,500,750,4);
+    createNPC(scene,750,820,5);
+    createNPC(scene,1550,760,6);
 
-    createNPC(scene,500,750,0xff4d8d);
-    createNPC(scene,750,820,0xffc107);
-    createNPC(scene,1550,760,0x00e5a0);
+    createNPC(scene,1750,980,7);
+    createNPC(scene,1950,1050,8);
+    createNPC(scene,2150,850,9);
 
-    createNPC(scene,1750,980,0xff4d8d);
-    createNPC(scene,1950,1050,0xffc107);
-    createNPC(scene,2150,850,0x9d6cff);
+    createNPC(scene,500,1100,10);
+    createNPC(scene,850,1120,11);
 
-    createNPC(scene,500,1100,0x00d9ff);
-    createNPC(scene,850,1120,0xff3d8d);
-
-
-    /* NPC COLLISION */
-
-    npcs.forEach(npc => {
-
+    npcs.forEach(npc=>{
         scene.physics.add.collider(
             npc,
             walls
         );
-
     });
-
 
     /* OBJECTIVE */
 
-    objective =
-        scene.add.circle(
-            760,
-            250,
-            18,
-            0xffd000
-        );
+    objective=scene.add.circle(
+        760,
+        250,
+        18,
+        0xffd000
+    );
 
     objective.setStrokeStyle(
         4,
@@ -226,40 +191,28 @@ function create(){
         0.9
     );
 
-
     scene.tweens.add({
-
         targets:objective,
-
         scale:1.5,
-
-        alpha:0.45,
-
+        alpha:.45,
         duration:650,
-
         yoyo:true,
-
         repeat:-1
-
     });
-
 
     /* CAMERA */
 
     scene.cameras.main.startFollow(
         player,
         true,
-        0.08,
-        0.08
+        .08,
+        .08
     );
 
-
-    /* KEYBOARD */
-
-    cursors =
+    cursors=
         scene.input.keyboard.createCursorKeys();
 
-    keys =
+    keys=
         scene.input.keyboard.addKeys({
             W:Phaser.Input.Keyboard.KeyCodes.W,
             A:Phaser.Input.Keyboard.KeyCodes.A,
@@ -267,11 +220,8 @@ function create(){
             D:Phaser.Input.Keyboard.KeyCodes.D
         });
 
-
     createHUD(scene);
-
     createMobileControls(scene);
-
 }
 
 
@@ -281,110 +231,72 @@ function create(){
 
 function update(time,delta){
 
-    if(!player) return;
+    if(!player)return;
 
-    let x = 0;
-    let y = 0;
-
-
-    /* KEYBOARD */
+    let x=0;
+    let y=0;
 
     if(
         cursors.left.isDown ||
         keys.A.isDown
-    ){
-        x -= 1;
-    }
+    )x-=1;
 
     if(
         cursors.right.isDown ||
         keys.D.isDown
-    ){
-        x += 1;
-    }
+    )x+=1;
 
     if(
         cursors.up.isDown ||
         keys.W.isDown
-    ){
-        y -= 1;
-    }
+    )y-=1;
 
     if(
         cursors.down.isDown ||
         keys.S.isDown
-    ){
-        y += 1;
-    }
-
-
-    /* MOBILE */
+    )y+=1;
 
     if(joystickActive){
-
-        x = joyX;
-        y = joyY;
-
+        x=joyX;
+        y=joyY;
     }
 
+    const movement=
+        new Phaser.Math.Vector2(x,y);
 
-    const movement =
-        new Phaser.Math.Vector2(
-            x,
-            y
-        );
+    const speed=240;
 
-
-    const speed = 240;
-
-
-    if(movement.length() > 0){
+    if(movement.length()>0){
 
         movement.normalize();
 
         player.body.setVelocity(
-            movement.x * speed,
-            movement.y * speed
+            movement.x*speed,
+            movement.y*speed
         );
 
-        player.walking = true;
+        player.walking=true;
 
-
-        if(movement.x < -0.1){
-
-            player.scaleX = -1;
-
+        if(movement.x<-.1){
+            player.scaleX=-1;
+        }
+        else if(movement.x>.1){
+            player.scaleX=1;
         }
 
-        else if(movement.x > 0.1){
+    }else{
 
-            player.scaleX = 1;
-
-        }
-
+        player.body.setVelocity(0,0);
+        player.walking=false;
     }
 
-    else{
-
-        player.body.setVelocity(
-            0,
-            0
-        );
-
-        player.walking = false;
-
-    }
-
-
-    animatePlayer(
+    animateCharacter(
         player,
-        time
+        time,
+        true
     );
 
-
-    /* OBJECTIVE */
-
-    const distance =
+    const distance=
         Phaser.Math.Distance.Between(
             player.x,
             player.y,
@@ -392,66 +304,57 @@ function update(time,delta){
             objective.y
         );
 
-
     if(
-        distance < 55 &&
+        distance<55 &&
         !objectiveDone
     ){
 
-        objectiveDone = true;
-
-        score += 100;
+        objectiveDone=true;
+        score+=100;
 
         scoreText.setText(
-            "SCORE  " + score
+            "SCORE  "+score
         );
 
         missionText.setText(
             "VIP FOUND  •  MISSION COMPLETE"
         );
 
-        missionText.setColor(
-            "#00ff9d"
-        );
+        missionText.setColor("#00ff9d");
 
         objective.setFillStyle(
             0x00ff9d
         );
-
     }
 
+    /* NPC AI */
 
-    /* NPC MOVEMENT */
+    npcs.forEach(npc=>{
 
-    npcs.forEach(npc => {
+        npc.timer-=delta;
 
-        npc.timer -= delta;
+        if(npc.timer<=0){
 
-
-        if(npc.timer <= 0){
-
-            npc.timer =
+            npc.timer=
                 Phaser.Math.Between(
                     1200,
                     3500
                 );
 
-            npc.targetX =
+            npc.targetX=
                 Phaser.Math.Between(
                     180,
-                    WORLD_W - 180
+                    WORLD_W-180
                 );
 
-            npc.targetY =
+            npc.targetY=
                 Phaser.Math.Between(
                     180,
-                    WORLD_H - 180
+                    WORLD_H-180
                 );
-
         }
 
-
-        const distance =
+        const distance=
             Phaser.Math.Distance.Between(
                 npc.x,
                 npc.y,
@@ -459,19 +362,14 @@ function update(time,delta){
                 npc.targetY
             );
 
+        if(distance<25){
 
-        if(distance < 25){
+            npc.body.setVelocity(0,0);
+            npc.walking=false;
 
-            npc.body.setVelocity(
-                0,
-                0
-            );
+        }else{
 
-        }
-
-        else{
-
-            const angle =
+            const angle=
                 Phaser.Math.Angle.Between(
                     npc.x,
                     npc.y,
@@ -479,16 +377,26 @@ function update(time,delta){
                     npc.targetY
                 );
 
-
             npc.body.setVelocity(
-                Math.cos(angle) * 35,
-                Math.sin(angle) * 35
+                Math.cos(angle)*35,
+                Math.sin(angle)*35
             );
 
+            npc.walking=true;
+
+            if(Math.cos(angle)<-.1)
+                npc.scaleX=-1;
+
+            else if(Math.cos(angle)>.1)
+                npc.scaleX=1;
         }
 
+        animateCharacter(
+            npc,
+            time,
+            false
+        );
     });
-
 }
 
 
@@ -498,8 +406,6 @@ function update(time,delta){
 
 function createFloor(scene){
 
-    /* MAIN FLOOR */
-
     scene.add.rectangle(
         1200,
         700,
@@ -508,53 +414,34 @@ function createFloor(scene){
         0x17191e
     );
 
-
-    /* FLOOR GRID */
-
-    const graphics =
+    const graphics=
         scene.add.graphics();
-
 
     graphics.lineStyle(
         1,
         0x292d35,
-        0.45
+        .45
     );
 
-
-    for(
-        let x = 80;
-        x < WORLD_W;
-        x += 80
-    ){
+    for(let x=80;x<WORLD_W;x+=80){
 
         graphics.lineBetween(
             x,
             70,
             x,
-            WORLD_H - 70
+            WORLD_H-70
         );
-
     }
 
-
-    for(
-        let y = 70;
-        y < WORLD_H;
-        y += 80
-    ){
+    for(let y=70;y<WORLD_H;y+=80){
 
         graphics.lineBetween(
             70,
             y,
-            WORLD_W - 70,
+            WORLD_W-70,
             y
         );
-
     }
-
-
-    /* OUTER BORDER */
 
     scene.add.rectangle(
         1200,
@@ -565,7 +452,6 @@ function createFloor(scene){
         8,
         0x313846
     );
-
 }
 
 
@@ -575,124 +461,18 @@ function createFloor(scene){
 
 function createArchitecture(scene){
 
-    /* PARTY HALL */
+    createRoom(scene,120,120,600,430,0x24143a,"PARTY HALL");
+    createRoom(scene,760,120,520,430,0x172d34,"BAR & KITCHEN");
+    createRoom(scene,1320,120,560,430,0x292033,"BEDROOM");
+    createRoom(scene,1920,120,330,300,0x17262c,"BATHROOM");
 
-    createRoom(
-        scene,
-        120,
-        120,
-        600,
-        430,
-        0x24143a,
-        "PARTY HALL"
-    );
+    createRoom(scene,120,650,560,430,0x191f36,"LOUNGE");
+    createRoom(scene,720,610,1160,300,0x11161d,"MAIN CORRIDOR");
 
+    createRoom(scene,760,960,780,300,0x102b22,"GARDEN");
+    createRoom(scene,1580,960,500,300,0x102632,"POOL");
 
-    /* KITCHEN / BAR */
-
-    createRoom(
-        scene,
-        760,
-        120,
-        520,
-        430,
-        0x172d34,
-        "BAR & KITCHEN"
-    );
-
-
-    /* BEDROOM */
-
-    createRoom(
-        scene,
-        1320,
-        120,
-        560,
-        430,
-        0x292033,
-        "BEDROOM"
-    );
-
-
-    /* BATHROOM */
-
-    createRoom(
-        scene,
-        1920,
-        120,
-        330,
-        300,
-        0x17262c,
-        "BATHROOM"
-    );
-
-
-    /* LOUNGE */
-
-    createRoom(
-        scene,
-        120,
-        650,
-        560,
-        430,
-        0x191f36,
-        "LOUNGE"
-    );
-
-
-    /* MAIN CORRIDOR */
-
-    createRoom(
-        scene,
-        720,
-        610,
-        1160,
-        300,
-        0x11161d,
-        "MAIN CORRIDOR"
-    );
-
-
-    /* GARDEN */
-
-    createRoom(
-        scene,
-        760,
-        960,
-        780,
-        300,
-        0x102b22,
-        "GARDEN"
-    );
-
-
-    /* POOL */
-
-    createRoom(
-        scene,
-        1580,
-        960,
-        500,
-        300,
-        0x102632,
-        "POOL"
-    );
-
-
-    /* STORAGE */
-
-    createRoom(
-        scene,
-        2100,
-        650,
-        180,
-        610,
-        0x191919,
-        "STORAGE"
-    );
-
-
-    /* WALLS / ROOM DIVIDERS */
+    createRoom(scene,2100,650,180,610,0x191919,"STORAGE");
 
     addWall(scene,80,700,35,1180);
     addWall(scene,2320,700,35,1180);
@@ -700,55 +480,37 @@ function createArchitecture(scene){
     addWall(scene,1200,75,2250,35);
     addWall(scene,1200,1325,2250,35);
 
-
     addWall(scene,740,335,30,430);
     addWall(scene,1300,335,30,430);
     addWall(scene,1900,270,30,300);
 
-
     addWall(scene,740,760,30,300);
     addWall(scene,1880,760,30,300);
-
-
-    /* DOOR GAPS ARE LEFT OPEN */
-
 }
 
 
-/* =========================================================
-   ROOM
-========================================================= */
-
 function createRoom(
     scene,
-    x,
-    y,
-    w,
-    h,
-    color,
-    label
+    x,y,w,h,color,label
 ){
 
-    const room =
+    const room=
         scene.add.rectangle(
-            x + w / 2,
-            y + h / 2,
-            w,
-            h,
+            x+w/2,
+            y+h/2,
+            w,h,
             color
         );
-
 
     room.setStrokeStyle(
         4,
         0x3b4353,
-        0.9
+        .9
     );
 
-
     scene.add.text(
-        x + 25,
-        y + 22,
+        x+25,
+        y+22,
         label,
         {
             fontFamily:"Arial",
@@ -764,48 +526,28 @@ function createRoom(
             }
         }
     );
-
 }
 
 
-/* =========================================================
-   WALL
-========================================================= */
+function addWall(scene,x,y,w,h){
 
-function addWall(
-    scene,
-    x,
-    y,
-    w,
-    h
-){
-
-    const wall =
+    const wall=
         scene.add.rectangle(
-            x,
-            y,
-            w,
-            h,
+            x,y,w,h,
             0x090b10
         );
-
 
     wall.setStrokeStyle(
         2,
         0x47516a
     );
 
-
     scene.physics.add.existing(
         wall,
         true
     );
 
-
-    walls.add(
-        wall
-    );
-
+    walls.add(wall);
 }
 
 
@@ -815,16 +557,7 @@ function addWall(
 
 function createFurniture(scene){
 
-    /* PARTY HALL DJ */
-
-    createDJ(
-        scene,
-        420,
-        220
-    );
-
-
-    /* PARTY TABLES */
+    createDJ(scene,420,220);
 
     createTable(scene,220,400);
     createTable(scene,550,400);
@@ -832,85 +565,29 @@ function createFurniture(scene){
     createTable(scene,930,450);
     createTable(scene,1130,450);
 
-
-    /* KITCHEN COUNTERS */
-
     for(
-        let x = 820;
-        x < 1220;
-        x += 110
+        let x=820;
+        x<1220;
+        x+=110
     ){
-
-        createCounter(
-            scene,
-            x,
-            220
-        );
-
+        createCounter(scene,x,220);
     }
 
+    createBed(scene,1550,300);
 
-    /* BED */
+    createSofa(scene,330,820);
+    createSofa(scene,500,960);
 
-    createBed(
-        scene,
-        1550,
-        300
-    );
+    createOutdoorTable(scene,980,1080);
+    createOutdoorTable(scene,1270,1160);
 
+    createPool(scene,1830,1110);
 
-    /* SOFA LOUNGE */
-
-    createSofa(
-        scene,
-        330,
-        820
-    );
-
-
-    createSofa(
-        scene,
-        500,
-        960
-    );
-
-
-    /* GARDEN TABLES */
-
-    createOutdoorTable(
-        scene,
-        980,
-        1080
-    );
-
-
-    createOutdoorTable(
-        scene,
-        1270,
-        1160
-    );
-
-
-    /* POOL */
-
-    createPool(
-        scene,
-        1830,
-        1110
-    );
-
-
-    /* STORAGE BOXES */
-
-    for(
-        let i = 0;
-        i < 6;
-        i++
-    ){
+    for(let i=0;i<6;i++){
 
         scene.add.rectangle(
             2180,
-            720 + i * 80,
+            720+i*80,
             80,
             55,
             0x493526
@@ -918,349 +595,181 @@ function createFurniture(scene){
             2,
             0x7a5a3c
         );
-
     }
-
 }
 
 
-/* =========================================================
-   PARTY DETAILS
-========================================================= */
-
 function createPartyDetails(scene){
 
-    /* LIGHTS */
-
-    const lightPositions = [
-
-        [180,170],
-        [350,170],
-        [520,170],
-
-        [820,170],
-        [1050,170],
-        [1220,170],
-
-        [1400,170],
-        [1650,170],
-        [1820,170],
-
-        [180,700],
-        [500,700],
-
-        [800,650],
-        [1100,650],
-        [1400,650],
-        [1700,650],
-
-        [850,1010],
-        [1150,1010],
-        [1400,1010],
-
-        [1650,1010],
-        [2000,1010]
+    const lightPositions=[
+        [180,170],[350,170],[520,170],
+        [820,170],[1050,170],[1220,170],
+        [1400,170],[1650,170],[1820,170],
+        [180,700],[500,700],
+        [800,650],[1100,650],[1400,650],[1700,650],
+        [850,1010],[1150,1010],[1400,1010],
+        [1650,1010],[2000,1010]
     ];
 
-
     lightPositions.forEach(
-        ([x,y],index) => {
+        ([x,y],index)=>{
 
-            const glow =
+            const glow=
                 scene.add.circle(
-                    x,
-                    y,
-                    18,
-                    index % 2
-                    ? 0xff238d
-                    : 0x00d9ff,
-                    0.12
+                    x,y,18,
+                    index%2
+                    ?0xff238d
+                    :0x00d9ff,
+                    .12
                 );
 
-
             scene.tweens.add({
-
                 targets:glow,
-
                 scale:1.6,
-
-                alpha:0.03,
-
-                duration:800 +
-                    index * 40,
-
+                alpha:.03,
+                duration:800+index*40,
                 yoyo:true,
-
                 repeat:-1
-
             });
 
-
             scene.add.circle(
-                x,
-                y,
-                5,
-                index % 2
-                ? 0xff238d
-                : 0x00d9ff
+                x,y,5,
+                index%2
+                ?0xff238d
+                :0x00d9ff
             );
-
         }
     );
 
-
-    /* PLANTS */
-
-    const plants = [
-
-        [150,150],
-        [690,150],
-        [1340,150],
-        [1870,150],
-
-        [150,1030],
-        [690,1030],
-        [800,1240],
-        [1510,1240]
+    const plants=[
+        [150,150],[690,150],
+        [1340,150],[1870,150],
+        [150,1030],[690,1030],
+        [800,1240],[1510,1240]
     ];
 
-
     plants.forEach(
-        ([x,y]) => createPlant(scene,x,y)
+        ([x,y])=>createPlant(scene,x,y)
     );
 
+    for(let i=0;i<80;i++){
 
-    /* PARTY CONFETTI */
+        const x=
+            Phaser.Math.Between(130,1880);
 
-    for(
-        let i = 0;
-        i < 80;
-        i++
-    ){
-
-        const x =
-            Phaser.Math.Between(
-                130,
-                1880
-            );
-
-        const y =
-            Phaser.Math.Between(
-                140,
-                550
-            );
-
+        const y=
+            Phaser.Math.Between(140,550);
 
         scene.add.rectangle(
-            x,
-            y,
-            3,
-            7,
+            x,y,3,7,
             [
                 0xff238d,
                 0x00d9ff,
                 0xffd000,
                 0xffffff
-            ][i % 4],
-            0.7
+            ][i%4],
+            .7
         );
-
     }
-
 }
 
-
-/* =========================================================
-   TABLE
-========================================================= */
 
 function createTable(scene,x,y){
 
     scene.add.circle(
-        x,
-        y,
-        35,
-        0x2b2520
+        x,y,35,0x2b2520
     ).setStrokeStyle(
-        3,
-        0x715943
+        3,0x715943
     );
 
+    for(let i=0;i<4;i++){
 
-    for(
-        let i = 0;
-        i < 4;
-        i++
-    ){
-
-        const a =
-            (Math.PI * 2 / 4) * i;
+        const a=(Math.PI*2/4)*i;
 
         scene.add.rectangle(
-            x + Math.cos(a) * 55,
-            y + Math.sin(a) * 55,
-            25,
-            25,
+            x+Math.cos(a)*55,
+            y+Math.sin(a)*55,
+            25,25,
             0x302821
         );
-
     }
-
 }
 
-
-/* =========================================================
-   COUNTER
-========================================================= */
 
 function createCounter(scene,x,y){
 
     scene.add.rectangle(
-        x,
-        y,
-        90,
-        45,
-        0x22272b
+        x,y,90,45,0x22272b
     ).setStrokeStyle(
-        2,
-        0x69747c
+        2,0x69747c
     );
-
 
     scene.add.circle(
-        x,
-        y - 3,
-        7,
-        0xffd000
+        x,y-3,7,0xffd000
     );
-
 }
 
-
-/* =========================================================
-   SOFA
-========================================================= */
 
 function createSofa(scene,x,y){
 
     scene.add.rectangle(
-        x,
-        y,
-        180,
-        70,
-        0x30253d
+        x,y,180,70,0x30253d
     ).setStrokeStyle(
-        3,
-        0x68527c
+        3,0x68527c
     );
-
 
     scene.add.rectangle(
-        x,
-        y - 38,
-        180,
-        30,
-        0x30253d
+        x,y-38,180,30,0x30253d
     );
-
 }
 
-
-/* =========================================================
-   BED
-========================================================= */
 
 function createBed(scene,x,y){
 
     scene.add.rectangle(
-        x,
-        y,
-        230,
-        150,
-        0x31262a
+        x,y,230,150,0x31262a
     ).setStrokeStyle(
-        4,
-        0x77606a
+        4,0x77606a
     );
-
 
     scene.add.rectangle(
-        x,
-        y + 10,
-        200,
-        110,
-        0x5b4651
+        x,y+10,200,110,0x5b4651
     );
-
 
     scene.add.rectangle(
-        x - 70,
-        y - 40,
-        60,
-        35,
-        0xe6e0db
+        x-70,y-40,60,35,0xe6e0db
     );
-
 
     scene.add.rectangle(
-        x + 20,
-        y - 40,
-        60,
-        35,
-        0xe6e0db
+        x+20,y-40,60,35,0xe6e0db
     );
-
 }
 
-
-/* =========================================================
-   DJ
-========================================================= */
 
 function createDJ(scene,x,y){
 
     scene.add.rectangle(
-        x,
-        y,
-        180,
-        70,
-        0x08090d
+        x,y,180,70,0x08090d
     ).setStrokeStyle(
-        3,
-        0xff238d
+        3,0xff238d
     );
-
 
     scene.add.rectangle(
-        x,
-        y - 55,
-        120,
-        25,
-        0x11141b
+        x,y-55,120,25,0x11141b
     );
 
-
-    for(
-        let i = 0;
-        i < 3;
-        i++
-    ){
+    for(let i=0;i<3;i++){
 
         scene.add.circle(
-            x - 50 + i * 50,
+            x-50+i*50,
             y,
             15,
-            i % 2
-            ? 0x00d9ff
-            : 0xff238d
+            i%2?0x00d9ff:0xff238d
         );
-
     }
 
-
     scene.add.text(
-        x - 55,
-        y - 100,
+        x-55,y-100,
         "DJ",
         {
             fontSize:"22px",
@@ -1268,429 +777,687 @@ function createDJ(scene,x,y){
             color:"#ff238d"
         }
     );
-
 }
 
-
-/* =========================================================
-   OUTDOOR TABLE
-========================================================= */
 
 function createOutdoorTable(scene,x,y){
 
     scene.add.circle(
-        x,
-        y,
-        32,
-        0x493a2c
+        x,y,32,0x493a2c
     ).setStrokeStyle(
-        3,
-        0x806548
+        3,0x806548
     );
-
 
     scene.add.circle(
-        x,
-        y,
-        8,
-        0xff8a00
+        x,y,8,0xff8a00
     );
-
 }
 
-
-/* =========================================================
-   POOL
-========================================================= */
 
 function createPool(scene,x,y){
 
     scene.add.rectangle(
-        x,
-        y,
-        380,
-        210,
-        0x087ea3
+        x,y,380,210,0x087ea3
     ).setStrokeStyle(
-        7,
-        0x8defff
+        7,0x8defff
     );
 
-
-    for(
-        let i = 0;
-        i < 8;
-        i++
-    ){
+    for(let i=0;i<8;i++){
 
         scene.add.line(
-            0,
-            0,
-            x - 150,
-            y - 70 + i * 20,
-            x + 150,
-            y - 70 + i * 20,
+            0,0,
+            x-150,
+            y-70+i*20,
+            x+150,
+            y-70+i*20,
             0xffffff,
-            0.16
+            .16
         );
-
     }
-
 }
 
-
-/* =========================================================
-   PLANT
-========================================================= */
 
 function createPlant(scene,x,y){
 
     scene.add.rectangle(
-        x,
-        y + 18,
-        28,
-        28,
-        0x5c3c2b
+        x,y+18,28,28,0x5c3c2b
     );
-
 
     scene.add.circle(
-        x - 12,
-        y,
-        15,
-        0x1c7a49
+        x-12,y,15,0x1c7a49
     );
-
 
     scene.add.circle(
-        x + 10,
-        y - 5,
-        16,
-        0x238d55
+        x+10,y-5,16,0x238d55
     );
-
 
     scene.add.circle(
-        x,
-        y - 15,
-        15,
-        0x2fae65
+        x,y-15,15,0x2fae65
     );
-
 }
 
 
 /* =========================================================
-   MAIN CHARACTER
+   REALISTIC PLAYER
 ========================================================= */
 
 function createPlayer(scene,x,y){
 
-    const c =
-        scene.add.container(
-            x,
-            y
-        );
+    const c=
+        scene.add.container(x,y);
 
-
-    const shadow =
+    const shadow=
         scene.add.ellipse(
-            0,
-            38,
-            55,
-            18,
-            0x000000,
-            0.65
+            0,44,64,20,
+            0x000000,.7
         );
 
-
-    const glow =
+    const glow=
         scene.add.circle(
-            0,
-            0,
-            55,
-            0x00d9ff,
-            0.07
+            0,0,58,
+            0x00d9ff,.06
         );
 
+    /* LEGS */
 
-    const legs =
+    const leftLeg=
         scene.add.rectangle(
-            0,
-            20,
-            34,
-            45,
-            0x12151c
+            -11,27,17,54,
+            0x171a22
         );
 
+    const rightLeg=
+        scene.add.rectangle(
+            11,27,17,54,
+            0x171a22
+        );
 
-    legs.setStrokeStyle(
-        2,
-        0x343c4c
+    leftLeg.setStrokeStyle(
+        2,0x343b4a
     );
 
-
-    const body =
-        scene.add.rectangle(
-            0,
-            -10,
-            52,
-            60,
-            0x10141b
-        );
-
-
-    body.setStrokeStyle(
-        3,
-        0x00d9ff,
-        0.7
+    rightLeg.setStrokeStyle(
+        2,0x343b4a
     );
 
+    /* SHOES */
 
-    const shirt =
+    const leftShoe=
+        scene.add.ellipse(
+            -13,56,31,14,
+            0xf5f5f5
+        );
+
+    const rightShoe=
+        scene.add.ellipse(
+            13,56,31,14,
+            0xf5f5f5
+        );
+
+    /* TORSO */
+
+    const torso=
         scene.add.rectangle(
-            0,
-            -13,
-            22,
-            42,
-            0xf2f2f2
+            0,-10,58,66,
+            0x11151c
         );
 
+    torso.setStrokeStyle(
+        2,0x343d4c
+    );
 
-    const head =
+    /* WHITE INNER SHIRT */
+
+    const shirt=
+        scene.add.rectangle(
+            0,-12,25,48,
+            0xf1f1ef
+        );
+
+    /* JACKET */
+
+    const jacketLeft=
+        scene.add.rectangle(
+            -21,-9,15,57,
+            0x090b10
+        );
+
+    const jacketRight=
+        scene.add.rectangle(
+            21,-9,15,57,
+            0x090b10
+        );
+
+    /* ZIPPER */
+
+    const zipper=
+        scene.add.rectangle(
+            0,-12,2,48,
+            0x657080
+        );
+
+    /* ARMS */
+
+    const leftArm=
+        scene.add.rectangle(
+            -34,-4,13,48,
+            0x10141a
+        );
+
+    const rightArm=
+        scene.add.rectangle(
+            34,-4,13,48,
+            0x10141a
+        );
+
+    leftArm.setStrokeStyle(
+        2,0x303744
+    );
+
+    rightArm.setStrokeStyle(
+        2,0x303744
+    );
+
+    /* HANDS */
+
+    const leftHand=
         scene.add.circle(
-            0,
-            -57,
-            21,
-            0xd89a70
+            -34,22,7,0xc98764
         );
 
+    const rightHand=
+        scene.add.circle(
+            34,22,7,0xc98764
+        );
+
+    /* NECK */
+
+    const neck=
+        scene.add.rectangle(
+            0,-48,15,14,
+            0xc98764
+        );
+
+    /* HEAD */
+
+    const head=
+        scene.add.ellipse(
+            0,-66,43,50,
+            0xd59a75
+        );
 
     head.setStrokeStyle(
-        2,
-        0xa96e52
+        2,0xa96f54
     );
 
+    /* EARS */
 
-    const hair =
-        scene.add.arc(
-            0,
-            -62,
-            24,
-            180,
-            360,
-            false,
-            0x111216
+    scene.add.circle(
+        -21,-66,7,0xc98764
+    );
+
+    scene.add.circle(
+        21,-66,7,0xc98764
+    );
+
+    /* HAIR */
+
+    const hairTop=
+        scene.add.ellipse(
+            0,-84,47,30,
+            0x101116
         );
 
-
-    hair.setStrokeStyle(
-        3,
-        0x2d3039
-    );
-
-
-    const glasses =
+    const hairFront=
         scene.add.rectangle(
-            0,
-            -58,
-            38,
-            9,
+            -3,-76,39,12,
+            0x101116
+        );
+
+    /* SUNGLASSES */
+
+    const glassesLeft=
+        scene.add.rectangle(
+            -11,-67,18,11,
             0x050608
         );
 
+    const glassesRight=
+        scene.add.rectangle(
+            11,-67,18,11,
+            0x050608
+        );
 
-    glasses.setStrokeStyle(
-        2,
-        0x7d8795
+    glassesLeft.setStrokeStyle(
+        2,0x8b95a5
     );
 
+    glassesRight.setStrokeStyle(
+        2,0x8b95a5
+    );
 
-    const leftArm =
+    const bridge=
         scene.add.rectangle(
-            -31,
-            -5,
-            11,
-            45,
-            0x10141b
+            0,-67,8,3,
+            0x8b95a5
         );
 
+    /* NOSE */
 
-    const rightArm =
-        scene.add.rectangle(
-            31,
-            -5,
-            11,
-            45,
-            0x10141b
-        );
+    scene.add.triangle(
+        0,-59,
+        0,0,
+        7,9,
+        -7,9,
+        0xb8795d
+    );
 
+    /* MOUTH */
 
-    const leftShoe =
-        scene.add.ellipse(
-            -13,
-            45,
-            27,
-            12,
-            0xffffff
-        );
-
-
-    const rightShoe =
-        scene.add.ellipse(
-            13,
-            45,
-            27,
-            12,
-            0xffffff
-        );
-
+    scene.add.rectangle(
+        0,-49,12,2,
+        0x713f3a
+    );
 
     c.add([
 
         glow,
         shadow,
 
-        legs,
+        leftLeg,
+        rightLeg,
+
+        leftShoe,
+        rightShoe,
+
+        torso,
+        shirt,
+
+        jacketLeft,
+        jacketRight,
+        zipper,
+
+        leftArm,
+        rightArm,
+
+        leftHand,
+        rightHand,
+
+        neck,
+        head,
+
+        hairTop,
+        hairFront,
+
+        glassesLeft,
+        glassesRight,
+        bridge,
+
+        c.scene.add.triangle(
+            0,-59,
+            0,0,
+            7,9,
+            -7,9,
+            0xb8795d
+        ),
+
+        c.scene.add.rectangle(
+            0,-49,12,2,
+            0x713f3a
+        )
+
+    ]);
+
+    scene.physics.world.enable(c);
+
+    c.body.setCircle(23);
+    c.body.setCollideWorldBounds(true);
+
+    c.walking=false;
+    c.walkCycle=0;
+
+    c.glow=glow;
+    c.leftArm=leftArm;
+    c.rightArm=rightArm;
+    c.leftLeg=leftLeg;
+    c.rightLeg=rightLeg;
+
+    return c;
+}
+
+
+/* =========================================================
+   REALISTIC NPC
+========================================================= */
+
+const NPC_STYLES=[
+
+    {
+        skin:0xc98764,
+        hair:0x151515,
+        shirt:0x222a38,
+        pants:0x171a20,
+        shoe:0xf0f0f0
+    },
+
+    {
+        skin:0xe0a47d,
+        hair:0x3a2118,
+        shirt:0x9b245f,
+        pants:0x22252d,
+        shoe:0xffffff
+    },
+
+    {
+        skin:0xb87554,
+        hair:0x0b0b0b,
+        shirt:0x174d61,
+        pants:0x151515,
+        shoe:0xdddde0
+    },
+
+    {
+        skin:0xd99a72,
+        hair:0x6d3f25,
+        shirt:0x7650a8,
+        pants:0x24242b,
+        shoe:0xffffff
+    },
+
+    {
+        skin:0x9e6248,
+        hair:0x17120f,
+        shirt:0xd17a22,
+        pants:0x20232a,
+        shoe:0xeaeaea
+    },
+
+    {
+        skin:0xd69b78,
+        hair:0x281810,
+        shirt:0x246f63,
+        pants:0x252832,
+        shoe:0xffffff
+    },
+
+    {
+        skin:0xe1aa83,
+        hair:0x222222,
+        shirt:0x9b315d,
+        pants:0x1b1d24,
+        shoe:0xf4f4f4
+    },
+
+    {
+        skin:0xb97959,
+        hair:0x101010,
+        shirt:0x374f9a,
+        pants:0x16181e,
+        shoe:0xe7e7e7
+    },
+
+    {
+        skin:0xd29a72,
+        hair:0x4b291c,
+        shirt:0xb05245,
+        pants:0x25262c,
+        shoe:0xffffff
+    },
+
+    {
+        skin:0xc58463,
+        hair:0x151515,
+        shirt:0x8c3f9d,
+        pants:0x17191e,
+        shoe:0xf1f1f1
+    },
+
+    {
+        skin:0xe0a47e,
+        hair:0x321d16,
+        shirt:0x2d7d65,
+        pants:0x24262e,
+        shoe:0xffffff
+    },
+
+    {
+        skin:0xaa6d50,
+        hair:0x111111,
+        shirt:0xc14d75,
+        pants:0x191b20,
+        shoe:0xe9e9e9
+    }
+];
+
+
+function createNPC(scene,x,y,index){
+
+    const s=
+        NPC_STYLES[index%NPC_STYLES.length];
+
+    const c=
+        scene.add.container(x,y);
+
+    const shadow=
+        scene.add.ellipse(
+            0,35,42,13,
+            0x000000,.6
+        );
+
+    const glow=
+        scene.add.circle(
+            0,0,38,
+            0xff238d,.025
+        );
+
+    /* LEGS */
+
+    const leftLeg=
+        scene.add.rectangle(
+            -8,20,13,36,
+            s.pants
+        );
+
+    const rightLeg=
+        scene.add.rectangle(
+            8,20,13,36,
+            s.pants
+        );
+
+    /* SHOES */
+
+    const leftShoe=
+        scene.add.ellipse(
+            -9,39,23,10,
+            s.shoe
+        );
+
+    const rightShoe=
+        scene.add.ellipse(
+            9,39,23,10,
+            s.shoe
+        );
+
+    /* BODY */
+
+    const body=
+        scene.add.rectangle(
+            0,-10,39,51,
+            s.shirt
+        );
+
+    body.setStrokeStyle(
+        2,0x000000,.35
+    );
+
+    /* ARMS */
+
+    const leftArm=
+        scene.add.rectangle(
+            -24,-7,10,39,
+            s.shirt
+        );
+
+    const rightArm=
+        scene.add.rectangle(
+            24,-7,10,39,
+            s.shirt
+        );
+
+    /* HANDS */
+
+    scene.add.circle(
+        -24,16,5,
+        s.skin
+    );
+
+    scene.add.circle(
+        24,16,5,
+        s.skin
+    );
+
+    /* NECK */
+
+    scene.add.rectangle(
+        0,-40,11,10,
+        s.skin
+    );
+
+    /* HEAD */
+
+    const head=
+        scene.add.ellipse(
+            0,-55,34,39,
+            s.skin
+        );
+
+    /* HAIR */
+
+    const hair=
+        scene.add.ellipse(
+            0,-70,38,24,
+            s.hair
+        );
+
+    /* HAIR FRONT */
+
+    scene.add.rectangle(
+        0,-63,31,9,
+        s.hair
+    );
+
+    /* EYES */
+
+    scene.add.rectangle(
+        -7,-54,5,3,
+        0x202020
+    );
+
+    scene.add.rectangle(
+        7,-54,5,3,
+        0x202020
+    );
+
+    c.add([
+
+        glow,
+        shadow,
+
+        leftLeg,
+        rightLeg,
+
+        leftShoe,
+        rightShoe,
 
         body,
-        shirt,
 
         leftArm,
         rightArm,
 
         head,
         hair,
-        glasses,
 
-        leftShoe,
-        rightShoe
+        scene.add.rectangle(
+            0,-63,31,9,
+            s.hair
+        )
 
     ]);
 
-
     scene.physics.world.enable(c);
 
+    c.body.setCircle(16);
+    c.body.setCollideWorldBounds(true);
 
-    c.body.setCircle(
-        20
-    );
+    c.targetX=x;
+    c.targetY=y;
 
-
-    c.body.setCollideWorldBounds(
-        true
-    );
-
-
-    c.walking = false;
-    c.walkCycle = 0;
-
-    c.glow = glow;
-    c.leftArm = leftArm;
-    c.rightArm = rightArm;
-
-    return c;
-
-}
-
-
-/* =========================================================
-   PLAYER ANIMATION
-========================================================= */
-
-function animatePlayer(player,time){
-
-    if(player.walking){
-
-        player.walkCycle += 0.22;
-
-        const swing =
-            Math.sin(
-                player.walkCycle
-            );
-
-
-        player.leftArm.rotation =
-            swing * 0.2;
-
-        player.rightArm.rotation =
-            -swing * 0.2;
-
-    }
-
-    else{
-
-        player.leftArm.rotation = 0;
-        player.rightArm.rotation = 0;
-
-    }
-
-
-    if(player.glow){
-
-        player.glow.alpha =
-            0.05 +
-            Math.sin(time * 0.004) * 0.025;
-
-    }
-
-}
-
-
-/* =========================================================
-   NPC
-========================================================= */
-
-function createNPC(
-    scene,
-    x,
-    y,
-    color
-){
-
-    const npc =
-        scene.add.circle(
-            x,
-            y,
-            15,
-            color
-        );
-
-
-    npc.setStrokeStyle(
-        3,
-        0xffffff,
-        0.7
-    );
-
-
-    scene.physics.add.existing(
-        npc
-    );
-
-
-    npc.body.setCircle(
-        15
-    );
-
-
-    npc.body.setCollideWorldBounds(
-        true
-    );
-
-
-    npc.targetX = x;
-    npc.targetY = y;
-
-    npc.timer =
+    c.timer=
         Phaser.Math.Between(
             500,
             2500
         );
 
+    c.walking=false;
+    c.walkCycle=0;
 
-    npcs.push(npc);
+    c.leftArm=leftArm;
+    c.rightArm=rightArm;
+    c.leftLeg=leftLeg;
+    c.rightLeg=rightLeg;
+    c.glow=glow;
 
+    npcs.push(c);
+}
+
+
+/* =========================================================
+   CHARACTER ANIMATION
+========================================================= */
+
+function animateCharacter(
+    character,
+    time,
+    isPlayer
+){
+
+    if(character.walking){
+
+        character.walkCycle+=
+            isPlayer ? .22 : .12;
+
+        const swing=
+            Math.sin(
+                character.walkCycle
+            );
+
+        character.leftArm.rotation=
+            swing*.22;
+
+        character.rightArm.rotation=
+            -swing*.22;
+
+        character.leftLeg.rotation=
+            -swing*.12;
+
+        character.rightLeg.rotation=
+            swing*.12;
+
+    }else{
+
+        character.leftArm.rotation=0;
+        character.rightArm.rotation=0;
+
+        character.leftLeg.rotation=0;
+        character.rightLeg.rotation=0;
+    }
+
+    if(character.glow){
+
+        character.glow.alpha=
+            .025+
+            Math.sin(time*.003)*.012;
+    }
 }
 
 
@@ -1700,23 +1467,16 @@ function createNPC(
 
 function createHUD(scene){
 
-    const top =
+    const top=
         scene.add.rectangle(
-            640,
-            32,
-            1280,
-            64,
-            0x050608,
-            0.94
+            640,32,1280,64,
+            0x050608,.94
         );
-
 
     top.setScrollFactor(0);
 
-
     scene.add.text(
-        25,
-        15,
+        25,15,
         "PARTY NIGHT: CHAOS",
         {
             fontFamily:"Arial",
@@ -1726,10 +1486,8 @@ function createHUD(scene){
         }
     ).setScrollFactor(0);
 
-
     scene.add.text(
-        300,
-        20,
+        300,20,
         "LEVEL 01  •  THE MANSION PARTY",
         {
             fontFamily:"Arial",
@@ -1738,11 +1496,9 @@ function createHUD(scene){
         }
     ).setScrollFactor(0);
 
-
-    scoreText =
+    scoreText=
         scene.add.text(
-            1080,
-            18,
+            1080,18,
             "SCORE  0",
             {
                 fontFamily:"Arial",
@@ -1752,26 +1508,16 @@ function createHUD(scene){
             }
         );
 
-
     scoreText.setScrollFactor(0);
 
-
-    /* BOTTOM */
-
     scene.add.rectangle(
-        640,
-        690,
-        1280,
-        60,
-        0x050608,
-        0.94
+        640,690,1280,60,
+        0x050608,.94
     ).setScrollFactor(0);
 
-
-    missionText =
+    missionText=
         scene.add.text(
-            25,
-            680,
+            25,680,
             "OBJECTIVE  •  Find the VIP guest in the party hall",
             {
                 fontFamily:"Arial",
@@ -1780,13 +1526,10 @@ function createHUD(scene){
             }
         );
 
-
     missionText.setScrollFactor(0);
 
-
     scene.add.text(
-        1010,
-        682,
+        1010,682,
         "WASD / ARROWS",
         {
             fontFamily:"Arial",
@@ -1794,148 +1537,103 @@ function createHUD(scene){
             color:"#8f99a9"
         }
     ).setScrollFactor(0);
-
 }
 
 
 /* =========================================================
-   MOBILE CONTROLS
+   MOBILE
 ========================================================= */
 
 function createMobileControls(scene){
 
-    joystickBase =
+    joystickBase=
         scene.add.circle(
-            105,
-            605,
-            65,
-            0x111827,
-            0.75
+            105,605,65,
+            0x111827,.75
         );
-
 
     joystickBase.setScrollFactor(0);
 
     joystickBase.setStrokeStyle(
-        3,
-        0x00d9ff,
-        0.7
+        3,0x00d9ff,.7
     );
 
-
-    joystickThumb =
+    joystickThumb=
         scene.add.circle(
-            105,
-            605,
-            29,
-            0x00d9ff,
-            0.8
+            105,605,29,
+            0x00d9ff,.8
         );
-
 
     joystickThumb.setScrollFactor(0);
 
-
     joystickBase.setInteractive();
-
 
     joystickBase.on(
         "pointerdown",
-        pointer => {
+        pointer=>{
 
-            joystickActive = true;
+            joystickActive=true;
+            joystickId=pointer.id;
 
-            joystickId =
-                pointer.id;
-
-            updateJoystick(
-                pointer
-            );
-
+            updateJoystick(pointer);
         }
     );
-
 
     scene.input.on(
         "pointermove",
-        pointer => {
+        pointer=>{
 
             if(
                 joystickActive &&
-                pointer.id === joystickId
+                pointer.id===joystickId
             ){
-
-                updateJoystick(
-                    pointer
-                );
-
+                updateJoystick(pointer);
             }
-
         }
     );
-
 
     scene.input.on(
         "pointerup",
-        pointer => {
+        pointer=>{
 
-            if(
-                pointer.id === joystickId
-            ){
+            if(pointer.id===joystickId){
 
-                joystickActive = false;
+                joystickActive=false;
+                joystickId=null;
 
-                joystickId = null;
+                joyX=0;
+                joyY=0;
 
-                joyX = 0;
-                joyY = 0;
-
-                joystickThumb.x =
+                joystickThumb.x=
                     joystickBase.x;
 
-                joystickThumb.y =
+                joystickThumb.y=
                     joystickBase.y;
-
             }
-
         }
     );
 
-
-    /* ACTION */
-
-    actionButton =
+    actionButton=
         scene.add.circle(
-            1175,
-            605,
-            58,
-            0xff238d,
-            0.82
+            1175,605,58,
+            0xff238d,.82
         );
-
 
     actionButton.setScrollFactor(0);
 
-
     actionButton.setStrokeStyle(
-        3,
-        0xffffff,
-        0.75
+        3,0xffffff,.75
     );
 
-
     actionButton.setInteractive();
-
 
     actionButton.on(
         "pointerdown",
         actionPressed
     );
 
-
     scene.add.text(
-        1175,
-        605,
+        1175,605,
         "ACTION",
         {
             fontFamily:"Arial",
@@ -1944,11 +1642,8 @@ function createMobileControls(scene){
             color:"#ffffff"
         }
     )
-    .setOrigin(0.5)
+    .setOrigin(.5)
     .setScrollFactor(0);
-
-
-    /* HIDE MOBILE UI ON DESKTOP */
 
     if(
         !/Android|iPhone|iPad|iPod/i.test(
@@ -1959,65 +1654,40 @@ function createMobileControls(scene){
         joystickBase.setVisible(false);
         joystickThumb.setVisible(false);
         actionButton.setVisible(false);
-
     }
-
 }
 
 
-/* =========================================================
-   JOYSTICK
-========================================================= */
-
 function updateJoystick(pointer){
 
-    const dx =
-        pointer.x -
-        joystickBase.x;
+    const dx=
+        pointer.x-joystickBase.x;
 
-    const dy =
-        pointer.y -
-        joystickBase.y;
+    const dy=
+        pointer.y-joystickBase.y;
 
+    const distance=
+        Math.sqrt(dx*dx+dy*dy);
 
-    const distance =
-        Math.sqrt(
-            dx * dx +
-            dy * dy
-        );
+    const max=45;
 
+    let px=dx;
+    let py=dy;
 
-    const max = 45;
+    if(distance>max){
 
-
-    let px = dx;
-    let py = dy;
-
-
-    if(distance > max){
-
-        px =
-            dx / distance * max;
-
-        py =
-            dy / distance * max;
-
+        px=dx/distance*max;
+        py=dy/distance*max;
     }
 
+    joystickThumb.x=
+        joystickBase.x+px;
 
-    joystickThumb.x =
-        joystickBase.x + px;
+    joystickThumb.y=
+        joystickBase.y+py;
 
-    joystickThumb.y =
-        joystickBase.y + py;
-
-
-    joyX =
-        px / max;
-
-    joyY =
-        py / max;
-
+    joyX=px/max;
+    joyY=py/max;
 }
 
 
@@ -2027,11 +1697,9 @@ function updateJoystick(pointer){
 
 function actionPressed(){
 
-    if(!player || !objective)
-        return;
+    if(!player||!objective)return;
 
-
-    const distance =
+    const distance=
         Phaser.Math.Distance.Between(
             player.x,
             player.y,
@@ -2039,18 +1707,16 @@ function actionPressed(){
             objective.y
         );
 
-
     if(
-        distance < 100 &&
+        distance<100 &&
         !objectiveDone
     ){
 
-        objectiveDone = true;
-
-        score += 100;
+        objectiveDone=true;
+        score+=100;
 
         scoreText.setText(
-            "SCORE  " + score
+            "SCORE  "+score
         );
 
         missionText.setText(
@@ -2064,9 +1730,7 @@ function actionPressed(){
         objective.setFillStyle(
             0x00ff9d
         );
-
     }
-
 }
 
 </script>
