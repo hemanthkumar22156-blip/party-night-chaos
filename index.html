@@ -2,17 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-
 <meta name="viewport"
-      content="width=device-width,
-      initial-scale=1.0,
-      maximum-scale=1.0,
-      user-scalable=no">
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>Party Night - Mansion Mayhem</title>
 
 <link rel="icon"
-href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23060914'/%3E%3Ccircle cx='50' cy='50' r='32' fill='%2300eaff'/%3E%3Ccircle cx='50' cy='50' r='16' fill='%23ff278e'/%3E%3C/svg%3E">
+href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23050914'/%3E%3Ccircle cx='50' cy='50' r='30' fill='%2300eaff'/%3E%3Ccircle cx='50' cy='50' r='14' fill='%23ff278e'/%3E%3C/svg%3E">
 
 <style>
 *{
@@ -21,8 +17,7 @@ href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 
     padding:0;
 }
 
-html,
-body{
+html,body{
     width:100%;
     height:100%;
     overflow:hidden;
@@ -54,77 +49,38 @@ canvas{
 
 /* =========================================================
    PARTY NIGHT - MANSION MAYHEM
+   FULL REPLACEMENT VERSION
 ========================================================= */
 
-const WORLD_W = 3000;
-const WORLD_H = 1900;
+const WORLD_W = 3200;
+const WORLD_H = 2100;
 
-const GAME_W = 1280;
-const GAME_H = 720;
+let game;
 
-
-/* =========================================================
-   COLORS
-========================================================= */
-
-const skinColors = [
-    0xf0b28c,
-    0xd99670,
-    0xb96f4e,
-    0xe2a27b,
-    0x8d553e,
-    0xc9825e
-];
-
-const shirtColors = [
-    0xff416c,
-    0x00b8d9,
-    0x8e44ff,
-    0xf39c12,
-    0x2ecc71,
-    0xffffff,
-    0xff5e57,
-    0x3498db
-];
-
-const hairColors = [
-    0x11131c,
-    0x302018,
-    0x513525,
-    0x191d28,
-    0x4a2419
-];
-
-
-/* =========================================================
-   GLOBALS
-========================================================= */
-
-let player = null;
+let player;
 let npcs = [];
-let walls = null;
 
-let roomGraphics = null;
-let decorationGraphics = null;
+let cursors;
+let keys;
 
-let cursors = null;
-let keys = null;
+let worldGraphics;
+let decorGraphics;
+let fxGraphics;
 
-let objectiveText = null;
-let scoreText = null;
-let statusText = null;
+let objectiveText;
+let scoreText;
+let alertText;
 
 let score = 0;
-
 let attackCooldown = 0;
-let attackFlash = 0;
-let actionPressed = false;
 
 let joystick = {
     active:false,
     x:0,
     y:0
 };
+
+let actionPressed = false;
 
 
 /* =========================================================
@@ -137,16 +93,16 @@ const config = {
 
     parent:"game-container",
 
-    width:GAME_W,
-    height:GAME_H,
+    width:1280,
+    height:720,
 
-    backgroundColor:"#070914",
+    backgroundColor:"#050713",
 
     scale:{
         mode:Phaser.Scale.FIT,
         autoCenter:Phaser.Scale.CENTER_BOTH,
-        width:GAME_W,
-        height:GAME_H
+        width:1280,
+        height:720
     },
 
     physics:{
@@ -162,14 +118,13 @@ const config = {
     },
 
     scene:{
-        preload:preload,
-        create:create,
-        update:update
+        preload,
+        create,
+        update
     }
 };
 
-
-new Phaser.Game(config);
+game = new Phaser.Game(config);
 
 
 /* =========================================================
@@ -186,18 +141,20 @@ function preload(){
 
 function create(){
 
-    roomGraphics =
-        this.add.graphics();
+    worldGraphics = this.add.graphics();
+    decorGraphics = this.add.graphics();
+    fxGraphics = this.add.graphics();
 
-    decorationGraphics =
-        this.add.graphics();
-
+    this.physics.world.setBounds(
+        0,
+        0,
+        WORLD_W,
+        WORLD_H
+    );
 
     createWorld(this);
 
     createRooms(this);
-
-    createWalls(this);
 
     createDecorations(this);
 
@@ -209,31 +166,18 @@ function create(){
 
     createControls(this);
 
-
     cursors =
         this.input.keyboard.createCursorKeys();
 
-
     keys =
         this.input.keyboard.addKeys({
-
             W:Phaser.Input.Keyboard.KeyCodes.W,
             A:Phaser.Input.Keyboard.KeyCodes.A,
             S:Phaser.Input.Keyboard.KeyCodes.S,
             D:Phaser.Input.Keyboard.KeyCodes.D,
-            SPACE:Phaser.Input.Keyboard.KeyCodes.SPACE,
-            E:Phaser.Input.Keyboard.KeyCodes.E
-
+            E:Phaser.Input.Keyboard.KeyCodes.E,
+            SPACE:Phaser.Input.Keyboard.KeyCodes.SPACE
         });
-
-
-    this.physics.world.setBounds(
-        0,
-        0,
-        WORLD_W,
-        WORLD_H
-    );
-
 
     this.cameras.main.setBounds(
         0,
@@ -242,35 +186,16 @@ function create(){
         WORLD_H
     );
 
-
     this.cameras.main.startFollow(
         player,
         true,
-        0.08,
-        0.08
+        0.10,
+        0.10
     );
-
 
     this.cameras.main.setZoom(1);
 
-
-    this.physics.add.collider(
-        player,
-        walls
-    );
-
-
-    npcs.forEach(function(npc){
-
-        this.physics.add.collider(
-            npc,
-            walls
-        );
-
-    },this);
-
-
-    updateScoreText();
+    player.body.setCollideWorldBounds(true);
 }
 
 
@@ -278,22 +203,17 @@ function create(){
    UPDATE
 ========================================================= */
 
-function update(time,delta){
+function update(scene){
 
-    if(!player){
-        return;
-    }
+    updatePlayer(scene);
 
-    updatePlayer(this);
+    updateNPCs(scene);
 
-    updateNPCs(this,delta);
+    updateAttack(scene);
 
-    updateAttackFX();
+    updateObjective(scene);
 
-    updateObjective();
-
-    updateNPCSeparation();
-
+    updateAlert(scene);
 }
 
 
@@ -303,11 +223,11 @@ function update(time,delta){
 
 function createWorld(scene){
 
-    roomGraphics.fillStyle(
-        0x090d18
+    worldGraphics.fillStyle(
+        0x070b16
     );
 
-    roomGraphics.fillRect(
+    worldGraphics.fillRect(
         0,
         0,
         WORLD_W,
@@ -315,126 +235,92 @@ function createWorld(scene){
     );
 
 
-    /* HOUSE */
+    /* Mansion foundation */
 
-    roomGraphics.fillStyle(
-        0x171b2b
+    worldGraphics.fillStyle(
+        0x151a28
     );
 
-    roomGraphics.fillRect(
-        120,
+    worldGraphics.fillRect(
         100,
-        2650,
-        1250
+        90,
+        3000,
+        1450
     );
 
 
-    /* HOUSE SHADOW */
+    /* Garden */
 
-    roomGraphics.lineStyle(
-        14,
-        0x050812
+    worldGraphics.fillStyle(
+        0x103d2b
     );
 
-    roomGraphics.strokeRect(
-        120,
+    worldGraphics.fillRect(
         100,
-        2650,
-        1250
+        1540,
+        1500,
+        470
     );
 
 
-    /* GARDEN */
+    /* Pool zone */
 
-    roomGraphics.fillStyle(
-        0x0d3927
+    worldGraphics.fillStyle(
+        0x103c4c
     );
 
-    roomGraphics.fillRect(
-        120,
-        1350,
-        1450,
-        430
-    );
-
-
-    /* POOL SIDE */
-
-    roomGraphics.fillStyle(
-        0x123d49
-    );
-
-    roomGraphics.fillRect(
-        1570,
-        1350,
-        1200,
-        430
+    worldGraphics.fillRect(
+        1600,
+        1540,
+        1500,
+        470
     );
 
 
-    /* ROAD */
+    /* Entrance road */
 
-    roomGraphics.fillStyle(
-        0x141821
+    worldGraphics.fillStyle(
+        0x1c202c
     );
 
-    roomGraphics.fillRect(
-        1100,
-        1780,
-        950,
-        120
+    worldGraphics.fillRect(
+        1320,
+        2010,
+        560,
+        90
     );
 
 
-    roomGraphics.lineStyle(
-        5,
-        0x454b59
+    /* Outer mansion border */
+
+    worldGraphics.lineStyle(
+        12,
+        0x41485d
     );
 
-    for(
-        let x=1150;
-        x<2000;
-        x+=120
-    ){
+    worldGraphics.strokeRect(
+        100,
+        90,
+        3000,
+        1920
+    );
 
-        roomGraphics.lineBetween(
-            x,
-            1840,
-            x+60,
-            1840
+
+    /* Neon outer lights */
+
+    for(let x=160;x<3050;x+=170){
+
+        worldGraphics.fillStyle(
+            0xffd45c,
+            0.9
         );
 
+        worldGraphics.fillCircle(
+            x,
+            1540,
+            7
+        );
     }
-
-
-    /* OUTER BORDER */
-
-    roomGraphics.lineStyle(
-        10,
-        0x3e465e
-    );
-
-    roomGraphics.strokeRect(
-        120,
-        100,
-        2650,
-        1680
-    );
-
-
-    /* ENTRANCE PATH */
-
-    roomGraphics.fillStyle(
-        0x252b3b
-    );
-
-    roomGraphics.fillRect(
-        1150,
-        1200,
-        300,
-        580
-    );
-
 }
 
 
@@ -445,72 +331,92 @@ function createWorld(scene){
 function createRooms(scene){
 
     drawRoom(
-        150,130,700,470,
+        130,
+        120,
+        720,
+        520,
         0x321a4d,
         "PARTY HALL"
     );
 
-
     drawRoom(
-        850,130,700,470,
-        0x253238,
+        850,
+        120,
+        760,
+        520,
+        0x29383e,
         "BAR & KITCHEN"
     );
 
-
     drawRoom(
-        1550,130,650,470,
-        0x432837,
+        1610,
+        120,
+        700,
+        520,
+        0x482936,
         "MASTER BEDROOM"
     );
 
-
     drawRoom(
-        2200,130,530,470,
-        0x263b47,
+        2310,
+        120,
+        770,
+        520,
+        0x253e4b,
         "BATHROOM"
     );
 
 
     drawRoom(
-        150,620,700,600,
-        0x29203d,
+        130,
+        640,
+        720,
+        650,
+        0x29213f,
         "LOUNGE"
     );
 
-
     drawRoom(
-        850,620,1370,350,
-        0x202535,
+        850,
+        640,
+        1460,
+        350,
+        0x202837,
         "MAIN CORRIDOR"
     );
 
-
     drawRoom(
-        2220,620,510,600,
-        0x28251f,
+        2310,
+        640,
+        770,
+        650,
+        0x29261f,
         "STORAGE"
     );
 
 
     drawOutdoor(
-        150,1230,1350,520,
-        0x123d28,
-        "GARDEN"
+        130,
+        1290,
+        1470,
+        700,
+        0x123c29,
+        "GARDEN PARTY"
     );
-
 
     drawOutdoor(
-        1570,1230,1200,520,
-        0x123e4b,
-        "POOL DECK"
+        1600,
+        1290,
+        1480,
+        700,
+        0x123e4c,
+        "POOL AREA"
     );
-
 }
 
 
 /* =========================================================
-   DRAW ROOM
+   ROOM DRAW
 ========================================================= */
 
 function drawRoom(
@@ -522,9 +428,11 @@ function drawRoom(
     title
 ){
 
-    roomGraphics.fillStyle(color);
+    worldGraphics.fillStyle(
+        color
+    );
 
-    roomGraphics.fillRect(
+    worldGraphics.fillRect(
         x,
         y,
         w,
@@ -532,12 +440,12 @@ function drawRoom(
     );
 
 
-    roomGraphics.lineStyle(
-        7,
-        0x555d73
+    worldGraphics.lineStyle(
+        9,
+        0x596174
     );
 
-    roomGraphics.strokeRect(
+    worldGraphics.strokeRect(
         x,
         y,
         w,
@@ -545,49 +453,47 @@ function drawRoom(
     );
 
 
-    roomGraphics.lineStyle(
+    worldGraphics.lineStyle(
         2,
-        0x72798b
+        0x858da3
     );
 
-    roomGraphics.strokeRect(
-        x+12,
-        y+12,
-        w-24,
-        h-24
+    worldGraphics.strokeRect(
+        x+14,
+        y+14,
+        w-28,
+        h-28
     );
 
 
-    const text =
+    const label =
         game.scene.scenes[0].add.text(
             x+w/2,
             y+34,
             title,
             {
                 fontFamily:"Arial",
-                fontSize:"21px",
+                fontSize:"24px",
                 fontStyle:"bold",
-                color:"#e8edff",
-                backgroundColor:"#0d1220",
+                color:"#f3f6ff",
+                backgroundColor:"#080d18",
                 padding:{
-                    left:12,
-                    right:12,
+                    left:14,
+                    right:14,
                     top:7,
                     bottom:7
                 }
             }
         );
 
-
-    text.setOrigin(0.5);
-
-    text.setDepth(25);
-
+    label
+        .setOrigin(0.5)
+        .setDepth(30);
 }
 
 
 /* =========================================================
-   DRAW OUTDOOR
+   OUTDOOR DRAW
 ========================================================= */
 
 function drawOutdoor(
@@ -599,9 +505,11 @@ function drawOutdoor(
     title
 ){
 
-    roomGraphics.fillStyle(color);
+    worldGraphics.fillStyle(
+        color
+    );
 
-    roomGraphics.fillRect(
+    worldGraphics.fillRect(
         x,
         y,
         w,
@@ -609,12 +517,12 @@ function drawOutdoor(
     );
 
 
-    roomGraphics.lineStyle(
-        7,
-        0x41664e
+    worldGraphics.lineStyle(
+        8,
+        0x48745b
     );
 
-    roomGraphics.strokeRect(
+    worldGraphics.strokeRect(
         x,
         y,
         w,
@@ -622,240 +530,29 @@ function drawOutdoor(
     );
 
 
-    const text =
+    const label =
         game.scene.scenes[0].add.text(
             x+w/2,
             y+34,
             title,
             {
                 fontFamily:"Arial",
-                fontSize:"21px",
+                fontSize:"24px",
                 fontStyle:"bold",
-                color:"#ecfff3",
-                backgroundColor:"#0b2018",
+                color:"#effff5",
+                backgroundColor:"#092015",
                 padding:{
-                    left:12,
-                    right:12,
+                    left:14,
+                    right:14,
                     top:7,
                     bottom:7
                 }
             }
         );
 
-
-    text.setOrigin(0.5);
-
-    text.setDepth(25);
-
-}
-
-
-/* =========================================================
-   WALLS
-========================================================= */
-
-function createWalls(scene){
-
-    walls =
-        scene.physics.add.staticGroup();
-
-
-    /* OUTER */
-
-    addWall(
-        scene,
-        1450,
-        105,
-        2650,
-        25
-    );
-
-
-    addWall(
-        scene,
-        1450,
-        1345,
-        2650,
-        25
-    );
-
-
-    addWall(
-        scene,
-        132,
-        720,
-        25,
-        1240
-    );
-
-
-    addWall(
-        scene,
-        2758,
-        720,
-        25,
-        1240
-    );
-
-
-    /* TOP DIVIDERS */
-
-    addWall(
-        scene,
-        850,
-        210,
-        18,
-        150
-    );
-
-    addWall(
-        scene,
-        850,
-        500,
-        18,
-        80
-    );
-
-
-    addWall(
-        scene,
-        1550,
-        210,
-        18,
-        150
-    );
-
-    addWall(
-        scene,
-        1550,
-        500,
-        18,
-        80
-    );
-
-
-    addWall(
-        scene,
-        2200,
-        210,
-        18,
-        150
-    );
-
-    addWall(
-        scene,
-        2200,
-        500,
-        18,
-        80
-    );
-
-
-    /* LOWER */
-
-    addWall(
-        scene,
-        2220,
-        700,
-        18,
-        300
-    );
-
-    addWall(
-        scene,
-        2220,
-        1100,
-        18,
-        120
-    );
-
-
-    /* LOUNGE WALL */
-
-    addWall(
-        scene,
-        150,
-        620,
-        280,
-        16
-    );
-
-    addWall(
-        scene,
-        560,
-        620,
-        290,
-        16
-    );
-
-
-    /* FURNITURE BLOCKS */
-
-    addWall(
-        scene,
-        930,
-        375,
-        520,
-        18
-    );
-
-
-    addWall(
-        scene,
-        1680,
-        500,
-        390,
-        16
-    );
-
-
-    addWall(
-        scene,
-        2300,
-        1100,
-        300,
-        16
-    );
-
-}
-
-
-/* =========================================================
-   ADD WALL
-========================================================= */
-
-function addWall(
-    scene,
-    x,
-    y,
-    width,
-    height
-){
-
-    const wall =
-        walls.create(
-            x,
-            y,
-            null
-        );
-
-
-    wall.setSize(
-        width,
-        height
-    );
-
-
-    wall.setDisplaySize(
-        width,
-        height
-    );
-
-
-    wall.refreshBody();
-
-    wall.setVisible(false);
-
+    label
+        .setOrigin(0.5)
+        .setDepth(30);
 }
 
 
@@ -865,671 +562,662 @@ function addWall(
 
 function createDecorations(scene){
 
-    /* PARTY FLOOR */
+    /* PARTY DANCE FLOOR */
 
-    decorationGraphics.fillStyle(
-        0x151b3d
+    decorGraphics.fillStyle(
+        0x141c3c
     );
 
-    decorationGraphics.fillRect(
-        270,
-        250,
-        460,
-        270
+    decorGraphics.fillRect(
+        210,
+        255,
+        560,
+        300
+    );
+
+    decorGraphics.lineStyle(
+        6,
+        0xa72fff
+    );
+
+    decorGraphics.strokeRect(
+        210,
+        255,
+        560,
+        300
     );
 
 
-    decorationGraphics.lineStyle(
-        5,
-        0x9f48ff
-    );
+    /* Dance tiles */
 
-    decorationGraphics.strokeRect(
-        270,
-        250,
-        460,
-        270
-    );
+    for(let x=240;x<750;x+=85){
 
+        for(let y=285;y<530;y+=80){
 
-    const tiles = [
-        0x222b61,
-        0x39205c,
-        0x173e55,
-        0x51244c
-    ];
-
-
-    for(
-        let row=0;
-        row<4;
-        row++
-    ){
-
-        for(
-            let col=0;
-            col<6;
-            col++
-        ){
-
-            decorationGraphics.fillStyle(
-                tiles[
-                    (row+col)%tiles.length
-                ]
+            decorGraphics.fillStyle(
+                ((x+y)/10)%2===0
+                ? 0x292e61
+                : 0x1b234c
             );
 
-
-            decorationGraphics.fillRect(
-                285+col*72,
-                265+row*60,
-                60,
-                48
+            decorGraphics.fillRect(
+                x,
+                y,
+                65,
+                60
             );
-
         }
-
     }
 
 
-    /* DJ */
+    /* DJ STAGE */
 
-    decorationGraphics.fillStyle(
-        0x090b12
+    decorGraphics.fillStyle(
+        0x0b0d15
     );
 
-    decorationGraphics.fillRoundedRect(
-        360,
-        160,
-        260,
-        80,
+    decorGraphics.fillRoundedRect(
+        330,
+        165,
+        320,
+        70,
         12
     );
 
-
-    decorationGraphics.fillStyle(
+    decorGraphics.fillStyle(
         0xff278e
     );
 
-    decorationGraphics.fillRect(
-        395,
-        178,
-        190,
-        8
+    decorGraphics.fillRect(
+        370,
+        185,
+        240,
+        10
     );
-
-
-    decorationGraphics.fillStyle(
-        0x00eaff
-    );
-
-    decorationGraphics.fillRect(
-        395,
-        202,
-        190,
-        8
-    );
-
 
     scene.add.text(
         490,
-        210,
+        198,
         "DJ",
         {
-            fontSize:"27px",
+            fontSize:"30px",
             fontStyle:"bold",
             color:"#ffffff"
         }
     )
-    .setOrigin(0.5);
+    .setOrigin(.5)
+    .setDepth(40);
 
 
-    drawSpeaker(scene,320,180);
-    drawSpeaker(scene,660,180);
-    drawSpeaker(scene,320,470);
-    drawSpeaker(scene,660,470);
+    /* PARTY TABLES */
+
+    drawTable(290,340);
+    drawTable(690,340);
+    drawTable(290,500);
+    drawTable(690,500);
 
 
-    /* TABLES */
+    /* SPEAKERS */
 
-    drawTable(350,330);
-    drawTable(650,330);
-    drawTable(350,470);
-    drawTable(650,470);
+    drawSpeaker(scene,170,220);
+    drawSpeaker(scene,790,220);
 
 
-    /* BAR */
+    /* BAR COUNTER */
 
-    decorationGraphics.fillStyle(
-        0x71482f
+    decorGraphics.fillStyle(
+        0x70452f
     );
 
-    decorationGraphics.fillRoundedRect(
+    decorGraphics.fillRoundedRect(
         930,
-        330,
-        520,
-        90,
-        12
+        345,
+        600,
+        95,
+        15
     );
 
-
-    decorationGraphics.lineStyle(
-        4,
-        0xd18a57
+    decorGraphics.lineStyle(
+        5,
+        0xc07a4e
     );
 
-    decorationGraphics.strokeRoundedRect(
+    decorGraphics.strokeRoundedRect(
         930,
-        330,
-        520,
-        90,
-        12
+        345,
+        600,
+        95,
+        15
     );
 
 
-    for(
-        let i=0;
-        i<7;
-        i++
-    ){
+    for(let i=0;i<7;i++){
 
-        drawCircle(
-            985+i*70,
-            455,
-            18,
-            0x111827
+        drawBarStool(
+            975+i*80,
+            475
         );
-
-    }
-
-
-    /* BOTTLES */
-
-    for(
-        let i=0;
-        i<8;
-        i++
-    ){
-
-        decorationGraphics.fillStyle(
-            i%2===0
-            ? 0x00c6d7
-            : 0xff2f92
-        );
-
-
-        decorationGraphics.fillRoundedRect(
-            980+i*55,
-            250,
-            20,
-            55,
-            5
-        );
-
-
-        decorationGraphics.fillStyle(
-            0xe6d4a5
-        );
-
-
-        decorationGraphics.fillRect(
-            985+i*55,
-            238,
-            10,
-            14
-        );
-
     }
 
 
     /* KITCHEN */
 
-    decorationGraphics.fillStyle(
-        0x4c5961
+    decorGraphics.fillStyle(
+        0x515e66
     );
 
-    decorationGraphics.fillRoundedRect(
-        950,
+    decorGraphics.fillRoundedRect(
+        930,
         170,
-        260,
-        100,
-        10
+        320,
+        110,
+        12
     );
 
-
-    decorationGraphics.fillStyle(
-        0x697781
+    decorGraphics.fillStyle(
+        0x75838a
     );
 
-    decorationGraphics.fillRoundedRect(
-        1240,
+    decorGraphics.fillRoundedRect(
+        1280,
         170,
-        180,
-        100,
-        10
+        220,
+        110,
+        12
     );
 
 
     /* FRIDGE */
 
-    decorationGraphics.fillStyle(
-        0x9ba8ad
+    decorGraphics.fillStyle(
+        0xb8c3c9
     );
 
-    decorationGraphics.fillRect(
-        1300,
-        180,
-        95,
-        180
-    );
-
-
-    decorationGraphics.lineStyle(
-        3,
-        0xd6e2e5
-    );
-
-    decorationGraphics.strokeRect(
-        1300,
-        180,
-        95,
-        180
-    );
-
-
-    /* BED */
-
-    decorationGraphics.fillStyle(
-        0x722d4b
-    );
-
-    decorationGraphics.fillRoundedRect(
-        1680,
-        270,
-        390,
-        250,
-        15
-    );
-
-
-    decorationGraphics.fillStyle(
-        0xe8dce0
-    );
-
-    decorationGraphics.fillRoundedRect(
-        1715,
-        295,
-        155,
-        80,
-        10
-    );
-
-    decorationGraphics.fillRoundedRect(
-        1885,
-        295,
-        155,
-        80,
-        10
-    );
-
-
-    decorationGraphics.fillStyle(
-        0x3b1c2b
-    );
-
-    decorationGraphics.fillRoundedRect(
-        1680,
-        245,
-        390,
-        45,
+    decorGraphics.fillRoundedRect(
+        1400,
+        185,
+        110,
+        230,
         8
     );
 
-
-    /* BED TABLES */
-
-    drawSmallTable(1630,450);
-    drawSmallTable(2110,450);
-
-
-    /* CUPBOARD */
-
-    decorationGraphics.fillStyle(
-        0x6b3f35
+    decorGraphics.fillStyle(
+        0x5f6b73
     );
 
-    decorationGraphics.fillRect(
-        1600,
-        150,
-        180,
-        70
+    decorGraphics.fillRect(
+        1420,
+        205,
+        5,
+        190
     );
 
 
-    /* LOUNGE */
+    /* BEDROOM */
 
-    drawSofa(
-        220,
-        820,
-        500,
-        105
+    decorGraphics.fillStyle(
+        0x6e3046
     );
 
-
-    drawSofa(
-        250,
-        1080,
-        440,
-        95
-    );
-
-
-    /* LOUNGE TABLE */
-
-    decorationGraphics.fillStyle(
-        0x805436
-    );
-
-    decorationGraphics.fillRoundedRect(
-        370,
-        925,
+    decorGraphics.fillRoundedRect(
+        1740,
         280,
-        100,
+        430,
+        270,
+        20
+    );
+
+    decorGraphics.fillStyle(
+        0xe9dce2
+    );
+
+    decorGraphics.fillRoundedRect(
+        1770,
+        310,
+        180,
+        85,
+        15
+    );
+
+    decorGraphics.fillRoundedRect(
+        1970,
+        310,
+        180,
+        85,
         15
     );
 
 
-    decorationGraphics.fillStyle(
-        0xcba66a
+    drawBedsideTable(1680,390);
+    drawBedsideTable(2190,390);
+
+
+    /* LOUNGE SOFAS */
+
+    drawSofa(
+        220,
+        800,
+        520,
+        110
     );
 
-    decorationGraphics.fillCircle(
-        510,
-        975,
-        30
+    drawSofa(
+        250,
+        1090,
+        460,
+        105
     );
 
 
     /* TV */
 
-    decorationGraphics.fillStyle(
-        0x080b12
+    decorGraphics.fillStyle(
+        0x090d17
     );
 
-    decorationGraphics.fillRoundedRect(
-        350,
-        670,
+    decorGraphics.fillRoundedRect(
+        340,
+        690,
         400,
-        60,
+        65,
         8
     );
 
-
-    decorationGraphics.lineStyle(
+    decorGraphics.lineStyle(
         4,
-        0x6874a2
+        0x7884ad
     );
 
-    decorationGraphics.strokeRoundedRect(
-        350,
-        670,
+    decorGraphics.strokeRoundedRect(
+        340,
+        690,
         400,
-        60,
+        65,
         8
     );
 
 
-    decorationGraphics.fillStyle(
-        0x163858
-    );
+    /* STORAGE */
 
-    decorationGraphics.fillRect(
-        375,
-        687,
-        350,
-        25
-    );
+    for(let r=0;r<4;r++){
 
+        for(let c=0;c<5;c++){
 
-    /* STORAGE BOXES */
-
-    for(
-        let row=0;
-        row<3;
-        row++
-    ){
-
-        for(
-            let col=0;
-            col<4;
-            col++
-        ){
-
-            decorationGraphics.fillStyle(
+            decorGraphics.fillStyle(
                 0x765238
             );
 
-
-            decorationGraphics.fillRect(
-                2290+col*90,
-                750+row*110,
-                70,
-                70
+            decorGraphics.fillRect(
+                2380+c*110,
+                760+r*105,
+                82,
+                72
             );
 
-
-            decorationGraphics.lineStyle(
-                3,
-                0xa8754d
+            decorGraphics.lineStyle(
+                2,
+                0x9c734d
             );
 
-
-            decorationGraphics.strokeRect(
-                2290+col*90,
-                750+row*110,
-                70,
-                70
+            decorGraphics.strokeRect(
+                2380+c*110,
+                760+r*105,
+                82,
+                72
             );
-
         }
-
     }
 
 
-    /* TREES */
+    /* GARDEN TREES */
 
     const trees = [
 
-        [250,1390],
-        [470,1600],
-        [700,1410],
-        [930,1660],
-        [1180,1430],
-        [1400,1640]
+        [230,1400],
+        [430,1720],
+        [650,1430],
+        [880,1800],
+        [1120,1430],
+        [1370,1720],
+        [1480,1450]
 
     ];
 
-
-    trees.forEach(function(tree){
-
-        drawTree(
-            tree[0],
-            tree[1]
-        );
-
-    });
+    trees.forEach(
+        t=>{
+            drawTree(
+                scene,
+                t[0],
+                t[1]
+            );
+        }
+    );
 
 
     /* GARDEN TABLES */
 
-    drawTable(800,1490);
-    drawTable(1080,1570);
-
-
-    /* GARDEN LAMPS */
-
-    for(
-        let i=0;
-        i<5;
-        i++
-    ){
-
-        drawGardenLamp(
-            350+i*250,
-            1500+(i%2)*150
-        );
-
-    }
+    drawTable(800,1510);
+    drawTable(1070,1660);
 
 
     /* POOL */
 
-    decorationGraphics.fillStyle(
-        0x087ca9
+    decorGraphics.fillStyle(
+        0x1084b8
     );
 
-    decorationGraphics.fillRoundedRect(
-        1690,
-        1370,
-        820,
-        310,
+    decorGraphics.fillRoundedRect(
+        1740,
+        1380,
+        1120,
+        420,
+        30
+    );
+
+    decorGraphics.lineStyle(
+        10,
+        0x75eaff
+    );
+
+    decorGraphics.strokeRoundedRect(
+        1740,
+        1380,
+        1120,
+        420,
         30
     );
 
 
-    decorationGraphics.lineStyle(
-        9,
-        0x6eeaff
+    /* Pool lane lines */
+
+    decorGraphics.lineStyle(
+        4,
+        0x9defff
     );
-
-    decorationGraphics.strokeRoundedRect(
-        1690,
-        1370,
-        820,
-        310,
-        30
-    );
-
-
-    decorationGraphics.lineStyle(
-        3,
-        0x8eeeff,
-        0.7
-    );
-
 
     for(
-        let x=1800;
-        x<2500;
-        x+=140
+        let x=1840;
+        x<2800;
+        x+=160
     ){
 
-        decorationGraphics.lineBetween(
+        decorGraphics.lineBetween(
             x,
-            1405,
+            1420,
             x,
-            1645
+            1760
         );
-
     }
 
 
-    /* POOL FLOATS */
+    /* Pool chairs */
 
-    decorationGraphics.fillStyle(
-        0xff4c9b
-    );
+    for(let i=0;i<5;i++){
 
-    decorationGraphics.fillEllipse(
-        1850,
-        1500,
-        130,
-        55
-    );
-
-
-    decorationGraphics.fillStyle(
-        0xffd45c
-    );
-
-    decorationGraphics.fillEllipse(
-        2190,
-        1580,
-        150,
-        60
-    );
-
-
-    /* POOL CHAIRS */
-
-    for(
-        let i=0;
-        i<4;
-        i++
-    ){
-
-        drawPoolChair(
-            1600+i*260,
-            1700
+        drawChair(
+            1640+i*260,
+            1840
         );
-
     }
 
 
-    /* LIGHTS */
+    /* Garden lights */
 
-    for(
-        let x=190;
-        x<2650;
-        x+=180
-    ){
+    for(let x=180;x<1500;x+=150){
+
+        drawLight(
+            x,
+            1270
+        );
+    }
+
+
+    /* Corridor lights */
+
+    for(let x=900;x<2250;x+=160){
 
         drawLight(
             x,
             610
         );
 
+        drawLight(
+            x,
+            985
+        );
     }
 
 
-    for(
-        let x=900;
-        x<2150;
-        x+=180
-    ){
+    /* Upper wall lights */
+
+    for(let x=180;x<3000;x+=180){
 
         drawLight(
             x,
-            950
+            670
         );
-
     }
+}
 
 
-    /* ENTRANCE */
+/* =========================================================
+   DECORATION HELPERS
+========================================================= */
 
-    decorationGraphics.fillStyle(
-        0x4a2b22
+function drawTable(x,y){
+
+    decorGraphics.fillStyle(
+        0x754d35
     );
 
-    decorationGraphics.fillRoundedRect(
-        1230,
-        1180,
-        140,
-        90,
-        10
+    decorGraphics.fillCircle(
+        x,
+        y,
+        45
     );
 
-
-    decorationGraphics.fillStyle(
-        0xd4a04c
+    decorGraphics.fillStyle(
+        0xffc963
     );
 
-    decorationGraphics.fillCircle(
-        1340,
-        1225,
-        7
+    decorGraphics.fillCircle(
+        x,
+        y,
+        9
+    );
+}
+
+
+function drawSofa(x,y,w,h){
+
+    decorGraphics.fillStyle(
+        0x57316a
     );
 
+    decorGraphics.fillRoundedRect(
+        x,
+        y,
+        w,
+        h,
+        20
+    );
+
+    decorGraphics.fillStyle(
+        0x854d94
+    );
+
+    decorGraphics.fillRoundedRect(
+        x+15,
+        y+12,
+        w-30,
+        h-28,
+        15
+    );
+}
+
+
+function drawTree(scene,x,y){
+
+    decorGraphics.fillStyle(
+        0x61432d
+    );
+
+    decorGraphics.fillRect(
+        x-12,
+        y,
+        24,
+        75
+    );
+
+    decorGraphics.fillStyle(
+        0x155b34
+    );
+
+    decorGraphics.fillCircle(
+        x,
+        y,
+        70
+    );
+
+    decorGraphics.fillStyle(
+        0x25854d
+    );
+
+    decorGraphics.fillCircle(
+        x-28,
+        y-25,
+        38
+    );
+
+    decorGraphics.fillCircle(
+        x+30,
+        y-15,
+        40
+    );
+}
+
+
+function drawLight(x,y){
+
+    decorGraphics.fillStyle(
+        0xffd76a,
+        0.25
+    );
+
+    decorGraphics.fillCircle(
+        x,
+        y,
+        22
+    );
+
+    decorGraphics.fillStyle(
+        0xffdf72
+    );
+
+    decorGraphics.fillCircle(
+        x,
+        y,
+        8
+    );
+}
+
+
+function drawSpeaker(scene,x,y){
+
+    decorGraphics.fillStyle(
+        0x080b13
+    );
+
+    decorGraphics.fillRoundedRect(
+        x,
+        y,
+        55,
+        105,
+        8
+    );
+
+    decorGraphics.fillStyle(
+        0x00eaff
+    );
+
+    decorGraphics.fillCircle(
+        x+28,
+        y+35,
+        15
+    );
+
+    decorGraphics.fillStyle(
+        0xff278e
+    );
+
+    decorGraphics.fillCircle(
+        x+28,
+        y+75,
+        9
+    );
+}
+
+
+function drawBarStool(x,y){
+
+    decorGraphics.fillStyle(
+        0x101827
+    );
+
+    decorGraphics.fillCircle(
+        x,
+        y,
+        20
+    );
+
+    decorGraphics.fillRect(
+        x-3,
+        y+15,
+        6,
+        28
+    );
+}
+
+
+function drawBedsideTable(x,y){
+
+    decorGraphics.fillStyle(
+        0x704d38
+    );
+
+    decorGraphics.fillRoundedRect(
+        x,
+        y,
+        75,
+        65,
+        8
+    );
+
+    decorGraphics.fillStyle(
+        0xffd15c
+    );
+
+    decorGraphics.fillCircle(
+        x+37,
+        y+15,
+        8
+    );
+}
+
+
+function drawChair(x,y){
+
+    decorGraphics.fillStyle(
+        0xe2b95e
+    );
+
+    decorGraphics.fillRoundedRect(
+        x,
+        y,
+        105,
+        38,
+        8
+    );
 }
 
 
@@ -1541,56 +1229,53 @@ function createPlayer(scene){
 
     player =
         scene.add.container(
-            1200,
-            1080
+            1220,
+            820
         );
-
-
-    /* IMPORTANT:
-       Container physics setup */
 
     scene.physics.add.existing(
         player
     );
 
-
-    player.body.setSize(
-        38,
-        58
+    player.setSize(
+        44,
+        70
     );
 
-
-    player.body.setOffset(
-        -19,
-        -29
-    );
-
-
-    /* FIX:
-       Container doesn't have setCollideWorldBounds.
-       Body does. */
+    player.setDepth(200);
 
     player.body.setCollideWorldBounds(
         true
     );
 
 
-    player.setDepth(
-        100
+    /* Shadow */
+
+    const shadow =
+        scene.add.ellipse(
+            0,
+            38,
+            52,
+            17,
+            0x000000,
+            .48
+        );
+
+    player.add(
+        shadow
     );
 
 
-    /* GLOW */
+    /* Glow */
 
     const glow =
         scene.add.circle(
             0,
             0,
-            55,
+            58,
             0x00eaff,
-            0.10
+            .10
         );
-
 
     player.addAt(
         glow,
@@ -1598,186 +1283,205 @@ function createPlayer(scene){
     );
 
 
-    /* SHADOW */
+    /* Legs */
 
-    player.add(
-        scene.add.ellipse(
-            0,
-            38,
-            50,
-            17,
-            0x000000,
-            0.45
-        )
-    );
-
-
-    /* LEGS */
-
-    player.add([
-
+    const leftLeg =
         scene.add.rectangle(
             -12,
             25,
-            13,
-            32,
-            0x202334
-        ),
+            14,
+            34,
+            0x202535
+        );
 
+    const rightLeg =
         scene.add.rectangle(
             12,
             25,
-            13,
-            32,
-            0x202334
-        )
-
-    ]);
-
-
-    /* SHOES */
+            14,
+            34,
+            0x202535
+        );
 
     player.add([
-
-        scene.add.rectangle(
-            -13,
-            43,
-            23,
-            10,
-            0xf4f4f4
-        ),
-
-        scene.add.rectangle(
-            13,
-            43,
-            23,
-            10,
-            0xf4f4f4
-        )
-
+        leftLeg,
+        rightLeg
     ]);
 
 
-    /* BODY */
+    /* Shoes */
 
-    player.add(
+    const leftShoe =
+        scene.add.rectangle(
+            -14,
+            44,
+            25,
+            11,
+            0xf4f4f4
+        );
+
+    const rightShoe =
+        scene.add.rectangle(
+            14,
+            44,
+            25,
+            11,
+            0xf4f4f4
+        );
+
+    player.add([
+        leftShoe,
+        rightShoe
+    ]);
+
+
+    /* Shirt */
+
+    const body =
         scene.add.rectangle(
             0,
             -5,
-            42,
+            44,
             52,
             0xf4f4f4
-        )
+        );
+
+    player.add(
+        body
     );
 
 
-    /* JACKET */
+    /* Jacket */
 
-    player.add(
+    const jacket =
         scene.add.rectangle(
             0,
             -5,
-            30,
+            31,
             50,
             0x171b2c
-        )
+        );
+
+    player.add(
+        jacket
     );
 
 
-    /* JACKET LINE */
+    /* Shirt center */
 
-    player.add(
+    const shirtLine =
         scene.add.rectangle(
             0,
-            -5,
-            3,
-            42,
-            0x46506d
-        )
+            -4,
+            4,
+            38,
+            0xdce5ff
+        );
+
+    player.add(
+        shirtLine
     );
 
 
-    /* NECK */
+    /* Neck */
 
-    player.add(
+    const neck =
         scene.add.rectangle(
             0,
             -35,
-            13,
+            14,
             15,
             0xd99670
-        )
+        );
+
+    player.add(
+        neck
     );
 
 
-    /* HEAD */
+    /* Head */
 
-    player.add(
+    const head =
         scene.add.circle(
             0,
             -55,
-            25,
+            26,
             0xd99670
-        )
+        );
+
+    player.add(
+        head
     );
 
 
-    /* EARS */
+    /* Ears */
 
     player.add([
-
         scene.add.circle(
-            -24,
+            -25,
             -55,
-            6,
+            7,
             0xd99670
         ),
 
         scene.add.circle(
-            24,
+            25,
             -55,
-            6,
+            7,
             0xd99670
         )
-
     ]);
 
 
-    /* HAIR */
+    /* Hair */
 
-    player.add(
+    const hair =
         scene.add.ellipse(
             0,
             -75,
-            47,
-            28,
-            0x11131c
+            49,
+            29,
+            0x10131c
+        );
+
+    player.add(
+        hair
+    );
+
+
+    /* Hair front */
+
+    player.add(
+        scene.add.rectangle(
+            0,
+            -72,
+            42,
+            12,
+            0x10131c
         )
     );
 
 
-    /* EYES */
+    /* Eyes */
 
     player.add([
-
         scene.add.circle(
             -9,
             -55,
-            3,
+            3.2,
             0x111111
         ),
 
         scene.add.circle(
             9,
             -55,
-            3,
+            3.2,
             0x111111
         )
-
     ]);
 
 
-    /* NOSE */
+    /* Nose */
 
     player.add(
         scene.add.triangle(
@@ -1789,12 +1493,12 @@ function createPlayer(scene){
             10,
             -7,
             10,
-            0xd27f62
+            0xc8795e
         )
     );
 
 
-    /* MOUTH */
+    /* Mouth */
 
     player.add(
         scene.add.rectangle(
@@ -1802,15 +1506,14 @@ function createPlayer(scene){
             -40,
             12,
             3,
-            0x7b3441
+            0x74343d
         )
     );
 
 
-    /* ARMS */
+    /* Arms */
 
     player.add([
-
         scene.add.rectangle(
             -27,
             -5,
@@ -1826,14 +1529,12 @@ function createPlayer(scene){
             40,
             0x171b2c
         )
-
     ]);
 
 
-    /* HANDS */
+    /* Hands */
 
     player.add([
-
         scene.add.circle(
             -27,
             17,
@@ -1847,107 +1548,83 @@ function createPlayer(scene){
             7,
             0xd99670
         )
-
     ]);
 
 
-    /* NAME */
-
-    player.add(
+    player.nameTag =
         scene.add.text(
             0,
             -105,
             "YOU",
             {
-                fontFamily:"Arial",
-                fontSize:"13px",
+                fontSize:"15px",
                 fontStyle:"bold",
                 color:"#00eaff",
                 stroke:"#050713",
                 strokeThickness:4
             }
         )
-        .setOrigin(0.5)
+        .setOrigin(.5);
+
+    player.add(
+        player.nameTag
     );
-
-
-    /* ATTACK RING */
-
-    player.attackRing =
-        scene.add.circle(
-            0,
-            0,
-            20,
-            0x00eaff,
-            0
-        );
-
-
-    player.attackRing.setStrokeStyle(
-        5,
-        0x00eaff,
-        0
-    );
-
-
-    player.addAt(
-        player.attackRing,
-        1
-    );
-
 }
 
 
 /* =========================================================
-   NPCS
+   NPC CREATION
 ========================================================= */
 
 function createNPCs(scene){
 
     const positions = [
 
-        [500,330],
-        [700,470],
-        [1040,300],
-        [1350,470],
+        [480,330],
+        [700,500],
 
-        [1700,320],
-        [1950,470],
+        [1030,300],
+        [1320,500],
 
-        [2350,320],
-        [2550,470],
+        [1750,330],
+        [2050,490],
 
-        [500,850],
-        [720,1080],
+        [2470,300],
+        [2830,500],
 
-        [1050,800],
+        [480,820],
+        [700,1110],
+
+        [1060,790],
         [1450,850],
 
-        [2400,820],
-        [2600,1080],
+        [1800,800],
+        [2100,900],
 
-        [500,1450],
-        [1050,1500],
+        [2500,820],
 
-        [1850,1450],
-        [2350,1600]
+        [350,1510],
+        [550,1780],
+        [980,1500],
+        [1280,1800],
+
+        [1950,1840],
+        [2300,1840],
+        [2700,1840]
 
     ];
 
-
     positions.forEach(
-        function(position,index){
+        (p,i)=>{
 
             createNPC(
                 scene,
-                position[0],
-                position[1],
-                index
+                p[0],
+                p[1],
+                i
             );
-
         }
     );
-
 }
 
 
@@ -1968,233 +1645,188 @@ function createNPC(
             y
         );
 
-
     scene.physics.add.existing(
         npc
     );
 
-
-    npc.body.setSize(
-        36,
-        56
+    npc.setSize(
+        42,
+        68
     );
 
-
-    npc.body.setOffset(
-        -18,
-        -28
-    );
-
+    npc.setDepth(150);
 
     npc.body.setCollideWorldBounds(
         true
     );
 
 
-    npc.setDepth(
-        80
-    );
+    const skin = [
+        0xd99670,
+        0xc27c59,
+        0xe2a17d,
+        0x9d6248
+    ];
+
+    const clothes = [
+        0x10bddd,
+        0xff3d72,
+        0x8a42ff,
+        0xffa51f,
+        0x20c978,
+        0xffffff,
+        0xf044aa
+    ];
+
+    const hair = [
+        0x111111,
+        0x332015,
+        0x512f20,
+        0x1b2030
+    ];
 
 
-    npc.speed =
-        Phaser.Math.Between(
-            25,
-            50
-        );
-
-
-    npc.dirX =
-        Phaser.Math.FloatBetween(
-            -1,
-            1
-        );
-
-
-    npc.dirY =
-        Phaser.Math.FloatBetween(
-            -1,
-            1
-        );
-
-
-    npc.timer =
-        Phaser.Math.Between(
-            1000,
-            3500
-        );
-
-
-    npc.stunned = 0;
-
-
-    npc.skin =
-        skinColors[
-            index % skinColors.length
-        ];
-
-
-    npc.shirt =
-        shirtColors[
-            index % shirtColors.length
-        ];
-
-
-    npc.hair =
-        hairColors[
-            index % hairColors.length
-        ];
-
-
-    /* SHADOW */
+    /* Shadow */
 
     npc.add(
         scene.add.ellipse(
             0,
-            35,
-            46,
-            14,
-            0x000000,
-            0.45
-        )
-    );
-
-
-    /* LEGS */
-
-    npc.add([
-
-        scene.add.rectangle(
-            -10,
-            25,
-            12,
-            30,
-            0x202334
-        ),
-
-        scene.add.rectangle(
-            10,
-            25,
-            12,
-            30,
-            0x202334
-        )
-
-    ]);
-
-
-    /* SHOES */
-
-    npc.add([
-
-        scene.add.rectangle(
-            -10,
-            42,
-            21,
-            9,
-            0xeaeaea
-        ),
-
-        scene.add.rectangle(
-            10,
-            42,
-            21,
-            9,
-            0xeaeaea
-        )
-
-    ]);
-
-
-    /* BODY */
-
-    npc.add(
-        scene.add.rectangle(
-            0,
-            -5,
-            40,
+            36,
             48,
-            npc.shirt
+            15,
+            0x000000,
+            .45
         )
     );
 
 
-    /* BODY DETAIL */
+    /* Legs */
+
+    npc.add([
+        scene.add.rectangle(
+            -10,
+            25,
+            12,
+            31,
+            0x202334
+        ),
+
+        scene.add.rectangle(
+            10,
+            25,
+            12,
+            31,
+            0x202334
+        )
+    ]);
+
+
+    /* Shoes */
+
+    npc.add([
+        scene.add.rectangle(
+            -11,
+            43,
+            22,
+            10,
+            0xeaeaea
+        ),
+
+        scene.add.rectangle(
+            11,
+            43,
+            22,
+            10,
+            0xeaeaea
+        )
+    ]);
+
+
+    /* Body */
 
     npc.add(
         scene.add.rectangle(
             0,
             -5,
-            4,
-            38,
-            0xffffff,
-            0.18
+            41,
+            49,
+            clothes[
+                index%clothes.length
+            ]
         )
     );
 
 
-    /* NECK */
+    /* Neck */
 
     npc.add(
         scene.add.rectangle(
             0,
             -35,
-            12,
-            14,
-            npc.skin
+            13,
+            15,
+            skin[
+                index%skin.length
+            ]
         )
     );
 
 
-    /* HEAD */
+    /* Head */
 
     npc.add(
         scene.add.circle(
             0,
             -55,
-            24,
-            npc.skin
+            25,
+            skin[
+                index%skin.length
+            ]
         )
     );
 
 
-    /* EARS */
+    /* Ears */
 
     npc.add([
-
         scene.add.circle(
-            -23,
+            -24,
             -55,
-            5,
-            npc.skin
+            6,
+            skin[
+                index%skin.length
+            ]
         ),
 
         scene.add.circle(
-            23,
+            24,
             -55,
-            5,
-            npc.skin
+            6,
+            skin[
+                index%skin.length
+            ]
         )
-
     ]);
 
 
-    /* HAIR */
+    /* Hair */
 
     npc.add(
         scene.add.ellipse(
             0,
             -74,
-            45,
-            27,
-            npc.hair
+            47,
+            28,
+            hair[
+                index%hair.length
+            ]
         )
     );
 
 
-    /* EYES */
+    /* Eyes */
 
     npc.add([
-
         scene.add.circle(
             -8,
             -55,
@@ -2208,11 +1840,10 @@ function createNPC(
             3,
             0x111111
         )
-
     ]);
 
 
-    /* NOSE */
+    /* Nose */
 
     npc.add(
         scene.add.triangle(
@@ -2229,7 +1860,7 @@ function createNPC(
     );
 
 
-    /* MOUTH */
+    /* Mouth */
 
     npc.add(
         scene.add.rectangle(
@@ -2242,16 +1873,17 @@ function createNPC(
     );
 
 
-    /* ARMS */
+    /* Arms */
 
     npc.add([
-
         scene.add.rectangle(
             -25,
             -5,
             11,
             38,
-            npc.shirt
+            clothes[
+                index%clothes.length
+            ]
         ),
 
         scene.add.rectangle(
@@ -2259,62 +1891,87 @@ function createNPC(
             -5,
             11,
             38,
-            npc.shirt
+            clothes[
+                index%clothes.length
+            ]
         )
-
     ]);
 
 
-    /* HANDS */
+    /* Hands */
 
     npc.add([
-
         scene.add.circle(
             -25,
             16,
             7,
-            npc.skin
+            skin[
+                index%skin.length
+            ]
         ),
 
         scene.add.circle(
             25,
             16,
             7,
-            npc.skin
+            skin[
+                index%skin.length
+            ]
         )
-
     ]);
 
 
-    /* NAME */
+    /* Guest label */
 
-    npc.label =
+    npc.add(
         scene.add.text(
             0,
-            -101,
+            -104,
             "GUEST",
             {
-                fontFamily:"Arial",
-                fontSize:"11px",
+                fontSize:"13px",
                 fontStyle:"bold",
                 color:"#ffffff",
                 stroke:"#050713",
                 strokeThickness:4
             }
-        );
-
-
-    npc.label.setOrigin(0.5);
-
-    npc.add(
-        npc.label
+        )
+        .setOrigin(.5)
     );
 
+
+    /* AI */
+
+    npc.speed =
+        25 + Math.random()*35;
+
+    npc.dirX =
+        Phaser.Math.FloatBetween(
+            -1,
+            1
+        );
+
+    npc.dirY =
+        Phaser.Math.FloatBetween(
+            -1,
+            1
+        );
+
+    npc.timer =
+        Phaser.Math.Between(
+            1200,
+            3500
+        );
+
+    npc.stunned = false;
+
+    npc.stunTimer = 0;
+
+    npc.alive = true;
 
     npcs.push(
         npc
     );
-
 }
 
 
@@ -2324,6 +1981,10 @@ function createNPC(
 
 function updatePlayer(scene){
 
+    if(!player || !player.body){
+        return;
+    }
+
     let dx = 0;
     let dy = 0;
 
@@ -2332,50 +1993,35 @@ function updatePlayer(scene){
         keys.W.isDown ||
         cursors.up.isDown
     ){
-
         dy -= 1;
-
     }
-
 
     if(
         keys.S.isDown ||
         cursors.down.isDown
     ){
-
         dy += 1;
-
     }
-
 
     if(
         keys.A.isDown ||
         cursors.left.isDown
     ){
-
         dx -= 1;
-
     }
-
 
     if(
         keys.D.isDown ||
         cursors.right.isDown
     ){
-
         dx += 1;
-
     }
 
 
-    if(
-        joystick.active
-    ){
+    if(joystick.active){
 
         dx += joystick.x;
-
         dy += joystick.y;
-
     }
 
 
@@ -2384,39 +2030,35 @@ function updatePlayer(scene){
         dy !== 0
     ){
 
-        const length =
+        const len =
             Math.sqrt(
                 dx*dx+
                 dy*dy
             );
 
+        dx /= len;
+        dy /= len;
 
-        dx /= length;
-
-        dy /= length;
-
+        const speed = 270;
 
         player.body.setVelocity(
-            dx*255,
-            dy*255
+            dx*speed,
+            dy*speed
         );
-
 
         player.rotation =
             Phaser.Math.Linear(
                 player.rotation,
-                dx*0.04,
+                dx*0.035,
                 0.15
             );
 
-    }
-    else{
+    }else{
 
         player.body.setVelocity(
             0,
             0
         );
-
 
         player.rotation =
             Phaser.Math.Linear(
@@ -2424,53 +2066,7 @@ function updatePlayer(scene){
                 0,
                 0.15
             );
-
     }
-
-
-    if(
-        Phaser.Input.Keyboard.JustDown(
-            keys.SPACE
-        )
-    ){
-
-        performAttack(scene);
-
-    }
-
-
-    if(
-        Phaser.Input.Keyboard.JustDown(
-            keys.E
-        )
-    ){
-
-        performAttack(scene);
-
-    }
-
-
-    if(actionPressed){
-
-        actionPressed = false;
-
-        performAttack(scene);
-
-    }
-
-
-    attackCooldown -=
-        scene.game.loop.delta;
-
-
-    if(
-        attackCooldown < 0
-    ){
-
-        attackCooldown = 0;
-
-    }
-
 }
 
 
@@ -2478,31 +2074,50 @@ function updatePlayer(scene){
    NPC MOVEMENT
 ========================================================= */
 
-function updateNPCs(
-    scene,
-    delta
-){
+function updateNPCs(scene){
 
     npcs.forEach(
-        function(npc){
+        npc=>{
 
             if(
-                npc.stunned > 0
+                !npc.active ||
+                !npc.body
             ){
+                return;
+            }
 
-                npc.stunned -= delta;
+
+            if(npc.stunned){
+
+                npc.stunTimer -=
+                    scene.game.loop.delta;
 
                 npc.body.setVelocity(
                     0,
                     0
                 );
 
-                return;
+                npc.rotation =
+                    Math.sin(
+                        scene.time.now/100
+                    )*.15;
 
+                if(
+                    npc.stunTimer <= 0
+                ){
+
+                    npc.stunned =
+                        false;
+
+                    npc.rotation = 0;
+                }
+
+                return;
             }
 
 
-            npc.timer -= delta;
+            npc.timer -=
+                scene.game.loop.delta;
 
 
             if(
@@ -2515,24 +2130,21 @@ function updateNPCs(
                         1
                     );
 
-
                 npc.dirY =
                     Phaser.Math.FloatBetween(
                         -1,
                         1
                     );
 
-
                 npc.timer =
                     Phaser.Math.Between(
                         1200,
                         4000
                     );
-
             }
 
 
-            const length =
+            const len =
                 Math.sqrt(
                     npc.dirX*npc.dirX+
                     npc.dirY*npc.dirY
@@ -2540,125 +2152,141 @@ function updateNPCs(
 
 
             npc.body.setVelocity(
-                npc.dirX/length*npc.speed,
-                npc.dirY/length*npc.speed
+                npc.dirX/len*npc.speed,
+                npc.dirY/len*npc.speed
             );
 
 
-            npc.rotation =
-                Phaser.Math.Linear(
-                    npc.rotation,
-                    npc.dirX*0.04,
-                    0.08
-                );
+            if(npc.x<150){
 
-        }
-    );
-
-}
-
-
-/* =========================================================
-   NPC SEPARATION
-========================================================= */
-
-function updateNPCSeparation(){
-
-    for(
-        let i=0;
-        i<npcs.length;
-        i++
-    ){
-
-        for(
-            let j=i+1;
-            j<npcs.length;
-            j++
-        ){
-
-            const a = npcs[i];
-
-            const b = npcs[j];
-
-
-            const distance =
-                Phaser.Math.Distance.Between(
-                    a.x,
-                    a.y,
-                    b.x,
-                    b.y
-                );
-
-
-            if(
-                distance < 42 &&
-                distance > 0
-            ){
-
-                const angle =
-                    Phaser.Math.Angle.Between(
-                        b.x,
-                        b.y,
-                        a.x,
-                        a.y
-                    );
-
-
-                a.x +=
-                    Math.cos(angle)*0.6;
-
-                a.y +=
-                    Math.sin(angle)*0.6;
-
+                npc.x=150;
+                npc.dirX=1;
             }
 
+            if(npc.x>3050){
+
+                npc.x=3050;
+                npc.dirX=-1;
+            }
+
+            if(npc.y<140){
+
+                npc.y=140;
+                npc.dirY=1;
+            }
+
+            if(npc.y>1980){
+
+                npc.y=1980;
+                npc.dirY=-1;
+            }
         }
-
-    }
-
+    );
 }
 
 
 /* =========================================================
-   ATTACK
+   ATTACK SYSTEM
 ========================================================= */
 
-function performAttack(scene){
+function updateAttack(scene){
 
     if(
         attackCooldown > 0
     ){
 
-        return;
+        attackCooldown -=
+            scene.game.loop.delta;
     }
 
 
-    attackCooldown = 600;
+    const keyboardAttack =
+        Phaser.Input.Keyboard.JustDown(
+            keys.SPACE
+        ) ||
+        Phaser.Input.Keyboard.JustDown(
+            keys.E
+        );
 
 
-    score += 10;
+    if(
+        keyboardAttack ||
+        actionPressed
+    ){
+
+        if(
+            attackCooldown <= 0
+        ){
+
+            performAttack(scene);
+
+            actionPressed =
+                false;
+        }
+    }
+}
 
 
-    const radius = 115;
+/* =========================================================
+   PERFORM ATTACK
+========================================================= */
+
+function performAttack(scene){
+
+    attackCooldown = 550;
 
 
-    player.attackRing.setRadius(
-        20
+    /* Attack ring */
+
+    const ring =
+        scene.add.circle(
+            player.x,
+            player.y,
+            20,
+            0xff278e,
+            0.18
+        );
+
+    ring.setStrokeStyle(
+        6,
+        0xff278e,
+        0.9
     );
 
-
-    player.attackRing.setStrokeStyle(
-        5,
-        0x00eaff,
-        1
-    );
+    ring.setDepth(180);
 
 
-    attackFlash = 300;
+    scene.tweens.add({
+
+        targets:ring,
+
+        radius:125,
+
+        alpha:0,
+
+        duration:280,
+
+        ease:"Cubic.Out",
+
+        onComplete:()=>{
+            ring.destroy();
+        }
+    });
+
+
+    let hit = false;
 
 
     npcs.forEach(
-        function(npc){
+        npc=>{
+
+            if(
+                !npc.active ||
+                npc.stunned
+            ){
+                return;
+            }
+
 
             const distance =
                 Phaser.Math.Distance.Between(
@@ -2670,8 +2298,26 @@ function performAttack(scene){
 
 
             if(
-                distance <= radius
+                distance <= 115
             ){
+
+                npc.stunned =
+                    true;
+
+                npc.stunTimer =
+                    1800;
+
+                npc.body.setVelocity(
+                    0,
+                    0
+                );
+
+                score += 100;
+
+                hit = true;
+
+
+                /* Knockback */
 
                 const angle =
                     Phaser.Math.Angle.Between(
@@ -2681,168 +2327,63 @@ function performAttack(scene){
                         npc.y
                     );
 
+                npc.x +=
+                    Math.cos(angle)*35;
 
-                npc.body.setVelocity(
-                    Math.cos(angle)*300,
-                    Math.sin(angle)*300
-                );
-
-
-                npc.stunned = 900;
+                npc.y +=
+                    Math.sin(angle)*35;
 
 
-                npc.label.setText(
-                    "WHOA!"
-                );
+                /* HIT FX */
+
+                const hitText =
+                    scene.add.text(
+                        npc.x,
+                        npc.y-100,
+                        "+100",
+                        {
+                            fontSize:"26px",
+                            fontStyle:"bold",
+                            color:"#ffdf4f",
+                            stroke:"#090b13",
+                            strokeThickness:5
+                        }
+                    )
+                    .setOrigin(.5)
+                    .setDepth(500);
 
 
-                score += 100;
+                scene.tweens.add({
 
+                    targets:hitText,
 
-                showFloatingText(
-                    scene,
-                    npc.x,
-                    npc.y-100,
-                    "+100"
-                );
+                    y:npc.y-150,
 
+                    alpha:0,
+
+                    duration:700,
+
+                    onComplete:()=>{
+                        hitText.destroy();
+                    }
+                });
             }
-
         }
     );
 
 
-    updateScoreText();
+    if(hit){
 
-
-    statusText.setText(
-        "⚡ SHOCKWAVE!"
-    );
-
-
-    scene.time.delayedCall(
-        700,
-        function(){
-
-            if(statusText){
-
-                statusText.setText(
-                    "PARTY IS GETTING WILD"
-                );
-
-            }
-
-        }
-    );
-
-}
-
-
-/* =========================================================
-   ATTACK FX
-========================================================= */
-
-function updateAttackFX(){
-
-    if(
-        attackFlash <= 0
-    ){
-
-        return;
-
-    }
-
-
-    attackFlash -= 16;
-
-
-    const radius =
-        20+
-        (300-attackFlash)*0.35;
-
-
-    player.attackRing.setRadius(
-        radius
-    );
-
-
-    player.attackRing.setStrokeStyle(
-        5,
-        0x00eaff,
-        Math.max(
-            0,
-            attackFlash/300
-        )
-    );
-
-
-    if(
-        attackFlash <= 0
-    ){
-
-        player.attackRing.setStrokeStyle(
-            5,
-            0x00eaff,
-            0
+        alertText.setText(
+            "⚡ HIT! +100"
         );
 
-    }
+    }else{
 
-}
-
-
-/* =========================================================
-   FLOATING SCORE
-========================================================= */
-
-function showFloatingText(
-    scene,
-    x,
-    y,
-    value
-){
-
-    const text =
-        scene.add.text(
-            x,
-            y,
-            value,
-            {
-                fontFamily:"Arial",
-                fontSize:"22px",
-                fontStyle:"bold",
-                color:"#00eaff",
-                stroke:"#06101a",
-                strokeThickness:5
-            }
+        alertText.setText(
+            "ATTACK"
         );
-
-
-    text.setOrigin(0.5);
-
-    text.setDepth(500);
-
-
-    scene.tweens.add({
-
-        targets:text,
-
-        y:y-60,
-
-        alpha:0,
-
-        duration:700,
-
-        ease:"Cubic.easeOut",
-
-        onComplete:function(){
-
-            text.destroy();
-
-        }
-
-    });
-
+    }
 }
 
 
@@ -2852,25 +2393,27 @@ function showFloatingText(
 
 function createHUD(scene){
 
+    /* Top bar */
+
     scene.add.rectangle(
         640,
         34,
         1280,
         68,
         0x050914,
-        0.94
+        .94
     )
     .setScrollFactor(0)
     .setDepth(900);
 
 
     scene.add.text(
-        28,
-        15,
+        30,
+        16,
         "PARTY NIGHT",
         {
             fontFamily:"Arial",
-            fontSize:"27px",
+            fontSize:"29px",
             fontStyle:"bold",
             color:"#ffffff"
         }
@@ -2880,12 +2423,12 @@ function createHUD(scene){
 
 
     scene.add.text(
-        255,
-        20,
+        330,
+        21,
         "MANSION MAYHEM",
         {
             fontFamily:"Arial",
-            fontSize:"17px",
+            fontSize:"20px",
             fontStyle:"bold",
             color:"#ff278e"
         }
@@ -2894,14 +2437,29 @@ function createHUD(scene){
     .setDepth(901);
 
 
+    scene.add.text(
+        590,
+        21,
+        "PARTY IS GETTING WILD",
+        {
+            fontFamily:"Arial",
+            fontSize:"16px",
+            fontStyle:"bold",
+            color:"#cbd3e8"
+        }
+    )
+    .setScrollFactor(0)
+    .setDepth(901);
+
+
     scoreText =
         scene.add.text(
-            1010,
-            18,
+            1120,
+            19,
             "SCORE  0",
             {
                 fontFamily:"Arial",
-                fontSize:"21px",
+                fontSize:"25px",
                 fontStyle:"bold",
                 color:"#00eaff"
             }
@@ -2910,31 +2468,16 @@ function createHUD(scene){
         .setDepth(901);
 
 
-    statusText =
-        scene.add.text(
-            640,
-            20,
-            "PARTY IS GETTING WILD",
-            {
-                fontFamily:"Arial",
-                fontSize:"14px",
-                fontStyle:"bold",
-                color:"#cbd4e8"
-            }
-        )
-        .setOrigin(0.5)
-        .setScrollFactor(0)
-        .setDepth(901);
-
+    /* Objective */
 
     objectiveText =
         scene.add.text(
-            28,
-            660,
+            30,
+            665,
             "OBJECTIVE • Explore the mansion",
             {
                 fontFamily:"Arial",
-                fontSize:"16px",
+                fontSize:"17px",
                 fontStyle:"bold",
                 color:"#ffffff",
                 backgroundColor:"#050914",
@@ -2950,37 +2493,40 @@ function createHUD(scene){
         .setDepth(901);
 
 
+    /* Attack info */
+
     scene.add.text(
-        955,
-        680,
-        "WASD / ARROWS • SPACE / E",
+        980,
+        665,
+        "SPACE / E  •  ATTACK",
         {
             fontFamily:"Arial",
-            fontSize:"12px",
+            fontSize:"14px",
             fontStyle:"bold",
-            color:"#8290ad"
+            color:"#aeb9d1"
         }
     )
     .setScrollFactor(0)
     .setDepth(901);
 
-}
 
-
-/* =========================================================
-   SCORE UPDATE
-========================================================= */
-
-function updateScoreText(){
-
-    if(scoreText){
-
-        scoreText.setText(
-            "SCORE  "+score
-        );
-
-    }
-
+    alertText =
+        scene.add.text(
+            640,
+            125,
+            "",
+            {
+                fontFamily:"Arial",
+                fontSize:"26px",
+                fontStyle:"bold",
+                color:"#ff278e",
+                stroke:"#050713",
+                strokeThickness:5
+            }
+        )
+        .setOrigin(.5)
+        .setScrollFactor(0)
+        .setDepth(950);
 }
 
 
@@ -2988,70 +2534,77 @@ function updateScoreText(){
    OBJECTIVE
 ========================================================= */
 
-function updateObjective(){
+function updateObjective(scene){
 
-    if(
-        !objectiveText ||
-        !player
-    ){
-
+    if(!objectiveText){
         return;
-
     }
 
 
-    const partyDistance =
-        Phaser.Math.Distance.Between(
-            player.x,
-            player.y,
-            500,
-            350
-        );
-
-
-    const poolDistance =
-        Phaser.Math.Distance.Between(
-            player.x,
-            player.y,
-            2100,
-            1500
-        );
+    scoreText.setText(
+        "SCORE  " + score
+    );
 
 
     if(
-        partyDistance < 190
+        player.x<850 &&
+        player.y<640
     ){
 
         objectiveText.setText(
-            "OBJECTIVE • Party Hall found! Press ACTION"
+            "OBJECTIVE • Party Hall — find the party"
         );
 
     }
     else if(
-        poolDistance < 260
+        player.x>=850 &&
+        player.x<1610 &&
+        player.y<640
     ){
 
         objectiveText.setText(
-            "OBJECTIVE • Pool party unlocked!"
+            "OBJECTIVE • Check the Bar & Kitchen"
         );
 
     }
     else if(
-        player.y > 1200
+        player.x>=1610 &&
+        player.x<2310 &&
+        player.y<640
     ){
 
         objectiveText.setText(
-            "OBJECTIVE • Explore Garden & Pool"
+            "OBJECTIVE • Explore the Master Bedroom"
         );
 
     }
     else if(
-        player.x > 1500 &&
-        player.y < 650
+        player.x>=2310 &&
+        player.y<640
     ){
 
         objectiveText.setText(
-            "OBJECTIVE • Explore the upper rooms"
+            "OBJECTIVE • Explore the Bathroom"
+        );
+
+    }
+    else if(
+        player.y>=1290 &&
+        player.x<1600
+    ){
+
+        objectiveText.setText(
+            "OBJECTIVE • Check the Garden Party"
+        );
+
+    }
+    else if(
+        player.y>=1290 &&
+        player.x>=1600
+    ){
+
+        objectiveText.setText(
+            "OBJECTIVE • Check the Pool Area"
         );
 
     }
@@ -3060,9 +2613,29 @@ function updateObjective(){
         objectiveText.setText(
             "OBJECTIVE • Explore the mansion"
         );
-
     }
+}
 
+
+/* =========================================================
+   ALERT
+========================================================= */
+
+function updateAlert(scene){
+
+    if(
+        alertText &&
+        alertText.text !== ""
+    ){
+
+        if(
+            scene.time.now %
+            900 < 20
+        ){
+
+            alertText.setText("");
+        }
+    }
 }
 
 
@@ -3072,62 +2645,62 @@ function updateObjective(){
 
 function createControls(scene){
 
-    const base =
+    /* Joystick base */
+
+    const joyBase =
         scene.add.circle(
             105,
-            615,
+            625,
             62,
             0x071526,
-            0.86
+            .88
         )
         .setScrollFactor(0)
         .setDepth(1000);
 
-
-    base.setStrokeStyle(
+    joyBase.setStrokeStyle(
         4,
         0x00d9ff,
-        0.85
+        .9
     );
 
 
-    const stick =
+    const joy =
         scene.add.circle(
             105,
-            615,
+            625,
             30,
             0x00d9ff,
-            0.75
+            .78
         )
         .setScrollFactor(0)
         .setDepth(1001);
 
 
-    /* ACTION */
+    /* Action */
 
     const action =
         scene.add.circle(
             1170,
-            615,
+            625,
             65,
             0xe90078,
-            0.88
+            .88
         )
         .setScrollFactor(0)
         .setDepth(1000);
 
-
     action.setStrokeStyle(
         4,
         0xff65c0,
-        0.95
+        .95
     );
 
 
     scene.add.text(
         1170,
-        615,
-        "ACTION",
+        625,
+        "ATTACK",
         {
             fontFamily:"Arial",
             fontSize:"17px",
@@ -3135,63 +2708,64 @@ function createControls(scene){
             color:"#ffffff"
         }
     )
-    .setOrigin(0.5)
+    .setOrigin(.5)
     .setScrollFactor(0)
     .setDepth(1001);
 
 
     scene.add.text(
         105,
-        685,
+        690,
         "MOVE",
         {
             fontFamily:"Arial",
-            fontSize:"13px",
+            fontSize:"14px",
             fontStyle:"bold",
             color:"#ffffff"
         }
     )
-    .setOrigin(0.5)
+    .setOrigin(.5)
     .setScrollFactor(0)
     .setDepth(1001);
 
 
+    /* Pointer down */
+
     scene.input.on(
         "pointerdown",
-        function(pointer){
+        pointer=>{
 
             if(
-                pointer.x < 230 &&
-                pointer.y > 520
+                pointer.x<220 &&
+                pointer.y>520
             ){
 
                 joystick.active = true;
 
                 updateJoystick(
                     pointer,
-                    base,
-                    stick
+                    joyBase,
+                    joy
                 );
-
             }
 
 
             if(
-                pointer.x > 1080 &&
-                pointer.y > 520
+                pointer.x>1080 &&
+                pointer.y>550
             ){
 
                 actionPressed = true;
-
             }
-
         }
     );
 
 
+    /* Pointer move */
+
     scene.input.on(
         "pointermove",
-        function(pointer){
+        pointer=>{
 
             if(
                 joystick.active
@@ -3199,33 +2773,30 @@ function createControls(scene){
 
                 updateJoystick(
                     pointer,
-                    base,
-                    stick
+                    joyBase,
+                    joy
                 );
-
             }
-
         }
     );
 
+
+    /* Pointer up */
 
     scene.input.on(
         "pointerup",
-        function(){
+        ()=>{
 
-            joystick.active = false;
+            joystick.active =
+                false;
 
             joystick.x = 0;
-
             joystick.y = 0;
 
-            stick.x = 105;
-
-            stick.y = 615;
-
+            joy.x = 105;
+            joy.y = 625;
         }
     );
-
 }
 
 
@@ -3236,15 +2807,17 @@ function createControls(scene){
 function updateJoystick(
     pointer,
     base,
-    stick
+    joy
 ){
 
+    const bx = base.x;
+    const by = base.y;
+
     let dx =
-        pointer.x-base.x;
+        pointer.x-bx;
 
     let dy =
-        pointer.y-base.y;
-
+        pointer.y-by;
 
     const distance =
         Math.sqrt(
@@ -3252,12 +2825,11 @@ function updateJoystick(
             dy*dy
         );
 
-
     const max = 42;
 
 
     if(
-        distance > max
+        distance>max
     ){
 
         dx =
@@ -3265,15 +2837,14 @@ function updateJoystick(
 
         dy =
             dy/distance*max;
-
     }
 
 
-    stick.x =
-        base.x+dx;
+    joy.x =
+        bx+dx;
 
-    stick.y =
-        base.y+dy;
+    joy.y =
+        by+dy;
 
 
     joystick.x =
@@ -3281,326 +2852,6 @@ function updateJoystick(
 
     joystick.y =
         dy/max;
-
-}
-
-
-/* =========================================================
-   DECORATION HELPERS
-========================================================= */
-
-function drawTable(x,y){
-
-    decorationGraphics.fillStyle(
-        0x754f37
-    );
-
-    decorationGraphics.fillCircle(
-        x,
-        y,
-        42
-    );
-
-
-    decorationGraphics.lineStyle(
-        3,
-        0xc08355
-    );
-
-    decorationGraphics.strokeCircle(
-        x,
-        y,
-        42
-    );
-
-
-    decorationGraphics.fillStyle(
-        0xffc866
-    );
-
-    decorationGraphics.fillCircle(
-        x,
-        y,
-        8
-    );
-
-}
-
-
-function drawSmallTable(x,y){
-
-    decorationGraphics.fillStyle(
-        0x6a4635
-    );
-
-    decorationGraphics.fillRoundedRect(
-        x,
-        y,
-        65,
-        55,
-        8
-    );
-
-}
-
-
-function drawSofa(
-    x,
-    y,
-    w,
-    h
-){
-
-    decorationGraphics.fillStyle(
-        0x5b326c
-    );
-
-    decorationGraphics.fillRoundedRect(
-        x,
-        y,
-        w,
-        h,
-        20
-    );
-
-
-    decorationGraphics.fillStyle(
-        0x8a4c96
-    );
-
-    decorationGraphics.fillRoundedRect(
-        x+15,
-        y+12,
-        w-30,
-        h-30,
-        15
-    );
-
-}
-
-
-function drawTree(x,y){
-
-    decorationGraphics.fillStyle(
-        0x62432d
-    );
-
-    decorationGraphics.fillRect(
-        x-10,
-        y,
-        20,
-        70
-    );
-
-
-    decorationGraphics.fillStyle(
-        0x165b35
-    );
-
-    decorationGraphics.fillCircle(
-        x,
-        y,
-        65
-    );
-
-
-    decorationGraphics.fillStyle(
-        0x23834a
-    );
-
-    decorationGraphics.fillCircle(
-        x-25,
-        y-20,
-        35
-    );
-
-    decorationGraphics.fillCircle(
-        x+25,
-        y-15,
-        35
-    );
-
-
-    decorationGraphics.fillStyle(
-        0x3aa95f
-    );
-
-    decorationGraphics.fillCircle(
-        x-10,
-        y-30,
-        18
-    );
-
-}
-
-
-function drawLight(x,y){
-
-    decorationGraphics.fillStyle(
-        0xffd66b,
-        0.18
-    );
-
-    decorationGraphics.fillCircle(
-        x,
-        y,
-        24
-    );
-
-
-    decorationGraphics.fillStyle(
-        0xffd66b
-    );
-
-    decorationGraphics.fillCircle(
-        x,
-        y,
-        10
-    );
-
-
-    decorationGraphics.fillStyle(
-        0xffeea8
-    );
-
-    decorationGraphics.fillCircle(
-        x,
-        y,
-        4
-    );
-
-}
-
-
-function drawCircle(
-    x,
-    y,
-    radius,
-    color
-){
-
-    decorationGraphics.fillStyle(
-        color
-    );
-
-    decorationGraphics.fillCircle(
-        x,
-        y,
-        radius
-    );
-
-}
-
-
-function drawSpeaker(
-    scene,
-    x,
-    y
-){
-
-    decorationGraphics.fillStyle(
-        0x090b12
-    );
-
-    decorationGraphics.fillRoundedRect(
-        x,
-        y,
-        55,
-        80,
-        8
-    );
-
-
-    decorationGraphics.fillStyle(
-        0x00eaff
-    );
-
-    decorationGraphics.fillCircle(
-        x+28,
-        y+28,
-        13
-    );
-
-
-    decorationGraphics.fillStyle(
-        0xff278e
-    );
-
-    decorationGraphics.fillCircle(
-        x+28,
-        y+56,
-        9
-    );
-
-}
-
-
-function drawGardenLamp(
-    x,
-    y
-){
-
-    decorationGraphics.fillStyle(
-        0x242a32
-    );
-
-    decorationGraphics.fillRect(
-        x-5,
-        y,
-        10,
-        55
-    );
-
-
-    decorationGraphics.fillStyle(
-        0xffd66b
-    );
-
-    decorationGraphics.fillCircle(
-        x,
-        y-5,
-        12
-    );
-
-}
-
-
-function drawPoolChair(
-    x,
-    y
-){
-
-    decorationGraphics.fillStyle(
-        0xe7c36a
-    );
-
-    decorationGraphics.fillRoundedRect(
-        x,
-        y,
-        105,
-        35,
-        8
-    );
-
-
-    decorationGraphics.fillStyle(
-        0xb99242
-    );
-
-    decorationGraphics.fillRect(
-        x+10,
-        y+35,
-        8,
-        25
-    );
-
-    decorationGraphics.fillRect(
-        x+87,
-        y+35,
-        8,
-        25
-    );
-
 }
 
 </script>
