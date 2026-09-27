@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+
 <meta name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+      content="width=device-width,
+      initial-scale=1.0,
+      maximum-scale=1.0,
+      user-scalable=no">
 
 <title>Party Night - Mansion Mayhem</title>
 
@@ -50,7 +54,6 @@ canvas{
 
 /* =========================================================
    PARTY NIGHT - MANSION MAYHEM
-   ORIGINAL TOP-DOWN PARTY GAME
 ========================================================= */
 
 const WORLD_W = 3000;
@@ -58,98 +61,6 @@ const WORLD_H = 1900;
 
 const GAME_W = 1280;
 const GAME_H = 720;
-
-
-/* =========================================================
-   GAME CONFIG
-========================================================= */
-
-const config = {
-
-    type: Phaser.AUTO,
-
-    parent:"game-container",
-
-    width:GAME_W,
-    height:GAME_H,
-
-    backgroundColor:"#070914",
-
-    scale:{
-        mode:Phaser.Scale.FIT,
-        autoCenter:Phaser.Scale.CENTER_BOTH,
-        width:GAME_W,
-        height:GAME_H
-    },
-
-    physics:{
-        default:"arcade",
-
-        arcade:{
-            gravity:{
-                y:0
-            },
-            debug:false
-        }
-    },
-
-    scene:{
-        preload:preload,
-        create:create,
-        update:update
-    }
-};
-
-const game = new Phaser.Game(config);
-
-
-/* =========================================================
-   GLOBALS
-========================================================= */
-
-let player;
-
-let npcs = [];
-
-let walls;
-
-let roomGraphics;
-
-let decorationGraphics;
-
-let fxGraphics;
-
-let cursors;
-
-let keys;
-
-let objectiveText;
-
-let scoreText;
-
-let statusText;
-
-let attackCooldown = 0;
-
-let attackFlash = 0;
-
-let score = 0;
-
-let chaosCount = 0;
-
-let joystick = {
-    active:false,
-    x:0,
-    y:0
-};
-
-let actionPressed = false;
-
-let mobileJoy;
-
-let actionButton;
-
-let playerMoving = false;
 
 
 /* =========================================================
@@ -186,11 +97,86 @@ const hairColors = [
 
 
 /* =========================================================
+   GLOBALS
+========================================================= */
+
+let player = null;
+let npcs = [];
+let walls = null;
+
+let roomGraphics = null;
+let decorationGraphics = null;
+
+let cursors = null;
+let keys = null;
+
+let objectiveText = null;
+let scoreText = null;
+let statusText = null;
+
+let score = 0;
+
+let attackCooldown = 0;
+let attackFlash = 0;
+let actionPressed = false;
+
+let joystick = {
+    active:false,
+    x:0,
+    y:0
+};
+
+
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const config = {
+
+    type:Phaser.AUTO,
+
+    parent:"game-container",
+
+    width:GAME_W,
+    height:GAME_H,
+
+    backgroundColor:"#070914",
+
+    scale:{
+        mode:Phaser.Scale.FIT,
+        autoCenter:Phaser.Scale.CENTER_BOTH,
+        width:GAME_W,
+        height:GAME_H
+    },
+
+    physics:{
+        default:"arcade",
+
+        arcade:{
+            gravity:{
+                y:0
+            },
+
+            debug:false
+        }
+    },
+
+    scene:{
+        preload:preload,
+        create:create,
+        update:update
+    }
+};
+
+
+new Phaser.Game(config);
+
+
+/* =========================================================
    PRELOAD
 ========================================================= */
 
 function preload(){
-
 }
 
 
@@ -200,13 +186,12 @@ function preload(){
 
 function create(){
 
-    roomGraphics = this.add.graphics();
+    roomGraphics =
+        this.add.graphics();
 
-    decorationGraphics = this.add.graphics();
+    decorationGraphics =
+        this.add.graphics();
 
-    fxGraphics = this.add.graphics();
-
-    createPixelTexture(this);
 
     createWorld(this);
 
@@ -224,23 +209,22 @@ function create(){
 
     createControls(this);
 
-    cursors = this.input.keyboard.createCursorKeys();
 
-    keys = this.input.keyboard.addKeys({
+    cursors =
+        this.input.keyboard.createCursorKeys();
 
-        W:Phaser.Input.Keyboard.KeyCodes.W,
 
-        A:Phaser.Input.Keyboard.KeyCodes.A,
+    keys =
+        this.input.keyboard.addKeys({
 
-        S:Phaser.Input.Keyboard.KeyCodes.S,
+            W:Phaser.Input.Keyboard.KeyCodes.W,
+            A:Phaser.Input.Keyboard.KeyCodes.A,
+            S:Phaser.Input.Keyboard.KeyCodes.S,
+            D:Phaser.Input.Keyboard.KeyCodes.D,
+            SPACE:Phaser.Input.Keyboard.KeyCodes.SPACE,
+            E:Phaser.Input.Keyboard.KeyCodes.E
 
-        D:Phaser.Input.Keyboard.KeyCodes.D,
-
-        SPACE:Phaser.Input.Keyboard.KeyCodes.SPACE,
-
-        E:Phaser.Input.Keyboard.KeyCodes.E
-
-    });
+        });
 
 
     this.physics.world.setBounds(
@@ -286,8 +270,7 @@ function create(){
     },this);
 
 
-    updateScoreText(this);
-
+    updateScoreText();
 }
 
 
@@ -297,51 +280,20 @@ function create(){
 
 function update(time,delta){
 
+    if(!player){
+        return;
+    }
+
     updatePlayer(this);
 
     updateNPCs(this,delta);
 
-    updateAttackFX(this,delta);
+    updateAttackFX();
 
-    updateObjective(this);
+    updateObjective();
 
-    updateNPCSeparation(this);
+    updateNPCSeparation();
 
-}
-
-
-/* =========================================================
-   PIXEL TEXTURE
-========================================================= */
-
-function createPixelTexture(scene){
-
-    if(scene.textures.exists("pixel")){
-        return;
-    }
-
-    const g = scene.make.graphics({
-        x:0,
-        y:0,
-        add:false
-    });
-
-    g.fillStyle(0xffffff);
-
-    g.fillRect(
-        0,
-        0,
-        4,
-        4
-    );
-
-    g.generateTexture(
-        "pixel",
-        4,
-        4
-    );
-
-    g.destroy();
 }
 
 
@@ -363,42 +315,28 @@ function createWorld(scene){
     );
 
 
-    /* MAIN HOUSE */
-
-    roomGraphics.fillStyle(
-        0x111625
-    );
-
-    roomGraphics.fillRect(
-        110,
-        90,
-        2670,
-        1260
-    );
-
-
-    /* HOUSE SHADOW */
-
-    roomGraphics.fillStyle(
-        0x060812,
-        0.7
-    );
-
-    roomGraphics.fillRect(
-        90,
-        75,
-        2710,
-        1290
-    );
-
-
-    /* HOUSE AGAIN */
+    /* HOUSE */
 
     roomGraphics.fillStyle(
         0x171b2b
     );
 
     roomGraphics.fillRect(
+        120,
+        100,
+        2650,
+        1250
+    );
+
+
+    /* HOUSE SHADOW */
+
+    roomGraphics.lineStyle(
+        14,
+        0x050812
+    );
+
+    roomGraphics.strokeRect(
         120,
         100,
         2650,
@@ -441,21 +379,23 @@ function createWorld(scene){
     );
 
     roomGraphics.fillRect(
-        1120,
+        1100,
         1780,
-        900,
+        950,
         120
     );
 
-
-    /* ROAD LINES */
 
     roomGraphics.lineStyle(
         5,
         0x454b59
     );
 
-    for(let x=1160;x<1980;x+=120){
+    for(
+        let x=1150;
+        x<2000;
+        x+=120
+    ){
 
         roomGraphics.lineBetween(
             x,
@@ -470,7 +410,7 @@ function createWorld(scene){
     /* OUTER BORDER */
 
     roomGraphics.lineStyle(
-        12,
+        10,
         0x3e465e
     );
 
@@ -495,19 +435,6 @@ function createWorld(scene){
         580
     );
 
-
-    roomGraphics.lineStyle(
-        4,
-        0x41495d
-    );
-
-    roomGraphics.strokeRect(
-        1150,
-        1200,
-        300,
-        580
-    );
-
 }
 
 
@@ -518,90 +445,63 @@ function createWorld(scene){
 function createRooms(scene){
 
     drawRoom(
-        150,
-        130,
-        700,
-        470,
+        150,130,700,470,
         0x321a4d,
         "PARTY HALL"
     );
 
 
     drawRoom(
-        850,
-        130,
-        700,
-        470,
+        850,130,700,470,
         0x253238,
         "BAR & KITCHEN"
     );
 
 
     drawRoom(
-        1550,
-        130,
-        650,
-        470,
+        1550,130,650,470,
         0x432837,
         "MASTER BEDROOM"
     );
 
 
     drawRoom(
-        2200,
-        130,
-        530,
-        470,
+        2200,130,530,470,
         0x263b47,
         "BATHROOM"
     );
 
 
     drawRoom(
-        150,
-        620,
-        700,
-        600,
+        150,620,700,600,
         0x29203d,
         "LOUNGE"
     );
 
 
     drawRoom(
-        850,
-        620,
-        1370,
-        350,
+        850,620,1370,350,
         0x202535,
         "MAIN CORRIDOR"
     );
 
 
     drawRoom(
-        2220,
-        620,
-        510,
-        600,
+        2220,620,510,600,
         0x28251f,
         "STORAGE"
     );
 
 
     drawOutdoor(
-        150,
-        1230,
-        1350,
-        520,
+        150,1230,1350,520,
         0x123d28,
         "GARDEN"
     );
 
 
     drawOutdoor(
-        1570,
-        1230,
-        1200,
-        520,
+        1570,1230,1200,520,
         0x123e4b,
         "POOL DECK"
     );
@@ -610,7 +510,7 @@ function createRooms(scene){
 
 
 /* =========================================================
-   ROOM DRAW
+   DRAW ROOM
 ========================================================= */
 
 function drawRoom(
@@ -622,9 +522,7 @@ function drawRoom(
     title
 ){
 
-    roomGraphics.fillStyle(
-        color
-    );
+    roomGraphics.fillStyle(color);
 
     roomGraphics.fillRect(
         x,
@@ -660,34 +558,36 @@ function drawRoom(
     );
 
 
-    const txt = game.scene.scenes[0].add.text(
-        x+w/2,
-        y+34,
-        title,
-        {
-            fontFamily:"Arial",
-            fontSize:"21px",
-            fontStyle:"bold",
-            color:"#e8edff",
-            backgroundColor:"#0d1220",
-            padding:{
-                left:12,
-                right:12,
-                top:7,
-                bottom:7
+    const text =
+        game.scene.scenes[0].add.text(
+            x+w/2,
+            y+34,
+            title,
+            {
+                fontFamily:"Arial",
+                fontSize:"21px",
+                fontStyle:"bold",
+                color:"#e8edff",
+                backgroundColor:"#0d1220",
+                padding:{
+                    left:12,
+                    right:12,
+                    top:7,
+                    bottom:7
+                }
             }
-        }
-    );
+        );
 
-    txt.setOrigin(0.5);
 
-    txt.setDepth(25);
+    text.setOrigin(0.5);
+
+    text.setDepth(25);
 
 }
 
 
 /* =========================================================
-   OUTDOOR DRAW
+   DRAW OUTDOOR
 ========================================================= */
 
 function drawOutdoor(
@@ -699,9 +599,7 @@ function drawOutdoor(
     title
 ){
 
-    roomGraphics.fillStyle(
-        color
-    );
+    roomGraphics.fillStyle(color);
 
     roomGraphics.fillRect(
         x,
@@ -724,28 +622,30 @@ function drawOutdoor(
     );
 
 
-    const txt = game.scene.scenes[0].add.text(
-        x+w/2,
-        y+34,
-        title,
-        {
-            fontFamily:"Arial",
-            fontSize:"21px",
-            fontStyle:"bold",
-            color:"#ecfff3",
-            backgroundColor:"#0b2018",
-            padding:{
-                left:12,
-                right:12,
-                top:7,
-                bottom:7
+    const text =
+        game.scene.scenes[0].add.text(
+            x+w/2,
+            y+34,
+            title,
+            {
+                fontFamily:"Arial",
+                fontSize:"21px",
+                fontStyle:"bold",
+                color:"#ecfff3",
+                backgroundColor:"#0b2018",
+                padding:{
+                    left:12,
+                    right:12,
+                    top:7,
+                    bottom:7
+                }
             }
-        }
-    );
+        );
 
-    txt.setOrigin(0.5);
 
-    txt.setDepth(25);
+    text.setOrigin(0.5);
+
+    text.setDepth(25);
 
 }
 
@@ -756,103 +656,164 @@ function drawOutdoor(
 
 function createWalls(scene){
 
-    walls = scene.physics.add.staticGroup();
+    walls =
+        scene.physics.add.staticGroup();
 
 
-    /* OUTER HOUSE */
-
-    addWall(scene,1450,105,2650,25);
-
-    addWall(scene,1450,1345,2650,25);
-
-    addWall(scene,132,720,25,1240);
-
-    addWall(scene,2758,720,25,1240);
-
-
-    /* TOP ROOM DIVIDERS */
-
-    addWall(scene,850,365,18,430);
-
-    addWall(scene,1550,365,18,430);
-
-    addWall(scene,2200,365,18,430);
-
-
-    /* LOWER STORAGE WALL */
-
-    addWall(scene,2220,920,18,600);
-
-
-    /* LOUNGE / CORRIDOR */
-
-    addWall(scene,500,620,700,16);
-
-    /* DOOR GAPS ARE LEFT OPEN BY SEGMENTS */
-
-    /* PARTY HALL RIGHT WALL */
-
-    addWall(scene,840,220,16,170);
-
-    addWall(scene,840,520,16,70);
-
-
-    /* BAR LEFT WALL */
-
-    addWall(scene,860,220,16,170);
-
-    addWall(scene,860,520,16,70);
-
-
-    /* BEDROOM RIGHT */
-
-    addWall(scene,2190,220,16,170);
-
-    addWall(scene,2190,520,16,70);
-
-
-    /* BATHROOM LEFT */
-
-    addWall(scene,2210,220,16,170);
-
-    addWall(scene,2210,520,16,70);
-
-
-    /* GARDEN BOUNDARY */
-
-    addWall(scene,1570,1350,16,300);
-
-
-    /* STORAGE LOWER */
-
-    addWall(scene,2220,1220,300,16);
-
-
-    /* FURNITURE COLLISION */
+    /* OUTER */
 
     addWall(
         scene,
-        950,
-        375,
+        1450,
+        105,
+        2650,
+        25
+    );
+
+
+    addWall(
+        scene,
+        1450,
+        1345,
+        2650,
+        25
+    );
+
+
+    addWall(
+        scene,
+        132,
+        720,
+        25,
+        1240
+    );
+
+
+    addWall(
+        scene,
+        2758,
+        720,
+        25,
+        1240
+    );
+
+
+    /* TOP DIVIDERS */
+
+    addWall(
+        scene,
+        850,
+        210,
+        18,
+        150
+    );
+
+    addWall(
+        scene,
+        850,
         500,
+        18,
+        80
+    );
+
+
+    addWall(
+        scene,
+        1550,
+        210,
+        18,
+        150
+    );
+
+    addWall(
+        scene,
+        1550,
+        500,
+        18,
+        80
+    );
+
+
+    addWall(
+        scene,
+        2200,
+        210,
+        18,
+        150
+    );
+
+    addWall(
+        scene,
+        2200,
+        500,
+        18,
+        80
+    );
+
+
+    /* LOWER */
+
+    addWall(
+        scene,
+        2220,
+        700,
+        18,
+        300
+    );
+
+    addWall(
+        scene,
+        2220,
+        1100,
+        18,
+        120
+    );
+
+
+    /* LOUNGE WALL */
+
+    addWall(
+        scene,
+        150,
+        620,
+        280,
+        16
+    );
+
+    addWall(
+        scene,
+        560,
+        620,
+        290,
+        16
+    );
+
+
+    /* FURNITURE BLOCKS */
+
+    addWall(
+        scene,
+        930,
+        375,
+        520,
         18
     );
 
 
     addWall(
         scene,
-        370,
-        545,
-        260,
+        1680,
+        500,
+        390,
         16
     );
 
 
     addWall(
         scene,
-        1710,
-        500,
-        330,
+        2300,
+        1100,
+        300,
         16
     );
 
@@ -867,20 +828,29 @@ function addWall(
     scene,
     x,
     y,
-    w,
-    h
+    width,
+    height
 ){
 
-    const wall = walls.create(
-        x,
-        y,
-        "pixel"
+    const wall =
+        walls.create(
+            x,
+            y,
+            null
+        );
+
+
+    wall.setSize(
+        width,
+        height
     );
 
+
     wall.setDisplaySize(
-        w,
-        h
+        width,
+        height
     );
+
 
     wall.refreshBody();
 
@@ -895,9 +865,7 @@ function addWall(
 
 function createDecorations(scene){
 
-    /* =========================================
-       PARTY HALL
-    ========================================= */
+    /* PARTY FLOOR */
 
     decorationGraphics.fillStyle(
         0x151b3d
@@ -924,24 +892,32 @@ function createDecorations(scene){
     );
 
 
-    /* DANCE FLOOR TILES */
-
-    const danceColors = [
+    const tiles = [
         0x222b61,
         0x39205c,
         0x173e55,
         0x51244c
     ];
 
-    for(let row=0;row<4;row++){
 
-        for(let col=0;col<6;col++){
+    for(
+        let row=0;
+        row<4;
+        row++
+    ){
+
+        for(
+            let col=0;
+            col<6;
+            col++
+        ){
 
             decorationGraphics.fillStyle(
-                danceColors[
-                    (row+col)%danceColors.length
+                tiles[
+                    (row+col)%tiles.length
                 ]
             );
+
 
             decorationGraphics.fillRect(
                 285+col*72,
@@ -955,10 +931,10 @@ function createDecorations(scene){
     }
 
 
-    /* DJ STAGE */
+    /* DJ */
 
     decorationGraphics.fillStyle(
-        0x0b0d16
+        0x090b12
     );
 
     decorationGraphics.fillRoundedRect(
@@ -1003,34 +979,25 @@ function createDecorations(scene){
             fontStyle:"bold",
             color:"#ffffff"
         }
-    ).setOrigin(0.5);
+    )
+    .setOrigin(0.5);
 
-
-    /* SPEAKERS */
 
     drawSpeaker(scene,320,180);
-
     drawSpeaker(scene,660,180);
-
     drawSpeaker(scene,320,470);
-
     drawSpeaker(scene,660,470);
 
 
     /* TABLES */
 
     drawTable(350,330);
-
     drawTable(650,330);
-
     drawTable(350,470);
-
     drawTable(650,470);
 
 
-    /* =========================================
-       BAR
-    ========================================= */
+    /* BAR */
 
     decorationGraphics.fillStyle(
         0x71482f
@@ -1059,10 +1026,13 @@ function createDecorations(scene){
     );
 
 
-    for(let i=0;i<7;i++){
+    for(
+        let i=0;
+        i<7;
+        i++
+    ){
 
         drawCircle(
-            scene,
             985+i*70,
             455,
             18,
@@ -1072,15 +1042,20 @@ function createDecorations(scene){
     }
 
 
-    /* BAR BOTTLES */
+    /* BOTTLES */
 
-    for(let i=0;i<8;i++){
+    for(
+        let i=0;
+        i<8;
+        i++
+    ){
 
         decorationGraphics.fillStyle(
             i%2===0
             ? 0x00c6d7
             : 0xff2f92
         );
+
 
         decorationGraphics.fillRoundedRect(
             980+i*55,
@@ -1090,9 +1065,11 @@ function createDecorations(scene){
             5
         );
 
+
         decorationGraphics.fillStyle(
             0xe6d4a5
         );
+
 
         decorationGraphics.fillRect(
             985+i*55,
@@ -1145,6 +1122,7 @@ function createDecorations(scene){
         180
     );
 
+
     decorationGraphics.lineStyle(
         3,
         0xd6e2e5
@@ -1158,9 +1136,7 @@ function createDecorations(scene){
     );
 
 
-    /* =========================================
-       BEDROOM
-    ========================================= */
+    /* BED */
 
     decorationGraphics.fillStyle(
         0x722d4b
@@ -1187,7 +1163,6 @@ function createDecorations(scene){
         10
     );
 
-
     decorationGraphics.fillRoundedRect(
         1885,
         295,
@@ -1196,8 +1171,6 @@ function createDecorations(scene){
         10
     );
 
-
-    /* BED HEADBOARD */
 
     decorationGraphics.fillStyle(
         0x3b1c2b
@@ -1212,10 +1185,9 @@ function createDecorations(scene){
     );
 
 
-    /* BED SIDE TABLES */
+    /* BED TABLES */
 
     drawSmallTable(1630,450);
-
     drawSmallTable(2110,450);
 
 
@@ -1233,16 +1205,7 @@ function createDecorations(scene){
     );
 
 
-    /* =========================================
-       BATHROOM
-    ========================================= */
-
-    drawBathroom(scene);
-
-
-    /* =========================================
-       LOUNGE
-    ========================================= */
+    /* LOUNGE */
 
     drawSofa(
         220,
@@ -1250,6 +1213,7 @@ function createDecorations(scene){
         500,
         105
     );
+
 
     drawSofa(
         250,
@@ -1326,17 +1290,24 @@ function createDecorations(scene){
     );
 
 
-    /* =========================================
-       STORAGE
-    ========================================= */
+    /* STORAGE BOXES */
 
-    for(let row=0;row<3;row++){
+    for(
+        let row=0;
+        row<3;
+        row++
+    ){
 
-        for(let col=0;col<4;col++){
+        for(
+            let col=0;
+            col<4;
+            col++
+        ){
 
             decorationGraphics.fillStyle(
                 0x765238
             );
+
 
             decorationGraphics.fillRect(
                 2290+col*90,
@@ -1345,10 +1316,12 @@ function createDecorations(scene){
                 70
             );
 
+
             decorationGraphics.lineStyle(
                 3,
                 0xa8754d
             );
+
 
             decorationGraphics.strokeRect(
                 2290+col*90,
@@ -1362,37 +1335,7 @@ function createDecorations(scene){
     }
 
 
-    /* SHELVES */
-
-    decorationGraphics.fillStyle(
-        0x5b4031
-    );
-
-    decorationGraphics.fillRect(
-        2500,
-        690,
-        150,
-        30
-    );
-
-    decorationGraphics.fillRect(
-        2500,
-        850,
-        150,
-        30
-    );
-
-    decorationGraphics.fillRect(
-        2500,
-        1010,
-        150,
-        30
-    );
-
-
-    /* =========================================
-       GARDEN
-    ========================================= */
+    /* TREES */
 
     const trees = [
 
@@ -1406,12 +1349,11 @@ function createDecorations(scene){
     ];
 
 
-    trees.forEach(function(t){
+    trees.forEach(function(tree){
 
         drawTree(
-            scene,
-            t[0],
-            t[1]
+            tree[0],
+            tree[1]
         );
 
     });
@@ -1420,13 +1362,16 @@ function createDecorations(scene){
     /* GARDEN TABLES */
 
     drawTable(800,1490);
-
     drawTable(1080,1570);
 
 
     /* GARDEN LAMPS */
 
-    for(let i=0;i<5;i++){
+    for(
+        let i=0;
+        i<5;
+        i++
+    ){
 
         drawGardenLamp(
             350+i*250,
@@ -1436,9 +1381,7 @@ function createDecorations(scene){
     }
 
 
-    /* =========================================
-       POOL
-    ========================================= */
+    /* POOL */
 
     decorationGraphics.fillStyle(
         0x087ca9
@@ -1467,15 +1410,18 @@ function createDecorations(scene){
     );
 
 
-    /* POOL WATER LINES */
-
     decorationGraphics.lineStyle(
         3,
         0x8eeeff,
         0.7
     );
 
-    for(let x=1800;x<2500;x+=140){
+
+    for(
+        let x=1800;
+        x<2500;
+        x+=140
+    ){
 
         decorationGraphics.lineBetween(
             x,
@@ -1515,7 +1461,11 @@ function createDecorations(scene){
 
     /* POOL CHAIRS */
 
-    for(let i=0;i<4;i++){
+    for(
+        let i=0;
+        i<4;
+        i++
+    ){
 
         drawPoolChair(
             1600+i*260,
@@ -1525,9 +1475,13 @@ function createDecorations(scene){
     }
 
 
-    /* WALL LIGHTS */
+    /* LIGHTS */
 
-    for(let x=190;x<2650;x+=180){
+    for(
+        let x=190;
+        x<2650;
+        x+=180
+    ){
 
         drawLight(
             x,
@@ -1537,7 +1491,11 @@ function createDecorations(scene){
     }
 
 
-    for(let x=900;x<2150;x+=180){
+    for(
+        let x=900;
+        x<2150;
+        x+=180
+    ){
 
         drawLight(
             x,
@@ -1547,17 +1505,7 @@ function createDecorations(scene){
     }
 
 
-    for(let x=220;x<1400;x+=180){
-
-        drawLight(
-            x,
-            1210
-        );
-
-    }
-
-
-    /* ENTRANCE DOOR */
+    /* ENTRANCE */
 
     decorationGraphics.fillStyle(
         0x4a2b22
@@ -1586,104 +1534,20 @@ function createDecorations(scene){
 
 
 /* =========================================================
-   BATHROOM
-========================================================= */
-
-function drawBathroom(scene){
-
-    /* SHOWER */
-
-    decorationGraphics.fillStyle(
-        0x66838c
-    );
-
-    decorationGraphics.fillRoundedRect(
-        2260,
-        200,
-        170,
-        150,
-        12
-    );
-
-
-    decorationGraphics.lineStyle(
-        3,
-        0xb7f4ff
-    );
-
-    decorationGraphics.strokeRoundedRect(
-        2260,
-        200,
-        170,
-        150,
-        12
-    );
-
-
-    /* SINK */
-
-    decorationGraphics.fillStyle(
-        0xe9f0f2
-    );
-
-    decorationGraphics.fillRoundedRect(
-        2490,
-        230,
-        130,
-        65,
-        15
-    );
-
-
-    /* MIRROR */
-
-    decorationGraphics.fillStyle(
-        0x7bd8e8
-    );
-
-    decorationGraphics.fillRect(
-        2490,
-        145,
-        130,
-        65
-    );
-
-
-    /* TOILET */
-
-    decorationGraphics.fillStyle(
-        0xe9f0f2
-    );
-
-    decorationGraphics.fillEllipse(
-        2660,
-        280,
-        75,
-        95
-    );
-
-
-    /* BATH LIGHT */
-
-    drawLight(
-        2490,
-        520
-    );
-
-}
-
-
-/* =========================================================
    PLAYER
 ========================================================= */
 
 function createPlayer(scene){
 
-    player = scene.add.container(
-        1200,
-        1080
-    );
+    player =
+        scene.add.container(
+            1200,
+            1080
+        );
 
+
+    /* IMPORTANT:
+       Container physics setup */
 
     scene.physics.add.existing(
         player
@@ -1702,25 +1566,31 @@ function createPlayer(scene){
     );
 
 
+    /* FIX:
+       Container doesn't have setCollideWorldBounds.
+       Body does. */
+
+    player.body.setCollideWorldBounds(
+        true
+    );
+
+
     player.setDepth(
         100
     );
 
 
-   player.body.setCollideWorldBounds(
-    true
-);
-
-
     /* GLOW */
 
-    const glow = scene.add.circle(
-        0,
-        0,
-        55,
-        0x00eaff,
-        0.10
-    );
+    const glow =
+        scene.add.circle(
+            0,
+            0,
+            55,
+            0x00eaff,
+            0.10
+        );
+
 
     player.addAt(
         glow,
@@ -1744,89 +1614,87 @@ function createPlayer(scene){
 
     /* LEGS */
 
-    const leftLeg = scene.add.rectangle(
-        -12,
-        25,
-        13,
-        32,
-        0x202334
-    );
-
-    const rightLeg = scene.add.rectangle(
-        12,
-        25,
-        13,
-        32,
-        0x202334
-    );
-
     player.add([
-        leftLeg,
-        rightLeg
+
+        scene.add.rectangle(
+            -12,
+            25,
+            13,
+            32,
+            0x202334
+        ),
+
+        scene.add.rectangle(
+            12,
+            25,
+            13,
+            32,
+            0x202334
+        )
+
     ]);
 
 
     /* SHOES */
 
-    const leftShoe = scene.add.rectangle(
-        -13,
-        43,
-        23,
-        10,
-        0xf4f4f4
-    );
-
-    const rightShoe = scene.add.rectangle(
-        13,
-        43,
-        23,
-        10,
-        0xf4f4f4
-    );
-
     player.add([
-        leftShoe,
-        rightShoe
+
+        scene.add.rectangle(
+            -13,
+            43,
+            23,
+            10,
+            0xf4f4f4
+        ),
+
+        scene.add.rectangle(
+            13,
+            43,
+            23,
+            10,
+            0xf4f4f4
+        )
+
     ]);
 
 
     /* BODY */
 
-    const body = scene.add.rectangle(
-        0,
-        -5,
-        42,
-        52,
-        0xf4f4f4
+    player.add(
+        scene.add.rectangle(
+            0,
+            -5,
+            42,
+            52,
+            0xf4f4f4
+        )
     );
-
-    player.add(body);
 
 
     /* JACKET */
 
-    const jacket = scene.add.rectangle(
-        0,
-        -5,
-        30,
-        50,
-        0x171b2c
+    player.add(
+        scene.add.rectangle(
+            0,
+            -5,
+            30,
+            50,
+            0x171b2c
+        )
     );
-
-    player.add(jacket);
 
 
     /* JACKET LINE */
 
-    const jacketLine = scene.add.rectangle(
-        0,
-        -5,
-        3,
-        42,
-        0x46506d
+    player.add(
+        scene.add.rectangle(
+            0,
+            -5,
+            3,
+            42,
+            0x46506d
+        )
     );
-
-    player.add(jacketLine);
 
 
     /* NECK */
@@ -1857,6 +1725,7 @@ function createPlayer(scene){
     /* EARS */
 
     player.add([
+
         scene.add.circle(
             -24,
             -55,
@@ -1870,6 +1739,7 @@ function createPlayer(scene){
             6,
             0xd99670
         )
+
     ]);
 
 
@@ -1889,6 +1759,7 @@ function createPlayer(scene){
     /* EYES */
 
     player.add([
+
         scene.add.circle(
             -9,
             -55,
@@ -1902,6 +1773,7 @@ function createPlayer(scene){
             3,
             0x111111
         )
+
     ]);
 
 
@@ -1938,6 +1810,7 @@ function createPlayer(scene){
     /* ARMS */
 
     player.add([
+
         scene.add.rectangle(
             -27,
             -5,
@@ -1953,12 +1826,14 @@ function createPlayer(scene){
             40,
             0x171b2c
         )
+
     ]);
 
 
     /* HANDS */
 
     player.add([
+
         scene.add.circle(
             -27,
             17,
@@ -1972,47 +1847,48 @@ function createPlayer(scene){
             7,
             0xd99670
         )
+
     ]);
 
 
     /* NAME */
 
-    player.nameLabel = scene.add.text(
-        0,
-        -105,
-        "YOU",
-        {
-            fontFamily:"Arial",
-            fontSize:"13px",
-            fontStyle:"bold",
-            color:"#00eaff",
-            stroke:"#050713",
-            strokeThickness:4
-        }
-    );
-
-    player.nameLabel.setOrigin(0.5);
-
     player.add(
-        player.nameLabel
+        scene.add.text(
+            0,
+            -105,
+            "YOU",
+            {
+                fontFamily:"Arial",
+                fontSize:"13px",
+                fontStyle:"bold",
+                color:"#00eaff",
+                stroke:"#050713",
+                strokeThickness:4
+            }
+        )
+        .setOrigin(0.5)
     );
 
 
     /* ATTACK RING */
 
-    player.attackRing = scene.add.circle(
-        0,
-        0,
-        72,
-        0x00eaff,
-        0
-    );
+    player.attackRing =
+        scene.add.circle(
+            0,
+            0,
+            20,
+            0x00eaff,
+            0
+        );
+
 
     player.attackRing.setStrokeStyle(
         5,
         0x00eaff,
         0
     );
+
 
     player.addAt(
         player.attackRing,
@@ -2023,7 +1899,7 @@ function createPlayer(scene){
 
 
 /* =========================================================
-   NPC CREATION
+   NPCS
 ========================================================= */
 
 function createNPCs(scene){
@@ -2060,12 +1936,12 @@ function createNPCs(scene){
 
 
     positions.forEach(
-        function(pos,index){
+        function(position,index){
 
             createNPC(
                 scene,
-                pos[0],
-                pos[1],
+                position[0],
+                position[1],
                 index
             );
 
@@ -2076,7 +1952,7 @@ function createNPCs(scene){
 
 
 /* =========================================================
-   CREATE NPC
+   NPC
 ========================================================= */
 
 function createNPC(
@@ -2086,10 +1962,11 @@ function createNPC(
     index
 ){
 
-    const npc = scene.add.container(
-        x,
-        y
-    );
+    const npc =
+        scene.add.container(
+            x,
+            y
+        );
 
 
     scene.physics.add.existing(
@@ -2106,6 +1983,11 @@ function createNPC(
     npc.body.setOffset(
         -18,
         -28
+    );
+
+
+    npc.body.setCollideWorldBounds(
+        true
     );
 
 
@@ -2180,6 +2062,7 @@ function createNPC(
     /* LEGS */
 
     npc.add([
+
         scene.add.rectangle(
             -10,
             25,
@@ -2195,12 +2078,14 @@ function createNPC(
             30,
             0x202334
         )
+
     ]);
 
 
     /* SHOES */
 
     npc.add([
+
         scene.add.rectangle(
             -10,
             42,
@@ -2216,6 +2101,7 @@ function createNPC(
             9,
             0xeaeaea
         )
+
     ]);
 
 
@@ -2274,6 +2160,7 @@ function createNPC(
     /* EARS */
 
     npc.add([
+
         scene.add.circle(
             -23,
             -55,
@@ -2287,6 +2174,7 @@ function createNPC(
             5,
             npc.skin
         )
+
     ]);
 
 
@@ -2306,6 +2194,7 @@ function createNPC(
     /* EYES */
 
     npc.add([
+
         scene.add.circle(
             -8,
             -55,
@@ -2319,6 +2208,7 @@ function createNPC(
             3,
             0x111111
         )
+
     ]);
 
 
@@ -2355,6 +2245,7 @@ function createNPC(
     /* ARMS */
 
     npc.add([
+
         scene.add.rectangle(
             -25,
             -5,
@@ -2370,12 +2261,14 @@ function createNPC(
             38,
             npc.shirt
         )
+
     ]);
 
 
     /* HANDS */
 
     npc.add([
+
         scene.add.circle(
             -25,
             16,
@@ -2389,45 +2282,32 @@ function createNPC(
             7,
             npc.skin
         )
+
     ]);
 
 
     /* NAME */
 
-    npc.label = scene.add.text(
-        0,
-        -101,
-        "GUEST",
-        {
-            fontFamily:"Arial",
-            fontSize:"11px",
-            fontStyle:"bold",
-            color:"#ffffff",
-            stroke:"#050713",
-            strokeThickness:4
-        }
-    );
+    npc.label =
+        scene.add.text(
+            0,
+            -101,
+            "GUEST",
+            {
+                fontFamily:"Arial",
+                fontSize:"11px",
+                fontStyle:"bold",
+                color:"#ffffff",
+                stroke:"#050713",
+                strokeThickness:4
+            }
+        );
+
 
     npc.label.setOrigin(0.5);
 
     npc.add(
         npc.label
-    );
-
-
-    /* NPC GLOW */
-
-    npc.glow = scene.add.circle(
-        0,
-        0,
-        42,
-        0xff278e,
-        0.04
-    );
-
-    npc.addAt(
-        npc.glow,
-        0
     );
 
 
@@ -2445,7 +2325,6 @@ function createNPC(
 function updatePlayer(scene){
 
     let dx = 0;
-
     let dy = 0;
 
 
@@ -2453,7 +2332,9 @@ function updatePlayer(scene){
         keys.W.isDown ||
         cursors.up.isDown
     ){
+
         dy -= 1;
+
     }
 
 
@@ -2461,7 +2342,9 @@ function updatePlayer(scene){
         keys.S.isDown ||
         cursors.down.isDown
     ){
+
         dy += 1;
+
     }
 
 
@@ -2469,7 +2352,9 @@ function updatePlayer(scene){
         keys.A.isDown ||
         cursors.left.isDown
     ){
+
         dx -= 1;
+
     }
 
 
@@ -2477,7 +2362,9 @@ function updatePlayer(scene){
         keys.D.isDown ||
         cursors.right.isDown
     ){
+
         dx += 1;
+
     }
 
 
@@ -2497,41 +2384,30 @@ function updatePlayer(scene){
         dy !== 0
     ){
 
-        const len =
+        const length =
             Math.sqrt(
-                dx*dx +
+                dx*dx+
                 dy*dy
             );
 
 
-        dx /= len;
+        dx /= length;
 
-        dy /= len;
-
-
-        const speed = 255;
+        dy /= length;
 
 
         player.body.setVelocity(
-            dx*speed,
-            dy*speed
+            dx*255,
+            dy*255
         );
-
-
-        playerMoving = true;
 
 
         player.rotation =
             Phaser.Math.Linear(
                 player.rotation,
-                dx*0.045,
+                dx*0.04,
                 0.15
             );
-
-
-        animatePlayer(
-            scene
-        );
 
     }
     else{
@@ -2540,9 +2416,6 @@ function updatePlayer(scene){
             0,
             0
         );
-
-
-        playerMoving = false;
 
 
         player.rotation =
@@ -2555,20 +2428,24 @@ function updatePlayer(scene){
     }
 
 
-    /* ACTION */
-
     if(
         Phaser.Input.Keyboard.JustDown(
             keys.SPACE
-        ) ||
+        )
+    ){
+
+        performAttack(scene);
+
+    }
+
+
+    if(
         Phaser.Input.Keyboard.JustDown(
             keys.E
         )
     ){
 
-        performAttack(
-            scene
-        );
+        performAttack(scene);
 
     }
 
@@ -2577,9 +2454,7 @@ function updatePlayer(scene){
 
         actionPressed = false;
 
-        performAttack(
-            scene
-        );
+        performAttack(scene);
 
     }
 
@@ -2588,35 +2463,13 @@ function updatePlayer(scene){
         scene.game.loop.delta;
 
 
-    if(attackCooldown < 0){
+    if(
+        attackCooldown < 0
+    ){
 
         attackCooldown = 0;
 
     }
-
-}
-
-
-/* =========================================================
-   PLAYER WALK ANIMATION
-========================================================= */
-
-function animatePlayer(scene){
-
-    if(!playerMoving){
-        return;
-    }
-
-    const wobble =
-        Math.sin(
-            scene.time.now / 90
-        ) * 0.035;
-
-    player.scaleX =
-        1 + wobble;
-
-    player.scaleY =
-        1 - wobble;
 
 }
 
@@ -2633,7 +2486,9 @@ function updateNPCs(
     npcs.forEach(
         function(npc){
 
-            if(npc.stunned > 0){
+            if(
+                npc.stunned > 0
+            ){
 
                 npc.stunned -= delta;
 
@@ -2642,14 +2497,8 @@ function updateNPCs(
                     0
                 );
 
-                npc.rotation =
-                    Phaser.Math.Linear(
-                        npc.rotation,
-                        0,
-                        0.12
-                    );
-
                 return;
+
             }
 
 
@@ -2666,6 +2515,7 @@ function updateNPCs(
                         1
                     );
 
+
                 npc.dirY =
                     Phaser.Math.FloatBetween(
                         -1,
@@ -2676,22 +2526,22 @@ function updateNPCs(
                 npc.timer =
                     Phaser.Math.Between(
                         1200,
-                        4200
+                        4000
                     );
 
             }
 
 
-            const len =
+            const length =
                 Math.sqrt(
-                    npc.dirX*npc.dirX +
+                    npc.dirX*npc.dirX+
                     npc.dirY*npc.dirY
                 ) || 1;
 
 
             npc.body.setVelocity(
-                npc.dirX/len*npc.speed,
-                npc.dirY/len*npc.speed
+                npc.dirX/length*npc.speed,
+                npc.dirY/length*npc.speed
             );
 
 
@@ -2701,44 +2551,6 @@ function updateNPCs(
                     npc.dirX*0.04,
                     0.08
                 );
-
-
-            /* WORLD LIMIT */
-
-            if(npc.x < 180){
-
-                npc.x = 180;
-
-                npc.dirX = 1;
-
-            }
-
-
-            if(npc.x > 2700){
-
-                npc.x = 2700;
-
-                npc.dirX = -1;
-
-            }
-
-
-            if(npc.y < 170){
-
-                npc.y = 170;
-
-                npc.dirY = 1;
-
-            }
-
-
-            if(npc.y > 1720){
-
-                npc.y = 1720;
-
-                npc.dirY = -1;
-
-            }
 
         }
     );
@@ -2750,7 +2562,7 @@ function updateNPCs(
    NPC SEPARATION
 ========================================================= */
 
-function updateNPCSeparation(scene){
+function updateNPCSeparation(){
 
     for(
         let i=0;
@@ -2779,7 +2591,7 @@ function updateNPCSeparation(scene){
 
 
             if(
-                distance < 45 &&
+                distance < 42 &&
                 distance > 0
             ){
 
@@ -2793,10 +2605,10 @@ function updateNPCSeparation(scene){
 
 
                 a.x +=
-                    Math.cos(angle)*0.8;
+                    Math.cos(angle)*0.6;
 
                 a.y +=
-                    Math.sin(angle)*0.8;
+                    Math.sin(angle)*0.6;
 
             }
 
@@ -2808,7 +2620,7 @@ function updateNPCSeparation(scene){
 
 
 /* =========================================================
-   ATTACK / SHOCKWAVE
+   ATTACK
 ========================================================= */
 
 function performAttack(scene){
@@ -2818,21 +2630,22 @@ function performAttack(scene){
     ){
 
         return;
-
     }
 
 
-    attackCooldown = 550;
+    attackCooldown = 600;
 
 
-    chaosCount++;
+    score += 10;
 
 
-    /* VISUAL */
+    const radius = 115;
+
 
     player.attackRing.setRadius(
         20
     );
+
 
     player.attackRing.setStrokeStyle(
         5,
@@ -2841,10 +2654,7 @@ function performAttack(scene){
     );
 
 
-    attackFlash = 260;
-
-
-    const hitRadius = 105;
+    attackFlash = 300;
 
 
     npcs.forEach(
@@ -2860,7 +2670,7 @@ function performAttack(scene){
 
 
             if(
-                distance <= hitRadius
+                distance <= radius
             ){
 
                 const angle =
@@ -2873,12 +2683,12 @@ function performAttack(scene){
 
 
                 npc.body.setVelocity(
-                    Math.cos(angle)*280,
-                    Math.sin(angle)*280
+                    Math.cos(angle)*300,
+                    Math.sin(angle)*300
                 );
 
 
-                npc.stunned = 800;
+                npc.stunned = 900;
 
 
                 npc.label.setText(
@@ -2902,12 +2712,7 @@ function performAttack(scene){
     );
 
 
-    score += 10;
-
-
-    updateScoreText(
-        scene
-    );
+    updateScoreText();
 
 
     statusText.setText(
@@ -2916,7 +2721,7 @@ function performAttack(scene){
 
 
     scene.time.delayedCall(
-        500,
+        700,
         function(){
 
             if(statusText){
@@ -2937,10 +2742,7 @@ function performAttack(scene){
    ATTACK FX
 ========================================================= */
 
-function updateAttackFX(
-    scene,
-    delta
-){
+function updateAttackFX(){
 
     if(
         attackFlash <= 0
@@ -2951,12 +2753,12 @@ function updateAttackFX(
     }
 
 
-    attackFlash -= delta;
+    attackFlash -= 16;
 
 
-    let radius =
-        20 +
-        (260-attackFlash)*0.35;
+    const radius =
+        20+
+        (300-attackFlash)*0.35;
 
 
     player.attackRing.setRadius(
@@ -2969,7 +2771,7 @@ function updateAttackFX(
         0x00eaff,
         Math.max(
             0,
-            attackFlash/260
+            attackFlash/300
         )
     );
 
@@ -2997,14 +2799,14 @@ function showFloatingText(
     scene,
     x,
     y,
-    text
+    value
 ){
 
-    const t =
+    const text =
         scene.add.text(
             x,
             y,
-            text,
+            value,
             {
                 fontFamily:"Arial",
                 fontSize:"22px",
@@ -3016,19 +2818,14 @@ function showFloatingText(
         );
 
 
-    t.setOrigin(
-        0.5
-    );
+    text.setOrigin(0.5);
 
-
-    t.setDepth(
-        500
-    );
+    text.setDepth(500);
 
 
     scene.tweens.add({
 
-        targets:t,
+        targets:text,
 
         y:y-60,
 
@@ -3040,7 +2837,7 @@ function showFloatingText(
 
         onComplete:function(){
 
-            t.destroy();
+            text.destroy();
 
         }
 
@@ -3055,8 +2852,6 @@ function showFloatingText(
 
 function createHUD(scene){
 
-    /* TOP BAR */
-
     scene.add.rectangle(
         640,
         34,
@@ -3068,8 +2863,6 @@ function createHUD(scene){
     .setScrollFactor(0)
     .setDepth(900);
 
-
-    /* TITLE */
 
     scene.add.text(
         28,
@@ -3101,8 +2894,6 @@ function createHUD(scene){
     .setDepth(901);
 
 
-    /* SCORE */
-
     scoreText =
         scene.add.text(
             1010,
@@ -3119,12 +2910,10 @@ function createHUD(scene){
         .setDepth(901);
 
 
-    /* STATUS */
-
     statusText =
         scene.add.text(
-            500,
-            21,
+            640,
+            20,
             "PARTY IS GETTING WILD",
             {
                 fontFamily:"Arial",
@@ -3137,8 +2926,6 @@ function createHUD(scene){
         .setScrollFactor(0)
         .setDepth(901);
 
-
-    /* OBJECTIVE */
 
     objectiveText =
         scene.add.text(
@@ -3163,12 +2950,10 @@ function createHUD(scene){
         .setDepth(901);
 
 
-    /* KEYBOARD */
-
     scene.add.text(
-        970,
+        955,
         680,
-        "WASD / ARROWS  •  SPACE / E = ACTION",
+        "WASD / ARROWS • SPACE / E",
         {
             fontFamily:"Arial",
             fontSize:"12px",
@@ -3183,16 +2968,15 @@ function createHUD(scene){
 
 
 /* =========================================================
-   SCORE
+   SCORE UPDATE
 ========================================================= */
 
-function updateScoreText(scene){
+function updateScoreText(){
 
     if(scoreText){
 
         scoreText.setText(
-            "SCORE  " +
-            score
+            "SCORE  "+score
         );
 
     }
@@ -3204,9 +2988,12 @@ function updateScoreText(scene){
    OBJECTIVE
 ========================================================= */
 
-function updateObjective(scene){
+function updateObjective(){
 
-    if(!objectiveText || !player){
+    if(
+        !objectiveText ||
+        !player
+    ){
 
         return;
 
@@ -3219,15 +3006,6 @@ function updateObjective(scene){
             player.y,
             500,
             350
-        );
-
-
-    const barDistance =
-        Phaser.Math.Distance.Between(
-            player.x,
-            player.y,
-            1100,
-            400
         );
 
 
@@ -3245,16 +3023,7 @@ function updateObjective(scene){
     ){
 
         objectiveText.setText(
-            "OBJECTIVE • Party Hall found! Press SPACE / ACTION"
-        );
-
-    }
-    else if(
-        barDistance < 200
-    ){
-
-        objectiveText.setText(
-            "OBJECTIVE • Check the Bar & Kitchen"
+            "OBJECTIVE • Party Hall found! Press ACTION"
         );
 
     }
@@ -3303,9 +3072,7 @@ function updateObjective(scene){
 
 function createControls(scene){
 
-    /* JOYSTICK BASE */
-
-    const joyBase =
+    const base =
         scene.add.circle(
             105,
             615,
@@ -3317,14 +3084,14 @@ function createControls(scene){
         .setDepth(1000);
 
 
-    joyBase.setStrokeStyle(
+    base.setStrokeStyle(
         4,
         0x00d9ff,
         0.85
     );
 
 
-    const joy =
+    const stick =
         scene.add.circle(
             105,
             615,
@@ -3336,12 +3103,9 @@ function createControls(scene){
         .setDepth(1001);
 
 
-    mobileJoy = joy;
+    /* ACTION */
 
-
-    /* ACTION BUTTON */
-
-    actionButton =
+    const action =
         scene.add.circle(
             1170,
             615,
@@ -3353,7 +3117,7 @@ function createControls(scene){
         .setDepth(1000);
 
 
-    actionButton.setStrokeStyle(
+    action.setStrokeStyle(
         4,
         0xff65c0,
         0.95
@@ -3392,8 +3156,6 @@ function createControls(scene){
     .setDepth(1001);
 
 
-    /* POINTER DOWN */
-
     scene.input.on(
         "pointerdown",
         function(pointer){
@@ -3407,8 +3169,8 @@ function createControls(scene){
 
                 updateJoystick(
                     pointer,
-                    joyBase,
-                    joy
+                    base,
+                    stick
                 );
 
             }
@@ -3427,8 +3189,6 @@ function createControls(scene){
     );
 
 
-    /* POINTER MOVE */
-
     scene.input.on(
         "pointermove",
         function(pointer){
@@ -3439,8 +3199,8 @@ function createControls(scene){
 
                 updateJoystick(
                     pointer,
-                    joyBase,
-                    joy
+                    base,
+                    stick
                 );
 
             }
@@ -3448,8 +3208,6 @@ function createControls(scene){
         }
     );
 
-
-    /* POINTER UP */
 
     scene.input.on(
         "pointerup",
@@ -3461,9 +3219,9 @@ function createControls(scene){
 
             joystick.y = 0;
 
-            joy.x = 105;
+            stick.x = 105;
 
-            joy.y = 615;
+            stick.y = 615;
 
         }
     );
@@ -3472,30 +3230,25 @@ function createControls(scene){
 
 
 /* =========================================================
-   JOYSTICK UPDATE
+   JOYSTICK
 ========================================================= */
 
 function updateJoystick(
     pointer,
     base,
-    joy
+    stick
 ){
 
-    const bx = base.x;
-
-    const by = base.y;
-
-
     let dx =
-        pointer.x-bx;
+        pointer.x-base.x;
 
     let dy =
-        pointer.y-by;
+        pointer.y-base.y;
 
 
     const distance =
         Math.sqrt(
-            dx*dx +
+            dx*dx+
             dy*dy
         );
 
@@ -3516,11 +3269,11 @@ function updateJoystick(
     }
 
 
-    joy.x =
-        bx+dx;
+    stick.x =
+        base.x+dx;
 
-    joy.y =
-        by+dy;
+    stick.y =
+        base.y+dy;
 
 
     joystick.x =
@@ -3536,10 +3289,7 @@ function updateJoystick(
    DECORATION HELPERS
 ========================================================= */
 
-function drawTable(
-    x,
-    y
-){
+function drawTable(x,y){
 
     decorationGraphics.fillStyle(
         0x754f37
@@ -3577,10 +3327,7 @@ function drawTable(
 }
 
 
-function drawSmallTable(
-    x,
-    y
-){
+function drawSmallTable(x,y){
 
     decorationGraphics.fillStyle(
         0x6a4635
@@ -3629,26 +3376,10 @@ function drawSofa(
         15
     );
 
-
-    decorationGraphics.fillStyle(
-        0xb86cc2
-    );
-
-    decorationGraphics.fillRect(
-        x+30,
-        y+25,
-        w-60,
-        5
-    );
-
 }
 
 
-function drawTree(
-    scene,
-    x,
-    y
-){
+function drawTree(x,y){
 
     decorationGraphics.fillStyle(
         0x62432d
@@ -3703,10 +3434,7 @@ function drawTree(
 }
 
 
-function drawLight(
-    x,
-    y
-){
+function drawLight(x,y){
 
     decorationGraphics.fillStyle(
         0xffd66b,
@@ -3745,10 +3473,9 @@ function drawLight(
 
 
 function drawCircle(
-    scene,
     x,
     y,
-    r,
+    radius,
     color
 ){
 
@@ -3759,7 +3486,7 @@ function drawCircle(
     decorationGraphics.fillCircle(
         x,
         y,
-        r
+        radius
     );
 
 }
@@ -3875,24 +3602,6 @@ function drawPoolChair(
     );
 
 }
-
-
-/* =========================================================
-   RESIZE
-========================================================= */
-
-window.addEventListener(
-    "resize",
-    function(){
-
-        if(game){
-
-            game.scale.refresh();
-
-        }
-
-    }
-);
 
 </script>
 
