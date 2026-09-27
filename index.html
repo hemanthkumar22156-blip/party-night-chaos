@@ -915,10 +915,12 @@ function drawCircle(scene,x,y,r,color){
 
 function createPlayer(scene){
 
-    player = scene.physics.add.container(
+    player = scene.add.container(
         1200,
         850
     );
+
+    scene.physics.add.existing(player);
 
     player.setSize(
         42,
@@ -926,6 +928,9 @@ function createPlayer(scene){
     );
 
     player.setDepth(100);
+
+    // remaining character code...
+}
 
     /* SHADOW */
 
@@ -1214,26 +1219,12 @@ function createNPCs(scene){
 
 function createNPC(scene,x,y,index){
 
-    const colors = [
-        0x2d7dd2,
-        0xd43f8d,
-        0xe5a62d,
-        0x3bb273,
-        0x8b5cf6,
-        0xe85d04
-    ];
-
-    const skin = [
-        0xc98561,
-        0xd99a70,
-        0xa9684e,
-        0xe0a47d
-    ];
-
-    const npc = scene.physics.add.container(
+    const npc = scene.add.container(
         x,
         y
     );
+
+    scene.physics.add.existing(npc);
 
     npc.setSize(
         40,
@@ -1254,6 +1245,8 @@ function createNPC(scene,x,y,index){
     npc.timer =
         Phaser.Math.Between(1000,3500);
 
+    // remaining NPC code...
+}
 
     /* SHADOW */
 
